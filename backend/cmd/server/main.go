@@ -9,44 +9,77 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	// slog é o logger estruturado da biblioteca padrão (Go 1.21+). Logs
-	// estruturados (chave=valor) são mais fáceis de pesquisar do que texto livre.
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
 	cfg := config.Load()
+
+	// Construímos as dependências do router. Sem DATABASE_URL, arrancamos em
+	// modo mínimo (só /healthz) — útil para smoke tests sem base de dados.
+	var deps httpapi.Deps
+	var pool *pgxpool.Pool
+
+	if cfg.DatabaseURL != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		var err error
+		pool, err = db.Connect(ctx, cfg.DatabaseURL)
+		cancel()
+		if err != nil {
+			logger.Error("ligação à BD falhou", "err", err)
+			os.Exit(1)
+		}
+		defer pool.Close()
+
+		migCtx, migCancel := context.WithTimeout(context.Background(), 30*time.Second)
+		if err := db.Migrate(migCtx, pool); err != nil {
+			migCancel()
+			logger.Error("migrações falharam", "err", err)
+			os.Exit(1)
+		}
+		migCancel()
+
+		userRepo := users.NewRepo(pool)
+		sessionRepo := sessions.NewRepo(pool)
+		const sessionTTL = 24 * 60 * 60 // 24h em segundos
+		deps = httpapi.Deps{
+			Auth:  auth.NewService(userRepo, sessionRepo, sessionTTL),
+			Vault: vault.NewRepo(pool),
+		}
+		logger.Info("base de dados ligada e migrada")
+	} else {
+		logger.Warn("AEGIS_DATABASE_URL vazio: a arrancar em modo mínimo (só /healthz)")
+	}
 
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
-		Handler: httpapi.NewRouter(),
+		Handler: httpapi.NewRouter(deps),
 	}
 
-	// Arrancamos o servidor numa goroutine para não bloquear a main, que vai
-	// ficar à espera de um sinal de paragem (Ctrl+C / SIGTERM do Docker).
 	go func() {
 		logger.Info("servidor a arrancar", "addr", cfg.HTTPAddr)
-		// ListenAndServe bloqueia até o servidor fechar. Quando fechamos de
-		// propósito, devolve ErrServerClosed — que NÃO é um erro real.
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("falha no servidor HTTP", "err", err)
 			os.Exit(1)
 		}
 	}()
 
-	// signal.NotifyContext devolve um context que é cancelado quando chega um
-	// dos sinais indicados. É a forma moderna de fazer graceful shutdown.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	<-ctx.Done() // bloqueia aqui até chegar o sinal
+	<-ctx.Done()
 	logger.Info("sinal de paragem recebido; a encerrar...")
 
-	// Damos um prazo para os pedidos em curso terminarem antes de matar tudo.
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 	defer cancel()
 
