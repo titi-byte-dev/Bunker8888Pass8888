@@ -25,8 +25,22 @@
     type PasskeyMeta,
   } from "./lib/passkey";
   import type { LoginItem, VaultItemMeta } from "./lib/vault/types";
+  import {
+    loadThemePreference,
+    setThemePreference,
+    cycleThemePreference,
+    themeModeLabel,
+    type ThemeMode,
+  } from "./lib/design";
 
   const API = ""; // Vite proxy → localhost:8080
+
+  let themeMode = $state<ThemeMode>(loadThemePreference());
+
+  function toggleTheme() {
+    themeMode = cycleThemePreference(themeMode);
+    setThemePreference(themeMode);
+  }
 
   let screen = $state<"login" | "recover">("login");
   let email = $state("");
@@ -237,8 +251,15 @@
 
 <main>
   <header>
-    <h1>AegisPass</h1>
-    <p class="tag">Playground de desenvolvimento — Zero-Knowledge no browser</p>
+    <div class="row spread header-row">
+      <div>
+        <h1>AegisPass</h1>
+        <p class="tag">Playground de desenvolvimento — Zero-Knowledge no browser</p>
+      </div>
+      <button type="button" class="secondary theme-toggle" onclick={toggleTheme} title="Alternar tema">
+        {themeModeLabel(themeMode)}
+      </button>
+    </div>
   </header>
 
   {#if !token}
@@ -376,76 +397,101 @@
 </main>
 
 <style>
-  :global(body) {
-    margin: 0;
-    background: #0f1419;
-    color: #e7ecf1;
-    font-family: system-ui, sans-serif;
-  }
   main {
-    max-width: 42rem;
+    max-width: var(--content-max);
     margin: 0 auto;
-    padding: 1.5rem 1rem 3rem;
+    padding: var(--space-6) var(--space-4) var(--space-12);
+  }
+  .header-row {
+    align-items: flex-start;
+    margin-bottom: var(--space-6);
+  }
+  .theme-toggle {
+    flex-shrink: 0;
+    font-size: var(--text-sm);
   }
   header h1 {
     margin: 0;
-    font-size: 1.75rem;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-tight);
   }
   .tag {
-    color: #8b9aab;
-    margin: 0.25rem 0 1.5rem;
-    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
   }
   .card {
-    background: #1a2332;
-    border: 1px solid #2a3544;
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1rem;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-6);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-inset);
   }
   h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.1rem;
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-lg);
+    line-height: var(--leading-tight);
   }
   label {
     display: block;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-    color: #a8b5c4;
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-label);
   }
   input[type="text"],
   input[type="email"],
-  input[type="password"] {
+  input[type="password"],
+  input[type="file"] {
     display: block;
     width: 100%;
-    margin-top: 0.25rem;
-    padding: 0.5rem;
-    border: 1px solid #3d4f63;
-    border-radius: 4px;
-    background: #0f1419;
+    margin-top: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
     color: inherit;
     box-sizing: border-box;
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  input:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
   }
   button {
-    padding: 0.5rem 1rem;
+    padding: var(--space-2) var(--space-4);
     border: none;
-    border-radius: 4px;
-    background: #3d8bfd;
-    color: #fff;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
     cursor: pointer;
     font-weight: 500;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+  button:hover:not(:disabled) {
+    opacity: 0.92;
+  }
+  button:active:not(:disabled) {
+    transform: scale(0.98);
   }
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
   button.secondary {
-    background: #2a3544;
-    color: #e7ecf1;
+    background: var(--color-accent-muted);
+    color: var(--color-text);
   }
   .row {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
     align-items: center;
     flex-wrap: wrap;
   }
@@ -453,42 +499,52 @@
     justify-content: space-between;
   }
   .muted {
-    color: #8b9aab;
-    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
   }
   ul {
-    padding-left: 1.25rem;
-    margin: 0.75rem 0 0;
+    padding-left: var(--space-6);
+    margin: var(--space-3) 0 0;
   }
   .status {
-    padding: 0.75rem;
-    background: #1e3a2f;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    padding: var(--space-3);
+    background: var(--color-success-bg);
+    color: var(--color-success-fg);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
   }
   footer {
-    margin-top: 2rem;
-    font-size: 0.85rem;
+    margin-top: var(--space-8);
+    font-size: var(--text-sm);
   }
   code {
-    background: #1a2332;
+    font-family: var(--font-mono);
+    background: var(--color-bg-surface);
     padding: 0.1rem 0.35rem;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
   }
   a {
-    color: #6cb6ff;
+    color: var(--color-link);
   }
   .warn {
-    color: #f0ad4e;
-    font-size: 0.9rem;
+    color: var(--color-warning);
+    font-size: var(--text-sm);
   }
   .recovery-code {
     display: block;
-    font-size: 1.1rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
     letter-spacing: 0.05em;
-    padding: 0.75rem;
-    margin: 0.5rem 0 1rem;
-    background: #0f1419;
-    border-radius: 4px;
+    padding: var(--space-3);
+    margin: var(--space-2) 0 var(--space-4);
+    background: var(--color-bg-inset);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button {
+      transition: none;
+    }
   }
 </style>
