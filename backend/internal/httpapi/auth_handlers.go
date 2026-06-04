@@ -94,6 +94,29 @@ func decodeAuthHash(encoded string) ([]byte, error) {
 
 // handleKDFParams devolve o salt/parâmetros KDF do cliente para um email, para o
 // cliente conseguir re-derivar o Auth Hash antes de fazer login.
+// handleAuthSession devolve o email do utilizador autenticado pelo Bearer token.
+// O cliente usa isto para pré-preencher /auth/unlock quando sessionStorage perdeu
+// o email mas ainda tem token (ex.: sessão criada antes de UI-003).
+func handleAuthSession(userRepo *users.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		if userID == "" {
+			writeError(w, http.StatusUnauthorized, "sessão inválida")
+			return
+		}
+		u, err := userRepo.ByID(r.Context(), userID)
+		if err != nil {
+			if errors.Is(err, users.ErrNotFound) {
+				writeError(w, http.StatusUnauthorized, "sessão inválida")
+				return
+			}
+			writeError(w, http.StatusInternalServerError, "falha ao ler sessão")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"email": u.Email})
+	}
+}
+
 func handleKDFParams(svc *auth.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		email := r.URL.Query().Get("email")

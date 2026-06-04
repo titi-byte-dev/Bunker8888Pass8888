@@ -1,30 +1,62 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { page } from "$app/state";
   import AuthShell from "$lib/auth/AuthShell.svelte";
   import ArgonProgress from "$lib/auth/ArgonProgress.svelte";
   import { navigateAfterAuth, unlockWithPassword } from "$lib/auth/flow";
   import { resolveAuthRedirect, resolveUnlockEmail } from "$lib/auth/guard";
-  import { loadSessionToken } from "$lib/session";
+  import { fetchSessionProfile } from "$lib/auth/session-api";
+  import { loadSessionToken, saveUserEmail } from "$lib/session";
 
   let masterPassword = $state("");
+  let email = $state("");
+  /** true quando o email veio de storage/servidor — não editável. */
+  let emailLocked = $state(false);
+  let hydrating = $state(true);
   let busy = $state(false);
   let deriving = $state(false);
   let error = $state("");
 
   const redirectTo = $derived(resolveAuthRedirect(page.url.searchParams));
-  const email = $derived(resolveUnlockEmail(page.url.searchParams));
   const hasSession = $derived(!!loadSessionToken());
 
+  onMount(async () => {
+    const cached = resolveUnlockEmail(page.url.searchParams);
+    if (cached) {
+      email = cached;
+      emailLocked = true;
+      hydrating = false;
+      return;
+    }
+    if (!loadSessionToken()) {
+      hydrating = false;
+      return;
+    }
+    try {
+      const profile = await fetchSessionProfile();
+      email = profile.email;
+      saveUserEmail(profile.email);
+      emailLocked = true;
+    } catch {
+      // Token sem email em storage — utilizador confirma manualmente.
+      emailLocked = false;
+    } finally {
+      hydrating = false;
+    }
+  });
+
   async function handleUnlock() {
-    if (!email) {
-      error = "Sessão inválida — inicia sessão novamente.";
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) {
+      error = "Indica o email da conta ou inicia sessão novamente.";
       return;
     }
     busy = true;
     deriving = true;
     error = "";
     try {
-      await unlockWithPassword(email, masterPassword);
+      await unlockWithPassword(normalized, masterPassword);
+      saveUserEmail(normalized);
       await navigateAfterAuth(redirectTo);
     } catch (e) {
       error = e instanceof Error ? e.message : "Desbloqueio falhou";
@@ -55,7 +87,14 @@
     >
       <label>
         Email
-        <input type="email" value={email} disabled />
+        <input
+          type="email"
+          bind:value={email}
+          autocomplete="username"
+          required
+          disabled={emailLocked || busy || hydrating}
+          placeholder={hydrating ? "A carregar…" : "email@empresa.pt"}
+        />
       </label>
       <label>
         Master Password
@@ -64,7 +103,7 @@
           bind:value={masterPassword}
           autocomplete="current-password"
           required
-          disabled={busy}
+          disabled={busy || hydrating}
         />
       </label>
 
@@ -75,7 +114,9 @@
       {/if}
 
       <div class="actions">
-        <button type="submit" disabled={busy || !masterPassword || !email}>Desbloquear</button>
+        <button type="submit" disabled={busy || hydrating || !masterPassword || !email.trim()}>
+          Desbloquear
+        </button>
       </div>
 
       <p class="hint">
