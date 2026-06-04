@@ -12,14 +12,15 @@ import (
 	"time"
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
 )
 
-// Deps são as dependências injetadas no router. Quando Auth/Vault são nil (ex:
-// sem base de dados configurada), só o /healthz fica disponível.
+// Deps são as dependências injetadas no router.
 type Deps struct {
 	Auth  *auth.Service
 	Vault *vault.Repo
+	Hub   *realtime.Hub // nil desactiva WebSocket e notificações push
 }
 
 // ctxKey é um tipo privado para chaves de context (evita colisões entre pacotes).
@@ -39,9 +40,15 @@ func NewRouter(deps Deps) http.Handler {
 		mux.HandleFunc("GET /api/auth/kdf", handleKDFParams(deps.Auth))
 	}
 	if deps.Auth != nil && deps.Vault != nil {
-		// Rotas protegidas: passam pelo middleware de sessão.
+		vd := vaultDeps{repo: deps.Vault, hub: deps.Hub}
 		mux.Handle("GET /api/vault", requireAuth(deps.Auth, handleListItems(deps.Vault)))
-		mux.Handle("POST /api/vault", requireAuth(deps.Auth, handleCreateItem(deps.Vault)))
+		mux.Handle("POST /api/vault", requireAuth(deps.Auth, handleCreateItem(vd)))
+		mux.Handle("GET /api/vault/{id}", requireAuth(deps.Auth, handleGetItem(deps.Vault)))
+		mux.Handle("PUT /api/vault/{id}", requireAuth(deps.Auth, handleUpdateItem(vd)))
+		mux.Handle("DELETE /api/vault/{id}", requireAuth(deps.Auth, handleDeleteItem(vd)))
+	}
+	if deps.Auth != nil && deps.Hub != nil {
+		mux.HandleFunc("GET /api/ws/vault", handleVaultWS(deps.Auth, deps.Hub))
 	}
 
 	return mux
