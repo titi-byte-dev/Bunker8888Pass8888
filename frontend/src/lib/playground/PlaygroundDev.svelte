@@ -1,46 +1,32 @@
 <script lang="ts">
   /**
-   * Playground de desenvolvimento (INFRA-006+) — UI mínima para testar o cofre.
-   * Não é o produto final; serve para validar lib + API end-to-end.
+   * Playground de desenvolvimento (VAULT-019) — UI mínima para testar o cofre.
+   * Vive em `/dev` dentro da app shell; não é o produto final.
    */
-  import { loginUser, loginAfterRegister, registerUser, fetchKdfParams, deriveMasterKeyBytes } from "./lib/auth";
-  import { saveSessionToken, loadSessionToken, clearSessionToken } from "./lib/session";
-  import { VaultAPI } from "./lib/vault/api";
-  import { blobFromBase64, openItem, sealItem, blobToBase64 } from "./lib/vault/items";
-  import { setMasterKey, purgeMasterKey, getMasterKey } from "./lib/vault/masterKeyStore";
-  import { generatePassword } from "./lib/vault/password";
-  import { importCsvToVaultInputs, uploadImportItems } from "./lib/vault/import";
+  import { loginUser, loginAfterRegister, registerUser, fetchKdfParams, deriveMasterKeyBytes } from "$lib/auth";
+  import { saveSessionToken, loadSessionToken, clearSessionToken } from "$lib/session";
+  import { VaultAPI } from "$lib/vault/api";
+  import { blobFromBase64, openItem, sealItem, blobToBase64 } from "$lib/vault/items";
+  import { setMasterKey, purgeMasterKey, getMasterKey } from "$lib/vault/masterKeyStore";
+  import { generatePassword } from "$lib/vault/password";
+  import { importCsvToVaultInputs, uploadImportItems } from "$lib/vault/import";
   import {
     generateRecoveryCode,
     wrapMasterKeyBytes,
     uploadRecoveryBackup,
     fetchRecoveryBackupStatus,
     recoverMasterKeyFromEmail,
-  } from "./lib/vault/recovery";
+  } from "$lib/vault/recovery";
   import {
     passkeysSupported,
     registerPasskey,
     unlockWithPasskeyAndPassword,
     listPasskeys,
     type PasskeyMeta,
-  } from "./lib/passkey";
-  import type { LoginItem, VaultItemMeta } from "./lib/vault/types";
-  import {
-    loadThemePreference,
-    setThemePreference,
-    cycleThemePreference,
-    themeModeLabel,
-    type ThemeMode,
-  } from "./lib/design";
+  } from "$lib/passkey";
+  import type { LoginItem, VaultItemMeta } from "$lib/vault/types";
 
-  const API = ""; // Vite proxy → localhost:8080
-
-  let themeMode = $state<ThemeMode>(loadThemePreference());
-
-  function toggleTheme() {
-    themeMode = cycleThemePreference(themeMode);
-    setThemePreference(themeMode);
-  }
+  const API = ""; // Proxy Vite → localhost:8080
 
   let screen = $state<"login" | "recover">("login");
   let email = $state("");
@@ -249,17 +235,10 @@
   }
 </script>
 
-<main>
+<div class="playground">
   <header>
-    <div class="row spread header-row">
-      <div>
-        <h1>AegisPass</h1>
-        <p class="tag">Playground de desenvolvimento — Zero-Knowledge no browser</p>
-      </div>
-      <button type="button" class="secondary theme-toggle" onclick={toggleTheme} title="Alternar tema">
-        {themeModeLabel(themeMode)}
-      </button>
-    </div>
+    <h1>Playground</h1>
+    <p class="tag">Validação end-to-end do cofre Zero-Knowledge — só em desenvolvimento</p>
   </header>
 
   {#if !token}
@@ -390,37 +369,29 @@
 
   <footer>
     <p class="muted">
-      Backend: <code>docker compose up</code> · Frontend: <code>npm run dev</code> →
-      <a href="http://localhost:5173">localhost:5173</a>
+      Backend: <code>docker compose up</code> · API via proxy <code>/api</code>
     </p>
   </footer>
-</main>
+</div>
 
 <style>
-  main {
+  .playground {
     max-width: var(--content-max);
-    margin: 0 auto;
-    padding: var(--space-6) var(--space-4) var(--space-12);
   }
-  .header-row {
-    align-items: flex-start;
-    margin-bottom: var(--space-6);
-  }
-  .theme-toggle {
-    flex-shrink: 0;
-    font-size: var(--text-sm);
-  }
+
   header h1 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     line-height: var(--leading-tight);
   }
+
   .tag {
     color: var(--color-text-muted);
-    margin: var(--space-1) 0 0;
+    margin: var(--space-1) 0 var(--space-6);
     font-size: var(--text-sm);
   }
+
   .card {
     background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
@@ -429,17 +400,20 @@
     margin-bottom: var(--space-4);
     box-shadow: var(--shadow-inset);
   }
+
   h2 {
     margin: 0 0 var(--space-3);
     font-size: var(--text-lg);
     line-height: var(--leading-tight);
   }
+
   label {
     display: block;
     margin-bottom: var(--space-3);
     font-size: var(--text-sm);
     color: var(--color-text-label);
   }
+
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -457,10 +431,12 @@
     font-size: var(--text-base);
     transition: border-color var(--duration-fast) var(--ease-out);
   }
+
   input:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
   }
+
   button {
     padding: var(--space-2) var(--space-4);
     border: none;
@@ -475,37 +451,46 @@
       opacity var(--duration-fast) var(--ease-out),
       transform var(--duration-fast) var(--ease-out);
   }
+
   button:hover:not(:disabled) {
     opacity: 0.92;
   }
+
   button:active:not(:disabled) {
     transform: scale(0.98);
   }
+
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+
   button.secondary {
     background: var(--color-accent-muted);
     color: var(--color-text);
   }
+
   .row {
     display: flex;
     gap: var(--space-2);
     align-items: center;
     flex-wrap: wrap;
   }
+
   .row.spread {
     justify-content: space-between;
   }
+
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
+
   ul {
     padding-left: var(--space-6);
     margin: var(--space-3) 0 0;
   }
+
   .status {
     padding: var(--space-3);
     background: var(--color-success-bg);
@@ -513,10 +498,12 @@
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
   }
+
   footer {
     margin-top: var(--space-8);
     font-size: var(--text-sm);
   }
+
   code {
     font-family: var(--font-mono);
     background: var(--color-bg-surface);
@@ -524,13 +511,12 @@
     border-radius: var(--radius-sm);
     font-size: 0.9em;
   }
-  a {
-    color: var(--color-link);
-  }
+
   .warn {
     color: var(--color-warning);
     font-size: var(--text-sm);
   }
+
   .recovery-code {
     display: block;
     font-family: var(--font-mono);
