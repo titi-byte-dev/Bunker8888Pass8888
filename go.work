@@ -1,0 +1,12 @@
+// go.work — Go workspace que liga os vários módulos Go do monorepo.
+//
+// Didático: um "workspace" (Go 1.18+) permite ter VÁRIOS módulos (cada um com o
+// seu go.mod) no mesmo repositório e usá-los em conjunto durante o
+// desenvolvimento, sem precisar de `replace` manuais. O ficheiro go.work NÃO é
+// publicado como dependência — é só para o ambiente local/CI.
+go 1.25
+
+use (
+	./backend
+	./cli
+)
