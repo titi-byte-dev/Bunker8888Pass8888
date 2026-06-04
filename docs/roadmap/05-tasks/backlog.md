@@ -24,7 +24,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | INFRA-001 | Provisionar VPS (Debian/Ubuntu) + hardening SSH (só chaves) | 1 | M | ⚪ | — |
 | INFRA-002 | Configurar WireGuard (servidor) + firewall (só UDP aberta) | 1 | M | ⚪ | INFRA-001 |
 | INFRA-003 | Docker + Docker Compose; esqueleto de serviços | 1 | M | 🟢 | INFRA-001 |
-| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟡 | INFRA-003 |
+| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟢 | INFRA-003 |
 | INFRA-005 | Pipeline CI (lint, test, build Go + Svelte) | 1 | M | 🟢 | — |
 | INFRA-006 | Scaffold monorepo (`/backend` Go, `/frontend` Svelte, `/cli`) | 1 | S | 🟢 | — |
 
@@ -38,7 +38,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-004 | API Go: login por Auth Hash + sessões | 1 | M | 🟢 | VAULT-001 |
 | VAULT-005 | CRUD de itens (logins, notas, cartões) | 1 | M | 🟢 | VAULT-003 |
 | VAULT-006 | Sincronização em tempo real (WebSockets) | 1 | M | 🟢 | VAULT-005 |
-| VAULT-007 | Gerador de palavras-passe | 1 | S | ⚪ | — |
+| VAULT-007 | Gerador de palavras-passe | 1 | S | 🟢 | — |
 | VAULT-008 | Score de higiene (fraca/reutilizada) calculado no cliente | 1 | M | ⚪ | VAULT-005 |
 | VAULT-009 | 2FA / TOTP (RFC 6238) integrado | 1 | M | ⚪ | VAULT-005 |
 | VAULT-010 | Acesso por turnos (validação NTP + expurgo de chave) | 1 | L | ⚪ | VAULT-004 |
