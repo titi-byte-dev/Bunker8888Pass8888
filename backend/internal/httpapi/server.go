@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
@@ -26,7 +27,8 @@ type Deps struct {
 	Hub      *realtime.Hub // nil desactiva WebSocket e notificações push
 	Wipe     *security.WipeService
 	Users    *users.Repo
-	Shifts   *shifts.Repo
+	Shifts    *shifts.Repo
+	Geofence  *geofence.Repo
 	AdminKey string // vazio desactiva POST /api/admin/.../remote-wipe
 }
 
@@ -38,37 +40,43 @@ const userIDKey ctxKey = "userID"
 // NewRouter devolve o http.Handler com todas as rotas registadas.
 func NewRouter(deps Deps) http.Handler {
 	mux := http.NewServeMux()
+	ap := accessPolicyDeps{Shifts: deps.Shifts, Geofence: deps.Geofence}
 
 	mux.HandleFunc("GET /healthz", handleHealth)
 	mux.HandleFunc("GET /api/time", handleServerTime)
 
 	if deps.Auth != nil {
 		mux.HandleFunc("POST /api/auth/register", handleRegister(deps.Auth))
-		if deps.Shifts != nil {
-			mux.HandleFunc("POST /api/auth/login", handleLoginWithShift(deps.Auth, deps.Shifts))
-		} else {
-			mux.HandleFunc("POST /api/auth/login", handleLogin(deps.Auth))
-		}
+		mux.HandleFunc("POST /api/auth/login", handleLoginWithAccessPolicy(deps.Auth, ap))
 		mux.HandleFunc("GET /api/auth/kdf", handleKDFParams(deps.Auth))
 	}
 	if deps.Auth != nil && deps.Vault != nil {
 		vd := vaultDeps{repo: deps.Vault, hub: deps.Hub}
-		mux.Handle("GET /api/vault", requireAuthWithShift(deps.Auth, deps.Shifts, handleListItems(deps.Vault)))
-		mux.Handle("POST /api/vault", requireAuthWithShift(deps.Auth, deps.Shifts, handleCreateItem(vd)))
-		mux.Handle("GET /api/vault/{id}", requireAuthWithShift(deps.Auth, deps.Shifts, handleGetItem(deps.Vault)))
-		mux.Handle("PUT /api/vault/{id}", requireAuthWithShift(deps.Auth, deps.Shifts, handleUpdateItem(vd)))
-		mux.Handle("DELETE /api/vault/{id}", requireAuthWithShift(deps.Auth, deps.Shifts, handleDeleteItem(vd)))
+		mux.Handle("GET /api/vault", requireAuthWithAccessPolicy(deps.Auth, ap, handleListItems(deps.Vault)))
+		mux.Handle("POST /api/vault", requireAuthWithAccessPolicy(deps.Auth, ap, handleCreateItem(vd)))
+		mux.Handle("GET /api/vault/{id}", requireAuthWithAccessPolicy(deps.Auth, ap, handleGetItem(deps.Vault)))
+		mux.Handle("PUT /api/vault/{id}", requireAuthWithAccessPolicy(deps.Auth, ap, handleUpdateItem(vd)))
+		mux.Handle("DELETE /api/vault/{id}", requireAuthWithAccessPolicy(deps.Auth, ap, handleDeleteItem(vd)))
 	}
 	if deps.Auth != nil && deps.Hub != nil {
-		mux.HandleFunc("GET /api/ws/vault", handleVaultWS(deps.Auth, deps.Hub, deps.Shifts))
+		mux.HandleFunc("GET /api/ws/vault", handleVaultWS(deps.Auth, deps.Hub, ap))
 	}
 	if deps.Shifts != nil && deps.Auth != nil {
 		mux.Handle("GET /api/access/shift", requireAuth(deps.Auth, handleGetAccessShift(deps.Shifts)))
+	}
+	if deps.Geofence != nil && deps.Auth != nil {
+		mux.Handle("GET /api/access/geofence", requireAuth(deps.Auth, handleGetAccessGeofence(deps.Geofence)))
 	}
 	if deps.Shifts != nil && deps.Users != nil && deps.AdminKey != "" {
 		mux.HandleFunc(
 			"PUT /api/admin/users/{id}/access-shift",
 			handleAdminSetAccessShift(deps.AdminKey, deps.Users, deps.Shifts),
+		)
+	}
+	if deps.Geofence != nil && deps.Users != nil && deps.AdminKey != "" {
+		mux.HandleFunc(
+			"PUT /api/admin/users/{id}/access-geofence",
+			handleAdminSetAccessGeofence(deps.AdminKey, deps.Users, deps.Geofence),
 		)
 	}
 	if deps.Wipe != nil && deps.Users != nil && deps.AdminKey != "" {

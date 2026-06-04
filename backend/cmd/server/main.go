@@ -15,6 +15,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
@@ -58,6 +59,7 @@ func main() {
 		hub := realtime.NewHub()
 		wipeSvc := security.NewWipeService(sessionRepo, hub, pool)
 		shiftRepo := shifts.NewRepo(pool)
+		geoRepo := geofence.NewRepo(pool)
 		deps = httpapi.Deps{
 			Auth:     auth.NewService(userRepo, sessionRepo, sessionTTL),
 			Vault:    vault.NewRepo(pool),
@@ -65,6 +67,7 @@ func main() {
 			Wipe:     wipeSvc,
 			Users:    userRepo,
 			Shifts:   shiftRepo,
+			Geofence: geoRepo,
 			AdminKey: cfg.AdminKey,
 		}
 		logger.Info("base de dados ligada e migrada")
