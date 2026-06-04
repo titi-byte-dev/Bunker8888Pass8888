@@ -1,10 +1,18 @@
 import type { VaultItemInput, VaultItemMeta, VaultItemType } from "./types";
+import type { GeoPosition } from "./geofence";
+import { geoHeaders } from "./geofence";
 
 export class VaultAPI {
   constructor(
     private baseURL: string,
     private token: string,
+    private geo: GeoPosition | null = null,
   ) {}
+
+  /** Actualiza coordenadas GPS enviadas em cada pedido. */
+  setGeo(pos: GeoPosition | null): void {
+    this.geo = pos;
+  }
 
   async list(type?: VaultItemType): Promise<VaultItemMeta[]> {
     const q = type ? `?type=${encodeURIComponent(type)}` : "";
@@ -37,6 +45,7 @@ export class VaultAPI {
       headers: {
         Authorization: `Bearer ${this.token}`,
         "Content-Type": "application/json",
+        ...geoHeaders(this.geo),
         ...init.headers,
       },
     });

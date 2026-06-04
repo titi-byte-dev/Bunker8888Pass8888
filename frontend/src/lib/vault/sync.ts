@@ -8,6 +8,7 @@
  */
 import type { RealtimeMessage, RemoteWipeEvent, VaultSyncEvent } from "./types";
 import { isRemoteWipeEvent } from "./types";
+import type { GeoPosition } from "./geofence";
 
 const MAX_BACKOFF_MS = 30_000;
 
@@ -23,6 +24,7 @@ export class VaultSync {
     private onVaultEvent: (ev: VaultSyncEvent) => void,
     private onStatus?: (connected: boolean) => void,
     private onRemoteWipe?: (ev: RemoteWipeEvent) => void,
+    private geo: GeoPosition | null = null,
   ) {}
 
   /** Abre (ou reabre) a ligação WebSocket. */
@@ -40,8 +42,13 @@ export class VaultSync {
     this.onStatus?.(false);
   }
 
+  /** Actualiza GPS usado na ligação WebSocket (query lat/lon). */
+  setGeo(pos: GeoPosition | null): void {
+    this.geo = pos;
+  }
+
   private openSocket(): void {
-    const url = buildWsURL(this.baseURL, this.token);
+    const url = buildWsURL(this.baseURL, this.token, this.geo);
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
@@ -81,11 +88,16 @@ export class VaultSync {
   }
 }
 
-/** Converte base URL HTTP(S) em URL WebSocket com token na query. */
-export function buildWsURL(baseURL: string, token: string): string {
+/** Converte base URL HTTP(S) em URL WebSocket com token (e GPS opcional na query). */
+export function buildWsURL(baseURL: string, token: string, geo: GeoPosition | null = null): string {
   const url = new URL(baseURL);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   url.pathname = "/api/ws/vault";
-  url.search = `token=${encodeURIComponent(token)}`;
+  const params = new URLSearchParams({ token });
+  if (geo) {
+    params.set("lat", String(geo.lat));
+    params.set("lon", String(geo.lon));
+  }
+  url.search = params.toString();
   return url.toString();
 }
