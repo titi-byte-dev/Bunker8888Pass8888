@@ -46,7 +46,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-012 | Remote wipe de emergência (push WebSocket) | 1 | L | 🟢 | VAULT-006 |
 | VAULT-013 | Browser isolado / sandbox (injeção sem revelar password) | 1 | XL | ⚪ | VAULT-005 |
 | VAULT-014 | Suporte a passkeys | 1 | M | ⚪ | VAULT-004 |
-| VAULT-015 | Importação de palavras-passe | 1 | M | ⚪ | VAULT-005 |
+| VAULT-015 | Importação de palavras-passe | 1 | M | 🟢 | VAULT-005 |
 | VAULT-016 | Acesso de Emergência (herdeiro digital, período de espera) | 1 | L | ⚪ | VAULT-004 |
 | VAULT-017 | CLI em Go (injeção de segredos via mTLS) | 1 | L | ⚪ | VAULT-004 |
 | VAULT-018 | Chave de recuperação (mitiga perda de Master Password) | 1 | M | ⚪ | VAULT-002 |
