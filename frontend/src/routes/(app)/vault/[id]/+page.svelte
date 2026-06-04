@@ -61,6 +61,10 @@
     <CopyField label="Utilizador" value={item.login.username} />
     <CopyField label="Password" value={item.login.password} secret />
 
+    <p class="sandbox-link">
+      <a href="/work/sandbox?item={item.meta.id}">Abrir no browser sandbox</a>
+    </p>
+
     {#if item.login.url}
       <CopyField label="URL" value={item.login.url} />
     {/if}
@@ -110,6 +114,15 @@
     font-size: var(--text-sm);
     color: var(--color-link);
     text-decoration: none;
+  }
+
+  .sandbox-link {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-sm);
+  }
+
+  .sandbox-link a {
+    color: var(--color-link);
   }
 
   .meta {

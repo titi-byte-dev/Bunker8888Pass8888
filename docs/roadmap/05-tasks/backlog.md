@@ -44,7 +44,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-010 | Acesso por turnos (validação NTP + expurgo de chave) | 1 | L | 🟢 | VAULT-004 |
 | VAULT-011 | Geofencing (IP/GPS) na validação de acesso | 1 | M | 🟢 | VAULT-010 |
 | VAULT-012 | Remote wipe de emergência (push WebSocket) | 1 | L | 🟢 | VAULT-006 |
-| VAULT-013 | Browser isolado / sandbox (injeção sem revelar password) | 1 | XL | ⚪ | VAULT-005 |
+| VAULT-013 | Browser isolado / sandbox (injeção sem revelar password) | 1 | XL | 🟢 | VAULT-005 |
 | VAULT-014 | Suporte a passkeys | 1 | M | 🟢 | VAULT-004 |
 | VAULT-015 | Importação de palavras-passe | 1 | M | 🟢 | VAULT-005 |
 | VAULT-019 | Playground dev UI (login + cofre + import CSV) | 1 | M | 🟢 | VAULT-005 |
@@ -63,8 +63,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | UI-003 | Fluxos Auth (login, register, unlock, recovery, passkey) | 1 | L | 🟢 | UI-002, VAULT-014, VAULT-018 |
 | UI-004 | Vault list + detail + CRUD (substituir playground) | 1 | L | 🟢 | UI-003, VAULT-005 |
 | UI-005 | Motion system (GSAP presets, reduced motion) | 1 | M | ⚪ | UI-001 |
-| UI-006 | Command palette (⌘K) | 1 | M | ⚪ | UI-002 |
-| UI-007 | Painel higiene + preview Dark Web (score cliente) | 2 | M | ⚪ | UI-004, VAULT-008, DW-001 |
+| UI-006 | Command palette (⌘K) | 1 | M | 🟢 | UI-002 |
+| UI-007 | Painel higiene + preview Dark Web (score cliente) | 2 | M | 🟢 | UI-004, VAULT-008, DW-001 |
 | UI-008 | Admin: utilizadores, políticas, audit, remote wipe | 1 | L | ⚪ | UI-002, VAULT-010, VAULT-012 |
 | UI-009 | Shell mobile Capacitor + biometria | 1 | L | ⚪ | UI-004 |
 | UI-010 | Catálogo componentes (Storybook ou página dev) | 1 | M | ⚪ | UI-001 |
@@ -106,7 +106,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| DW-001 | Verificação de fugas via k-anonymity (breach data API) | 2 | M | ⚪ | VAULT-005 |
+| DW-001 | Verificação de fugas via k-anonymity (breach data API) | 2 | M | 🟢 | VAULT-005 |
 | DW-002 | Forçar alteração de password em exposição | 2 | S | ⚪ | DW-001 |
 | DW-003 | Painel de saúde de segurança (score) | 2 | M | ⚪ | VAULT-008 |
 | DW-004 | Sentinel Mode (deteção de login impossível) | 2 | L | ⚪ | VAULT-004 |
