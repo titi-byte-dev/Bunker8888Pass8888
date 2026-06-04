@@ -3,17 +3,25 @@
    * Playground de desenvolvimento (INFRA-006+) — UI mínima para testar o cofre.
    * Não é o produto final; serve para validar lib + API end-to-end.
    */
-  import { loginUser, loginAfterRegister, registerUser } from "./lib/auth";
+  import { loginUser, loginAfterRegister, registerUser, fetchKdfParams, deriveMasterKeyBytes } from "./lib/auth";
   import { saveSessionToken, loadSessionToken, clearSessionToken } from "./lib/session";
   import { VaultAPI } from "./lib/vault/api";
   import { blobFromBase64, openItem, sealItem, blobToBase64 } from "./lib/vault/items";
   import { setMasterKey, purgeMasterKey, getMasterKey } from "./lib/vault/masterKeyStore";
   import { generatePassword } from "./lib/vault/password";
   import { importCsvToVaultInputs, uploadImportItems } from "./lib/vault/import";
+  import {
+    generateRecoveryCode,
+    wrapMasterKeyBytes,
+    uploadRecoveryBackup,
+    fetchRecoveryBackupStatus,
+    recoverMasterKeyFromEmail,
+  } from "./lib/vault/recovery";
   import type { LoginItem, VaultItemMeta } from "./lib/vault/types";
 
   const API = ""; // Vite proxy → localhost:8080
 
+  let screen = $state<"login" | "recover">("login");
   let email = $state("");
   let masterPassword = $state("");
   let token = $state<string | null>(loadSessionToken());
@@ -27,6 +35,11 @@
   let newPass = $state("");
   let importPreview = $state("");
 
+  let recoveryConfigured = $state(false);
+  let recoveryConfirmPw = $state("");
+  let newRecoveryCode = $state("");
+  let recoverCode = $state("");
+
   async function handleRegister() {
     busy = true;
     status = "A derivar chaves (Argon2id)…";
@@ -38,6 +51,7 @@
       saveSessionToken(t);
       setMasterKey(masterKey);
       status = "Sessão iniciada.";
+      recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
       await refreshVault();
     } catch (e) {
       status = e instanceof Error ? e.message : "Erro no registo";
@@ -55,6 +69,7 @@
       saveSessionToken(t);
       setMasterKey(masterKey);
       status = "Sessão iniciada.";
+      recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
       await refreshVault();
     } catch (e) {
       status = e instanceof Error ? e.message : "Erro no login";
@@ -135,6 +150,39 @@
   function fillGeneratedPassword() {
     newPass = generatePassword({ length: 20 });
   }
+
+  async function handleCreateRecovery() {
+    if (!token) return;
+    busy = true;
+    try {
+      const kdf = await fetchKdfParams(API, email);
+      const mk = await deriveMasterKeyBytes(recoveryConfirmPw, kdf.salt, kdf);
+      const code = generateRecoveryCode();
+      const envelope = await wrapMasterKeyBytes(mk, code);
+      await uploadRecoveryBackup(API, token, envelope);
+      newRecoveryCode = code;
+      recoveryConfigured = true;
+      recoveryConfirmPw = "";
+      status = "Chave de recuperação criada — guarda o código abaixo offline.";
+    } catch (e) {
+      status = e instanceof Error ? e.message : "Falha ao criar recuperação";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handleRecoverMasterKey() {
+    busy = true;
+    try {
+      await recoverMasterKeyFromEmail(API, email, recoverCode);
+      status =
+        "Master Key recuperada com sucesso. Ainda precisas de redefinir a Master Password (em breve) para voltar a entrar.";
+    } catch (e) {
+      status = e instanceof Error ? e.message : "Recuperação falhou";
+    } finally {
+      busy = false;
+    }
+  }
 </script>
 
 <main>
@@ -144,6 +192,12 @@
   </header>
 
   {#if !token}
+    <div class="row" style="margin-bottom: 1rem">
+      <button class:secondary={screen !== "login"} onclick={() => (screen = "login")}>Entrar</button>
+      <button class:secondary={screen !== "recover"} onclick={() => (screen = "recover")}>Recuperar</button>
+    </div>
+
+    {#if screen === "login"}
     <section class="card">
       <h2>Iniciar sessão</h2>
       <label>
@@ -161,6 +215,15 @@
         </button>
       </div>
     </section>
+    {:else}
+    <section class="card">
+      <h2>Recuperar Master Key</h2>
+      <p class="muted">Usa a chave de recuperação guardada offline. Não substitui login — valida o backup cifrado.</p>
+      <label>Email <input type="email" bind:value={email} /></label>
+      <label>Código de recuperação <input type="text" bind:value={recoverCode} placeholder="XXXXX-XXXXX-XXXXX-XXXXX" /></label>
+      <button onclick={handleRecoverMasterKey} disabled={busy || !email || !recoverCode}>Recuperar</button>
+    </section>
+    {/if}
   {:else}
     <section class="card">
       <div class="row spread">
@@ -205,6 +268,24 @@
       <p class="muted">Bitwarden ou CSV genérico (title, url, username, password). Cifragem local.</p>
       <input type="file" accept=".csv,text/csv" onchange={handleImport} disabled={busy} />
       {#if importPreview}<p>{importPreview}</p>{/if}
+    </section>
+
+    <section class="card">
+      <h2>Chave de recuperação</h2>
+      {#if recoveryConfigured && !newRecoveryCode}
+        <p class="muted">Backup configurado. Podes criar um novo (substitui o anterior).</p>
+      {/if}
+      {#if newRecoveryCode}
+        <p class="warn">Guarda este código offline — não voltará a ser mostrado:</p>
+        <code class="recovery-code">{newRecoveryCode}</code>
+      {/if}
+      <label>
+        Confirma Master Password
+        <input type="password" bind:value={recoveryConfirmPw} autocomplete="current-password" />
+      </label>
+      <button onclick={handleCreateRecovery} disabled={busy || !recoveryConfirmPw}>
+        {recoveryConfigured ? "Regenerar chave" : "Criar chave de recuperação"}
+      </button>
     </section>
   {/if}
 
@@ -322,5 +403,18 @@
   }
   a {
     color: #6cb6ff;
+  }
+  .warn {
+    color: #f0ad4e;
+    font-size: 0.9rem;
+  }
+  .recovery-code {
+    display: block;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    padding: 0.75rem;
+    margin: 0.5rem 0 1rem;
+    background: #0f1419;
+    border-radius: 4px;
   }
 </style>

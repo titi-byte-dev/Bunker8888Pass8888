@@ -13,6 +13,7 @@ import (
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
@@ -29,6 +30,7 @@ type Deps struct {
 	Users    *users.Repo
 	Shifts    *shifts.Repo
 	Geofence  *geofence.Repo
+	Recovery  *recovery.Repo
 	AdminKey string // vazio desactiva POST /api/admin/.../remote-wipe
 }
 
@@ -90,6 +92,14 @@ func NewRouter(deps Deps) http.Handler {
 			"POST /api/security/remote-wipe/self",
 			requireAuth(deps.Auth, handleSelfRemoteWipe(deps.Wipe)),
 		)
+	}
+	if deps.Recovery != nil && deps.Auth != nil {
+		mux.Handle("PUT /api/vault/recovery-backup", requireAuth(deps.Auth, handlePutRecoveryBackup(deps.Recovery)))
+		mux.Handle("GET /api/vault/recovery-backup", requireAuth(deps.Auth, handleGetRecoveryBackupSelf(deps.Recovery)))
+		mux.Handle("GET /api/vault/recovery-backup/status", requireAuth(deps.Auth, handleRecoveryBackupStatus(deps.Recovery)))
+	}
+	if deps.Recovery != nil {
+		mux.HandleFunc("GET /api/vault/recovery-backup/lookup", handleGetRecoveryBackupByEmail(deps.Recovery))
 	}
 
 	return mux
