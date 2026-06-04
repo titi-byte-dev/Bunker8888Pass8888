@@ -13,6 +13,7 @@ import (
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -37,6 +38,7 @@ type Deps struct {
 	CLIca     *clidevices.CA
 	CLICertTTL time.Duration
 	Passkeys   *passkeys.Service
+	Emergency  *emergency.Service
 	AdminKey string // vazio desactiva POST /api/admin/.../remote-wipe
 }
 
@@ -106,6 +108,17 @@ func NewRouter(deps Deps) http.Handler {
 	}
 	if deps.Recovery != nil {
 		mux.HandleFunc("GET /api/vault/recovery-backup/lookup", handleGetRecoveryBackupByEmail(deps.Recovery))
+	}
+	if deps.Emergency != nil && deps.Auth != nil {
+		mux.Handle("PUT /api/emergency/config", requireAuth(deps.Auth, handlePutEmergencyConfig(deps.Emergency)))
+		mux.Handle("GET /api/emergency/config", requireAuth(deps.Auth, handleGetEmergencyConfig(deps.Emergency)))
+		mux.Handle("DELETE /api/emergency/config", requireAuth(deps.Auth, handleDeleteEmergencyConfig(deps.Emergency)))
+		mux.Handle("GET /api/emergency/requests", requireAuth(deps.Auth, handleListEmergencyRequests(deps.Emergency)))
+		mux.Handle("POST /api/emergency/requests/{id}/reject", requireAuth(deps.Auth, handleRejectEmergencyRequest(deps.Emergency)))
+		mux.Handle("POST /api/emergency/requests/{id}/approve", requireAuth(deps.Auth, handleApproveEmergencyRequest(deps.Emergency)))
+		mux.Handle("POST /api/emergency/request", requireAuth(deps.Auth, handleCreateEmergencyRequest(deps.Emergency)))
+		mux.Handle("GET /api/emergency/request/status", requireAuth(deps.Auth, handleGetEmergencyRequestStatus(deps.Emergency)))
+		mux.Handle("GET /api/emergency/access", requireAuth(deps.Auth, handleFetchEmergencyAccess(deps.Emergency)))
 	}
 	registerCLIRoutes(mux, deps)
 	registerPasskeyRoutes(mux, deps, ap)
