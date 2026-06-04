@@ -1,0 +1,16 @@
+/**
+ * Fallback CSS para reduced motion — complementa GSAP (UI-005).
+ *
+ * > ⚠️ **Segurança UX:** animações decorativas desactivadas; transições
+ * funcionais críticas (ex.: focus) mantêm-se via outline nativo do browser.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

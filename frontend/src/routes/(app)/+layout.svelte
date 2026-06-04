@@ -13,6 +13,7 @@
   } from "$lib/design";
   import { clearSession, loadUserEmail } from "$lib/session";
   import { purgeMasterKey } from "$lib/vault/masterKeyStore";
+  import ShellPageMotion from "$lib/motion/ShellPageMotion.svelte";
 
   let { children } = $props();
 
@@ -55,7 +56,9 @@
     </header>
 
     <main class="shell-content">
-      {@render children()}
+      <ShellPageMotion>
+        {@render children()}
+      </ShellPageMotion>
     </main>
   </div>
 
