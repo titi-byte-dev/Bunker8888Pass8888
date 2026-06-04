@@ -11,6 +11,7 @@ import {
   registerUser,
 } from "$lib/auth";
 import { loginWithPasskey } from "$lib/passkey";
+import { normalizeEmail } from "$lib/auth/http";
 import { saveSessionToken, saveUserEmail } from "$lib/session";
 import { setMasterKey } from "$lib/vault/masterKeyStore";
 
@@ -34,16 +35,18 @@ export async function loginWithPassword(
   email: string,
   masterPassword: string,
 ): Promise<{ token: string; masterKey: CryptoKey }> {
-  const { masterKey, token } = await loginUser(API, email, masterPassword);
-  persistSession(email, token);
+  const normalized = normalizeEmail(email);
+  const { masterKey, token } = await loginUser(API, normalized, masterPassword);
+  persistSession(normalized, token);
   setMasterKey(masterKey);
   return { token, masterKey };
 }
 
 /** Passkey autentica o servidor; unlock fica para a página seguinte. */
 export async function loginWithPasskeyOnly(email: string): Promise<string> {
-  const token = await loginWithPasskey(API, email);
-  persistSession(email, token);
+  const normalized = normalizeEmail(email);
+  const token = await loginWithPasskey(API, normalized);
+  persistSession(normalized, token);
   return token;
 }
 
@@ -51,9 +54,10 @@ export async function registerAndLogin(
   email: string,
   masterPassword: string,
 ): Promise<{ token: string; masterKey: CryptoKey }> {
-  await registerUser(API, email, masterPassword);
-  const { masterKey, token } = await loginAfterRegister(API, email, masterPassword);
-  persistSession(email, token);
+  const normalized = normalizeEmail(email);
+  await registerUser(API, normalized, masterPassword);
+  const { masterKey, token } = await loginAfterRegister(API, normalized, masterPassword);
+  persistSession(normalized, token);
   setMasterKey(masterKey);
   return { token, masterKey };
 }
