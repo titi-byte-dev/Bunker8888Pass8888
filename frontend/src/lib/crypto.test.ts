@@ -6,6 +6,7 @@ import {
   randomBytes,
   toBytes,
   fromBytes,
+  bytesEqual,
 } from "./crypto";
 
 // Parâmetros leves para os testes correrem depressa (em produção usa-se DEFAULT_KDF).
@@ -42,7 +43,7 @@ describe("crypto (Zero-Knowledge client-side)", () => {
     const key = await deriveMasterKey("pw", randomBytes(16), fastKdf);
     const a = await encrypt(key, toBytes("igual"));
     const b = await encrypt(key, toBytes("igual"));
-    expect(Buffer.from(a).equals(Buffer.from(b))).toBe(false);
+    expect(bytesEqual(a, b)).toBe(false);
   });
 
   it("respeita o AAD (additional authenticated data)", async () => {

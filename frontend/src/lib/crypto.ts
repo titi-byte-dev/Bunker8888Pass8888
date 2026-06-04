@@ -11,6 +11,16 @@
 
 const encoder = new TextEncoder();
 
+/**
+ * Bytes = Uint8Array garantidamente apoiado num ArrayBuffer (não partilhado).
+ *
+ * Didático: desde o TypeScript 5.7 os typed arrays são genéricos no tipo de
+ * buffer. A WebCrypto exige `BufferSource` (apoiado em ArrayBuffer, nunca
+ * SharedArrayBuffer). Fixar este tipo evita erros de atribuição e deixa a
+ * intenção explícita.
+ */
+export type Bytes = Uint8Array<ArrayBuffer>;
+
 export interface KdfParams {
   /** Nº de iterações do PBKDF2. Mais = mais lento = mais seguro. */
   iterations: number;
@@ -24,7 +34,7 @@ export const DEFAULT_KDF: KdfParams = { iterations: 600_000, hash: "SHA-256" };
 const NONCE_BYTES = 12;
 
 /** Gera `n` bytes aleatórios criptograficamente seguros. */
-export function randomBytes(n: number): Uint8Array {
+export function randomBytes(n: number): Bytes {
   return crypto.getRandomValues(new Uint8Array(n));
 }
 
@@ -36,7 +46,7 @@ export function randomBytes(n: number): Uint8Array {
  */
 export async function deriveMasterKey(
   password: string,
-  salt: Uint8Array,
+  salt: Bytes,
   params: KdfParams = DEFAULT_KDF,
 ): Promise<CryptoKey> {
   // Importamos a password como material base para a KDF (só permite deriveKey).
@@ -63,9 +73,9 @@ export async function deriveMasterKey(
  */
 export async function encrypt(
   key: CryptoKey,
-  plaintext: Uint8Array,
-  aad?: Uint8Array,
-): Promise<Uint8Array> {
+  plaintext: Bytes,
+  aad?: Bytes,
+): Promise<Bytes> {
   const nonce = randomBytes(NONCE_BYTES);
   const ciphertext = new Uint8Array(
     await crypto.subtle.encrypt(
@@ -85,9 +95,9 @@ export async function encrypt(
 /** Reverte encrypt(). Lança se a autenticação falhar (dados adulterados). */
 export async function decrypt(
   key: CryptoKey,
-  blob: Uint8Array,
-  aad?: Uint8Array,
-): Promise<Uint8Array> {
+  blob: Bytes,
+  aad?: Bytes,
+): Promise<Bytes> {
   const nonce = blob.subarray(0, NONCE_BYTES);
   const ciphertext = blob.subarray(NONCE_BYTES);
   const plaintext = await crypto.subtle.decrypt(
@@ -99,11 +109,16 @@ export async function decrypt(
 }
 
 /** Converte texto em bytes (UTF-8) — atalho conveniente para o chamador. */
-export function toBytes(s: string): Uint8Array {
+export function toBytes(s: string): Bytes {
   return encoder.encode(s);
 }
 
 /** Converte bytes (UTF-8) em texto. */
-export function fromBytes(b: Uint8Array): string {
+export function fromBytes(b: Bytes): string {
   return new TextDecoder().decode(b);
+}
+
+/** Compara dois conjuntos de bytes (não criptográfico; só para igualdade). */
+export function bytesEqual(a: Bytes, b: Bytes): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
 }
