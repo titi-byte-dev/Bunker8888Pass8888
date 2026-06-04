@@ -53,3 +53,15 @@ func (r *Repo) Delete(ctx context.Context, tokenHash []byte) error {
 	_, err := r.pool.Exec(ctx, `DELETE FROM sessions WHERE token_hash = $1`, tokenHash)
 	return err
 }
+
+// DeleteAllForUser revoga TODAS as sessões de um utilizador (remote wipe).
+//
+// ⚠️ Segurança: mesmo que o dispositivo não receba o push WebSocket, fica
+// impossibilitado de voltar a autenticar-se com tokens antigos.
+func (r *Repo) DeleteAllForUser(ctx context.Context, userID string) (int64, error) {
+	tag, err := r.pool.Exec(ctx, `DELETE FROM sessions WHERE user_id = $1`, userID)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}

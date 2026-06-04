@@ -21,6 +21,8 @@ const (
 	EventCreated = "vault.item.created"
 	EventUpdated = "vault.item.updated"
 	EventDeleted = "vault.item.deleted"
+	// EventRemoteWipe — ordem de apagar cache local + descartar Master Key (VAULT-012).
+	EventRemoteWipe = "security.remote_wipe"
 )
 
 // Event é a mensagem JSON enviada aos clientes ligados.
@@ -29,6 +31,31 @@ type Event struct {
 	ItemID    string    `json:"item_id"`
 	ItemType  string    `json:"item_type,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+}
+
+// WipeEvent é enviado aos dispositivos ligados para apagar dados locais da app.
+type WipeEvent struct {
+	Type     string    `json:"type"`
+	Reason   string    `json:"reason,omitempty"`
+	IssuedAt time.Time `json:"issued_at"`
+}
+
+// NotifyWipe envia ordem de remote wipe a todos os dispositivos do utilizador.
+func (h *Hub) NotifyWipe(userID, reason string) {
+	ev := WipeEvent{
+		Type:     EventRemoteWipe,
+		Reason:   reason,
+		IssuedAt: time.Now().UTC(),
+	}
+	payload, err := json.Marshal(ev)
+	if err != nil {
+		return
+	}
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	for c := range h.clients[userID] {
+		c.trySend(payload)
+	}
 }
 
 // Hub regista ligações WebSocket por userID e faz broadcast de eventos.

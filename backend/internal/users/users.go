@@ -72,6 +72,22 @@ func (r *Repo) ByEmail(ctx context.Context, email string) (*User, error) {
 	return u, nil
 }
 
+// ByID procura um utilizador pelo UUID. Devolve ErrNotFound se não existir.
+func (r *Repo) ByID(ctx context.Context, id string) (*User, error) {
+	u := &User{}
+	err := r.pool.QueryRow(ctx, `
+		SELECT id::text, email, verifier, verifier_salt, kdf_salt, kdf_time, kdf_memory, kdf_threads
+		FROM users WHERE id = $1`, id,
+	).Scan(&u.ID, &u.Email, &u.Verifier, &u.VerifierSalt, &u.KDFSalt, &u.KDFTime, &u.KDFMemory, &u.KDFThreads)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return u, nil
+}
+
 // isUniqueViolation deteta o erro de chave única do PostgreSQL sem importar o
 // pacote pgconn diretamente nos chamadores.
 func isUniqueViolation(err error) bool {

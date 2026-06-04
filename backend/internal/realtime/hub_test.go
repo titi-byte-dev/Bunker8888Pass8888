@@ -32,6 +32,24 @@ func TestHub_NotifyDelivered(t *testing.T) {
 	}
 }
 
+func TestHub_NotifyWipeDelivered(t *testing.T) {
+	h := NewHub()
+	c := NewClient()
+	defer c.Close()
+	h.Register("user-1", c)
+
+	h.NotifyWipe("user-1", "offboarding")
+
+	select {
+	case msg := <-c.Send():
+		if string(msg) == "" {
+			t.Fatal("mensagem wipe vazia")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("wipe não entregue")
+	}
+}
+
 func TestHub_NotifyOtherUserIgnored(t *testing.T) {
 	h := NewHub()
 	c := NewClient()

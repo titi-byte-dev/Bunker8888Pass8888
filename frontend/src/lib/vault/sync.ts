@@ -6,7 +6,8 @@
  * exponencial até 30s). O conteúdo sensível NÃO vem pelo WS — só metadados;
  * usa VaultAPI.get() para obter o blob cifrado actualizado.
  */
-import type { VaultSyncEvent } from "./types";
+import type { RealtimeMessage, RemoteWipeEvent, VaultSyncEvent } from "./types";
+import { isRemoteWipeEvent } from "./types";
 
 const MAX_BACKOFF_MS = 30_000;
 
@@ -19,8 +20,9 @@ export class VaultSync {
   constructor(
     private baseURL: string,
     private token: string,
-    private onEvent: (ev: VaultSyncEvent) => void,
+    private onVaultEvent: (ev: VaultSyncEvent) => void,
     private onStatus?: (connected: boolean) => void,
+    private onRemoteWipe?: (ev: RemoteWipeEvent) => void,
   ) {}
 
   /** Abre (ou reabre) a ligação WebSocket. */
@@ -49,7 +51,12 @@ export class VaultSync {
 
     this.ws.onmessage = (ev) => {
       try {
-        this.onEvent(JSON.parse(String(ev.data)) as VaultSyncEvent);
+        const msg = JSON.parse(String(ev.data)) as RealtimeMessage;
+        if (isRemoteWipeEvent(msg)) {
+          this.onRemoteWipe?.(msg);
+          return;
+        }
+        this.onVaultEvent(msg);
       } catch {
         // Mensagem inválida — ignoramos (dados ≠ instruções).
       }
