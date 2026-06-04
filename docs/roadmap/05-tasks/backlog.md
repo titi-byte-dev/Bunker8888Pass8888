@@ -11,7 +11,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 
 ## Como adicionar uma task
 
-1. Escolhe o prefixo do epic (`VAULT`, `HR`, `FIN`, `SHARE`, `DW`, `MAIL`, `AGENT`, `INFRA`).
+1. Escolhe o prefixo do epic (`VAULT`, `HR`, `FIN`, `SHARE`, `DW`, `MAIL`, `AGENT`, `INFRA`, `UI`).
 2. Usa o próximo número livre.
 3. Formato: `| ID | Descrição | Fase | Tamanho | Estado | Depende de |`
 
@@ -51,6 +51,23 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-016 | Acesso de Emergência (herdeiro digital, período de espera) | 1 | L | ⚪ | VAULT-004 |
 | VAULT-017 | CLI em Go (injeção de segredos via mTLS) | 1 | L | 🟢 | VAULT-004 |
 | VAULT-018 | Chave de recuperação (mitiga perda de Master Password) | 1 | M | 🟢 | VAULT-002 |
+
+## UI — Design & Experiência de Produto
+
+> Visão completa: [`../09-design/product-ui-vision.md`](../09-design/product-ui-vision.md)
+
+| ID | Descrição | Fase | Tamanho | Estado | Depende de |
+|---|---|---|---|---|---|
+| UI-001 | Design tokens (CSS vars, light/dark, tipografia, spacing) | 1 | M | ⚪ | VAULT-019 |
+| UI-002 | App shell SvelteKit (routing, layouts, sidebar/tab bar) | 1 | L | ⚪ | UI-001 |
+| UI-003 | Fluxos Auth (login, register, unlock, recovery, passkey) | 1 | L | ⚪ | UI-002, VAULT-014, VAULT-018 |
+| UI-004 | Vault list + detail + CRUD (substituir playground) | 1 | L | ⚪ | UI-003, VAULT-005 |
+| UI-005 | Motion system (GSAP presets, reduced motion) | 1 | M | ⚪ | UI-001 |
+| UI-006 | Command palette (⌘K) | 1 | M | ⚪ | UI-002 |
+| UI-007 | Painel higiene + preview Dark Web (score cliente) | 2 | M | ⚪ | UI-004, VAULT-008, DW-001 |
+| UI-008 | Admin: utilizadores, políticas, audit, remote wipe | 1 | L | ⚪ | UI-002, VAULT-010, VAULT-012 |
+| UI-009 | Shell mobile Capacitor + biometria | 1 | L | ⚪ | UI-004 |
+| UI-010 | Catálogo componentes (Storybook ou página dev) | 1 | M | ⚪ | UI-001 |
 
 ## HR — Recursos Humanos & RGPD
 

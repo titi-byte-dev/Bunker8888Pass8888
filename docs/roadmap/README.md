@@ -23,12 +23,13 @@ A numeração indica a ordem de leitura sugerida (do "porquê" para o "como").
 | 06 | [`06-testing/`](06-testing/) | Estratégia de testes, segurança e RGPD |
 | 07 | [`07-non-functional/`](07-non-functional/) | Segurança, performance, conformidade |
 | 08 | [`08-ai-tooling/`](08-ai-tooling/README.md) | Configuração de IA + melhorias futuras |
+| 09 | [`09-design/`](09-design/README.md) | Visão UX/UI, design system, referências |
 
 ## Convenções
 
 - **Idioma:** Português (Portugal) no conteúdo; termos técnicos e IDs em inglês.
 - **IDs:** cada epic tem um prefixo (`VAULT`, `HR`, `FIN`, `SHARE`, `DW`, `MAIL`,
-  `AGENT`) e as tasks numeram-se a partir daí (`VAULT-001`). Ver [`05-tasks/backlog.md`](05-tasks/backlog.md).
+  `AGENT`, `UI`) e as tasks numeram-se a partir daí (`VAULT-001`). Ver [`05-tasks/backlog.md`](05-tasks/backlog.md).
 - **Estilo didático:** o código e docs incluem comentários que ensinam a
   linguagem (ver regra em `.cursor/rules/didactic-style.mdc`).
 - **Notas pessoais:** em [`_private/`](_private/) (fora do git por defeito).
