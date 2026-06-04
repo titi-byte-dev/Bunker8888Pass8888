@@ -23,6 +23,15 @@ type Config struct {
 	// AdminKey protege endpoints administrativos (remote wipe de terceiros).
 	// ⚠️ Segurança: vazio desactiva esses endpoints — nunca usar valor por omissão.
 	AdminKey string
+	// MTLSAddr é o endereço do servidor mTLS da CLI (ex: ":8443"). Vazio desactiva.
+	MTLSAddr string
+	// MTLSAutoDev gera CA/servidor efémeros ao arrancar (só desenvolvimento).
+	MTLSAutoDev bool
+	// Caminhos PEM para mTLS em produção.
+	MTLSCACert     string
+	MTLSCAKey      string
+	MTLSServerCert string
+	MTLSServerKey  string
 }
 
 // Load lê a configuração do ambiente, aplicando valores por omissão.
@@ -32,6 +41,12 @@ func Load() Config {
 		ShutdownTimeout: getenvDuration("AEGIS_SHUTDOWN_TIMEOUT", 10*time.Second),
 		DatabaseURL:     getenv("AEGIS_DATABASE_URL", ""),
 		AdminKey:        getenv("AEGIS_ADMIN_KEY", ""),
+		MTLSAddr:        getenv("AEGIS_MTLS_ADDR", ":8443"),
+		MTLSAutoDev:     getenvBool("AEGIS_MTLS_AUTO_DEV", false),
+		MTLSCACert:      getenv("AEGIS_MTLS_CA_CERT", ""),
+		MTLSCAKey:       getenv("AEGIS_MTLS_CA_KEY", ""),
+		MTLSServerCert:  getenv("AEGIS_MTLS_SERVER_CERT", ""),
+		MTLSServerKey:   getenv("AEGIS_MTLS_SERVER_KEY", ""),
 	}
 }
 
@@ -58,4 +73,16 @@ func getenvDuration(key string, fallback time.Duration) time.Duration {
 		return time.Duration(secs) * time.Second
 	}
 	return fallback
+}
+
+func getenvBool(key string, fallback bool) bool {
+	v, ok := os.LookupEnv(key)
+	if !ok || v == "" {
+		return fallback
+	}
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return fallback
+	}
+	return b
 }

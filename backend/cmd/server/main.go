@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
@@ -62,6 +63,23 @@ func main() {
 		shiftRepo := shifts.NewRepo(pool)
 		geoRepo := geofence.NewRepo(pool)
 		recoveryRepo := recovery.NewRepo(pool)
+		deviceRepo := clidevices.NewRepo(pool)
+
+		var mtlsMat *config.MTLSMaterial
+		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
+			var err error
+			mtlsMat, err = config.LoadMTLSMaterial(cfg)
+			if err != nil {
+				logger.Error("mTLS material inválido", "err", err)
+				os.Exit(1)
+			}
+		}
+
+		var cliCA *clidevices.CA
+		if mtlsMat != nil {
+			cliCA = mtlsMat.CA
+		}
+
 		deps = httpapi.Deps{
 			Auth:     auth.NewService(userRepo, sessionRepo, sessionTTL),
 			Vault:    vault.NewRepo(pool),
@@ -71,6 +89,8 @@ func main() {
 			Shifts:   shiftRepo,
 			Geofence: geoRepo,
 			Recovery: recoveryRepo,
+			Devices:  deviceRepo,
+			CLIca:    cliCA,
 			AdminKey: cfg.AdminKey,
 		}
 		logger.Info("base de dados ligada e migrada")
@@ -83,6 +103,11 @@ func main() {
 		Handler: httpapi.NewRouter(deps),
 	}
 
+	var mtlsSrv *http.Server
+	if mtlsMat := loadMTLSForServer(cfg, deps, logger); mtlsMat != nil {
+		mtlsSrv = mtlsMat
+	}
+
 	go func() {
 		logger.Info("servidor a arrancar", "addr", cfg.HTTPAddr)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -90,6 +115,16 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	if mtlsSrv != nil {
+		go func() {
+			logger.Info("servidor mTLS CLI a arrancar", "addr", mtlsSrv.Addr)
+			if err := mtlsSrv.ListenAndServeTLS("", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				logger.Error("falha no servidor mTLS", "err", err)
+				os.Exit(1)
+			}
+		}()
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -104,5 +139,37 @@ func main() {
 		logger.Error("encerramento forçado", "err", err)
 		os.Exit(1)
 	}
+	if mtlsSrv != nil {
+		if err := mtlsSrv.Shutdown(shutdownCtx); err != nil {
+			logger.Error("encerramento mTLS forçado", "err", err)
+			os.Exit(1)
+		}
+	}
 	logger.Info("servidor encerrado em segurança")
+}
+
+func loadMTLSForServer(cfg config.Config, deps httpapi.Deps, logger *slog.Logger) *http.Server {
+	if deps.Devices == nil || deps.Vault == nil {
+		return nil
+	}
+	mtlsMat, err := config.LoadMTLSMaterial(cfg)
+	if err != nil || mtlsMat == nil {
+		if err != nil {
+			logger.Warn("mTLS desactivado", "err", err)
+		}
+		return nil
+	}
+	if cfg.MTLSAddr == "" {
+		return nil
+	}
+	tlsCfg, err := httpapi.MTLSTLSConfig(mtlsMat.ServerCertPEM, mtlsMat.ServerKeyPEM, mtlsMat.CACertPEM)
+	if err != nil {
+		logger.Warn("mTLS TLS config inválida", "err", err)
+		return nil
+	}
+	return &http.Server{
+		Addr:      cfg.MTLSAddr,
+		Handler:   httpapi.NewMTLSRouter(deps),
+		TLSConfig: tlsCfg,
+	}
 }
