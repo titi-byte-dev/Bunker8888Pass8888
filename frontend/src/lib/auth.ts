@@ -8,6 +8,7 @@
  */
 import { argon2id } from "hash-wasm";
 import { randomBytes, type Bytes } from "./crypto";
+import { normalizeEmail, wrapNetworkError } from "./auth/http";
 
 /** Parâmetros KDF do cliente (guardados na BD no registo). */
 export interface ClientKdfParams {
@@ -92,15 +93,19 @@ export interface KdfResponse {
 }
 
 export async function fetchKdfParams(baseURL: string, email: string): Promise<ClientKdfParams & { salt: Bytes }> {
-  const res = await fetch(`${baseURL}/api/auth/kdf?email=${encodeURIComponent(email)}`);
-  if (!res.ok) throw new Error("Utilizador não encontrado");
-  const j = (await res.json()) as KdfResponse;
-  return {
-    salt: base64ToBytes(j.salt),
-    time: j.time,
-    memory: j.memory,
-    threads: j.threads,
-  };
+  try {
+    const res = await fetch(`${baseURL}/api/auth/kdf?email=${encodeURIComponent(normalizeEmail(email))}`);
+    if (!res.ok) throw new Error("Utilizador não encontrado — regista-te primeiro em /auth/register");
+    const j = (await res.json()) as KdfResponse;
+    return {
+      salt: base64ToBytes(j.salt),
+      time: j.time,
+      memory: j.memory,
+      threads: j.threads,
+    };
+  } catch (e) {
+    throw wrapNetworkError(e, "KDF");
+  }
 }
 
 export async function registerUser(
@@ -112,23 +117,27 @@ export async function registerUser(
   const salt = randomBytes(16);
   const mk = await deriveMasterKeyBytes(masterPassword, salt, kdf);
   const authHash = await deriveAuthHashBytes(mk, masterPassword, kdf);
-  const res = await fetch(`${baseURL}/api/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email,
-      auth_hash: bytesToBase64(authHash),
-      kdf: {
-        salt: bytesToBase64(salt),
-        time: kdf.time,
-        memory: kdf.memory,
-        threads: kdf.threads,
-      },
-    }),
-  });
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(err.error ?? `Registo falhou (${res.status})`);
+  try {
+    const res = await fetch(`${baseURL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: normalizeEmail(email),
+        auth_hash: bytesToBase64(authHash),
+        kdf: {
+          salt: bytesToBase64(salt),
+          time: kdf.time,
+          memory: kdf.memory,
+          threads: kdf.threads,
+        },
+      }),
+    });
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(err.error ?? `Registo falhou (${res.status})`);
+    }
+  } catch (e) {
+    throw wrapNetworkError(e, "Registo");
   }
   const masterKey = await importAesKeyFromBytes(mk);
   return { masterKey, token: null };
@@ -142,21 +151,25 @@ export async function loginUser(
   const kdf = await fetchKdfParams(baseURL, email);
   const mk = await deriveMasterKeyBytes(masterPassword, kdf.salt, kdf);
   const authHash = await deriveAuthHashBytes(mk, masterPassword, kdf);
-  const res = await fetch(`${baseURL}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email,
-      auth_hash: bytesToBase64(authHash),
-    }),
-  });
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(err.error ?? `Login falhou (${res.status})`);
+  try {
+    const res = await fetch(`${baseURL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: normalizeEmail(email),
+        auth_hash: bytesToBase64(authHash),
+      }),
+    });
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(err.error ?? `Login falhou (${res.status})`);
+    }
+    const { token } = (await res.json()) as { token: string };
+    const masterKey = await importAesKeyFromBytes(mk);
+    return { masterKey, token };
+  } catch (e) {
+    throw wrapNetworkError(e, "Login");
   }
-  const { token } = (await res.json()) as { token: string };
-  const masterKey = await importAesKeyFromBytes(mk);
-  return { masterKey, token };
 }
 
 /** Deriva chaves após registo (login imediato). */

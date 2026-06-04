@@ -100,6 +100,10 @@
       </p>
     {/if}
 
+    <p class="hint">
+      Primeira vez? <a href="/auth/register">Criar conta</a>. Requer backend activo (<code>docker compose up</code>).
+    </p>
+
     <div class="links">
       <a href="/auth/register">Criar conta</a>
       <a href="/auth/recovery">Recuperar acesso</a>

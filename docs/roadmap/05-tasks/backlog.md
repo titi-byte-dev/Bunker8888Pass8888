@@ -61,7 +61,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | UI-001 | Design tokens (CSS vars, light/dark, tipografia, spacing) | 1 | M | 🟢 | VAULT-019 |
 | UI-002 | App shell SvelteKit (routing, layouts, sidebar/tab bar) | 1 | L | 🟢 | UI-001 |
 | UI-003 | Fluxos Auth (login, register, unlock, recovery, passkey) | 1 | L | 🟢 | UI-002, VAULT-014, VAULT-018 |
-| UI-004 | Vault list + detail + CRUD (substituir playground) | 1 | L | ⚪ | UI-003, VAULT-005 |
+| UI-004 | Vault list + detail + CRUD (substituir playground) | 1 | L | 🟢 | UI-003, VAULT-005 |
 | UI-005 | Motion system (GSAP presets, reduced motion) | 1 | M | ⚪ | UI-001 |
 | UI-006 | Command palette (⌘K) | 1 | M | ⚪ | UI-002 |
 | UI-007 | Painel higiene + preview Dark Web (score cliente) | 2 | M | ⚪ | UI-004, VAULT-008, DW-001 |
