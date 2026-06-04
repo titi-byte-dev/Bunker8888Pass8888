@@ -8,6 +8,11 @@ export interface LoginItem {
   password: string;
   url?: string;
   notes?: string;
+  /**
+   * Segredo TOTP em Base32 (como no QR do Google Authenticator).
+   * Guardado cifrado no blob — o servidor nunca o vê em claro.
+   */
+  totpSecretBase32?: string;
 }
 
 export interface NoteItem {
