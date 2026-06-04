@@ -60,6 +60,9 @@ func NewRouter(deps Deps) http.Handler {
 		mux.HandleFunc("POST /api/auth/login", handleLoginWithAccessPolicy(deps.Auth, ap))
 		mux.HandleFunc("GET /api/auth/kdf", handleKDFParams(deps.Auth))
 	}
+	if deps.Auth != nil && deps.Users != nil {
+		mux.Handle("GET /api/auth/session", requireAuth(deps.Auth, handleAuthSession(deps.Users)))
+	}
 	if deps.Auth != nil && deps.Vault != nil {
 		vd := vaultDeps{repo: deps.Vault, hub: deps.Hub}
 		mux.Handle("GET /api/vault", requireAuthWithAccessPolicy(deps.Auth, ap, handleListItems(deps.Vault)))
