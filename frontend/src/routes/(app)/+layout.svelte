@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import AppSidebar from "$lib/shell/AppSidebar.svelte";
   import AppTabBar from "$lib/shell/AppTabBar.svelte";
@@ -10,6 +11,8 @@
     themeModeLabel,
     type ThemeMode,
   } from "$lib/design";
+  import { clearSession, loadUserEmail } from "$lib/session";
+  import { purgeMasterKey } from "$lib/vault/masterKeyStore";
 
   let { children } = $props();
 
@@ -20,8 +23,15 @@
     setThemePreference(themeMode);
   }
 
+  function handleLogout() {
+    purgeMasterKey();
+    clearSession();
+    goto("/auth/login");
+  }
+
   const navItems = visibleNavItems();
   const tabs = tabBarItems();
+  const userEmail = $derived(loadUserEmail());
 </script>
 
 <div class="app-shell">
@@ -29,10 +39,19 @@
 
   <div class="shell-main">
     <header class="topbar">
-      <div class="topbar-spacer" aria-hidden="true"></div>
-      <button type="button" class="theme-btn" onclick={toggleTheme} title="Alternar tema">
-        {themeModeLabel(themeMode)}
-      </button>
+      {#if userEmail}
+        <span class="user-email" title="Sessão activa">{userEmail}</span>
+      {:else}
+        <div class="topbar-spacer" aria-hidden="true"></div>
+      {/if}
+      <div class="topbar-actions">
+        <button type="button" class="theme-btn" onclick={toggleTheme} title="Alternar tema">
+          {themeModeLabel(themeMode)}
+        </button>
+        <button type="button" class="logout-btn" onclick={handleLogout} title="Terminar sessão">
+          Sair
+        </button>
+      </div>
     </header>
 
     <main class="shell-content">
@@ -61,16 +80,43 @@
   .topbar {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg-base);
   }
 
-  @media (min-width: 768px) {
-    .topbar-spacer {
-      flex: 1;
-    }
+  .user-email {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  .logout-btn {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .logout-btn:hover {
+    color: var(--color-text);
+    background: var(--color-bg-surface);
   }
 
   .theme-btn {

@@ -5,5 +5,5 @@
 <PlaceholderPage
   taskId="UI-004"
   title="Cofre"
-  description="Lista de credenciais, pesquisa local, detalhe de item e importação — substituirá o playground."
+  description="Lista de credenciais, pesquisa local, detalhe de item e importação. Usa /auth/login para entrar ou /dev para testes."
 />

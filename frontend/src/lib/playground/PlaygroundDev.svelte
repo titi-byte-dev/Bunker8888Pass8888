@@ -4,7 +4,7 @@
    * Vive em `/dev` dentro da app shell; não é o produto final.
    */
   import { loginUser, loginAfterRegister, registerUser, fetchKdfParams, deriveMasterKeyBytes } from "$lib/auth";
-  import { saveSessionToken, loadSessionToken, clearSessionToken } from "$lib/session";
+  import { saveSessionToken, loadSessionToken, clearSession, saveUserEmail } from "$lib/session";
   import { VaultAPI } from "$lib/vault/api";
   import { blobFromBase64, openItem, sealItem, blobToBase64 } from "$lib/vault/items";
   import { setMasterKey, purgeMasterKey, getMasterKey } from "$lib/vault/masterKeyStore";
@@ -60,6 +60,7 @@
       const { masterKey, token: t } = await loginAfterRegister(API, email, masterPassword);
       token = t;
       saveSessionToken(t);
+      saveUserEmail(email);
       setMasterKey(masterKey);
       status = "Sessão iniciada.";
       recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
@@ -78,6 +79,7 @@
       const { masterKey, token: t } = await loginUser(API, email, masterPassword);
       token = t;
       saveSessionToken(t);
+      saveUserEmail(email);
       setMasterKey(masterKey);
       status = "Sessão iniciada.";
       recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
@@ -101,6 +103,7 @@
       const { masterKey, token: t } = await unlockWithPasskeyAndPassword(API, email, masterPassword);
       token = t;
       saveSessionToken(t);
+      saveUserEmail(email);
       setMasterKey(masterKey);
       status = "Sessão iniciada via passkey.";
       recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
@@ -130,7 +133,7 @@
 
   function handleLogout() {
     token = null;
-    clearSessionToken();
+    clearSession();
     purgeMasterKey();
     items = [];
     status = "Sessão terminada — Master Key expurgada.";
