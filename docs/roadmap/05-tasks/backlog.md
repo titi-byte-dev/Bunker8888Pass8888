@@ -36,8 +36,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-002 | Cifragem AES-GCM-256 (cliente) + test vectors | 1 | M | 🟢 | VAULT-001 |
 | VAULT-003 | Modelo de dados de itens do cofre (blobs cifrados) | 1 | S | 🟢 | INFRA-004 |
 | VAULT-004 | API Go: login por Auth Hash + sessões | 1 | M | 🟢 | VAULT-001 |
-| VAULT-005 | CRUD de itens (logins, notas, cartões) | 1 | M | ⚪ | VAULT-003 |
-| VAULT-006 | Sincronização em tempo real (WebSockets) | 1 | M | ⚪ | VAULT-005 |
+| VAULT-005 | CRUD de itens (logins, notas, cartões) | 1 | M | 🟢 | VAULT-003 |
+| VAULT-006 | Sincronização em tempo real (WebSockets) | 1 | M | 🟢 | VAULT-005 |
 | VAULT-007 | Gerador de palavras-passe | 1 | S | ⚪ | — |
 | VAULT-008 | Score de higiene (fraca/reutilizada) calculado no cliente | 1 | M | ⚪ | VAULT-005 |
 | VAULT-009 | 2FA / TOTP (RFC 6238) integrado | 1 | M | ⚪ | VAULT-005 |
