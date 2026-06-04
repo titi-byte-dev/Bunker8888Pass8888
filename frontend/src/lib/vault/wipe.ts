@@ -8,6 +8,8 @@
  * ⚠️ Segurança: mesmo offline, a revogação de sessões no servidor impede
  * novos acessos; a Master Key em memória deve ser descartada pelo callback.
  */
+import { purgeMasterKey } from "./masterKeyStore";
+
 export const AEGIS_STORAGE_PREFIX = "aegis:";
 
 /** Apaga entradas localStorage/sessionStorage com prefixo AegisPass. */
@@ -51,5 +53,6 @@ export async function requestSelfRemoteWipe(
 /** Executa a limpeza local após receber evento WebSocket ou acção manual. */
 export function executeLocalWipe(onMasterKeyDiscarded?: () => void): void {
   clearLocalVaultCache();
+  purgeMasterKey();
   onMasterKeyDiscarded?.();
 }

@@ -69,7 +69,7 @@ func handleLogin(svc *auth.Service) http.HandlerFunc {
 			writeError(w, http.StatusBadRequest, "JSON inválido")
 			return
 		}
-		authHash, err := base64.StdEncoding.DecodeString(req.AuthHash)
+		authHash, err := decodeAuthHash(req.AuthHash)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, "base64 inválido")
 			return
@@ -77,7 +77,6 @@ func handleLogin(svc *auth.Service) http.HandlerFunc {
 
 		token, err := svc.Login(r.Context(), req.Email, authHash)
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			// 401 genérico: não dizemos se foi o email ou o auth hash.
 			writeError(w, http.StatusUnauthorized, "credenciais inválidas")
 			return
 		}
@@ -87,6 +86,10 @@ func handleLogin(svc *auth.Service) http.HandlerFunc {
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"token": token})
 	}
+}
+
+func decodeAuthHash(encoded string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(encoded)
 }
 
 // handleKDFParams devolve o salt/parâmetros KDF do cliente para um email, para o

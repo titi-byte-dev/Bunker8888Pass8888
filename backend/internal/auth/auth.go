@@ -84,11 +84,18 @@ func (s *Service) KDFParamsFor(ctx context.Context, email string) (ClientKDF, er
 // Login valida o Auth Hash e, em caso de sucesso, cria uma sessão e devolve o
 // token em claro (que só o cliente vê; a BD guarda apenas o seu hash).
 func (s *Service) Login(ctx context.Context, email string, authHash []byte) (string, error) {
+	userID, err := s.ValidateCredentials(ctx, email, authHash)
+	if err != nil {
+		return "", err
+	}
+	return s.CreateSessionForUser(ctx, userID)
+}
+
+// ValidateCredentials confirma email + Auth Hash e devolve o id do utilizador.
+func (s *Service) ValidateCredentials(ctx context.Context, email string, authHash []byte) (string, error) {
 	u, err := s.users.ByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, users.ErrNotFound) {
-			// Fazemos na mesma uma derivação "a vazio" para que o tempo de
-			// resposta seja semelhante ao do caso válido (mitiga enumeração por timing).
 			dummySalt, _ := crypto.GenerateSalt()
 			_ = crypto.DeriveMasterKey(authHash, dummySalt, s.verifyKDF)
 			return "", ErrInvalidCredentials
@@ -100,12 +107,16 @@ func (s *Service) Login(ctx context.Context, email string, authHash []byte) (str
 	if !crypto.ConstantTimeEqual(candidate, u.Verifier) {
 		return "", ErrInvalidCredentials
 	}
+	return u.ID, nil
+}
 
+// CreateSessionForUser emite um token de sessão para um utilizador já autenticado.
+func (s *Service) CreateSessionForUser(ctx context.Context, userID string) (string, error) {
 	token, err := newToken()
 	if err != nil {
 		return "", err
 	}
-	if err := s.sessions.Create(ctx, hashToken(token), u.ID, s.sessionTTL); err != nil {
+	if err := s.sessions.Create(ctx, hashToken(token), userID, s.sessionTTL); err != nil {
 		return "", err
 	}
 	return token, nil
