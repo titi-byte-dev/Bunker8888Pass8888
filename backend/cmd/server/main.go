@@ -16,6 +16,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -64,6 +65,7 @@ func main() {
 		shiftRepo := shifts.NewRepo(pool)
 		geoRepo := geofence.NewRepo(pool)
 		recoveryRepo := recovery.NewRepo(pool)
+		emergencyRepo := emergency.NewRepo(pool)
 		deviceRepo := clidevices.NewRepo(pool)
 		passkeyRepo := passkeys.NewRepo(pool)
 
@@ -105,6 +107,7 @@ func main() {
 			Shifts:   shiftRepo,
 			Geofence: geoRepo,
 			Recovery: recoveryRepo,
+			Emergency: emergency.NewService(emergencyRepo, userRepo),
 			Devices:  deviceRepo,
 			CLIca:    cliCA,
 			Passkeys: passkeySvc,
