@@ -1,0 +1,57 @@
+# ============================================================================
+# AegisPass — .gitignore
+# ============================================================================
+# Nota didática: o .gitignore diz ao git QUE ficheiros NÃO deve versionar.
+# Padrões terminados em "/" referem-se a pastas. "*" é um wildcard.
+# Uma linha começada por "!" cria uma exceção (re-inclui um ficheiro).
+# ----------------------------------------------------------------------------
+
+# --- Referência externa (NUNCA versionar) ---
+# A pasta .claude/ contém um snapshot de código-fonte proprietário de terceiros,
+# usado apenas como referência LOCAL. Não deve ir para o repositório público.
+.claude/
+
+# --- Notas pessoais/didáticas (OPÇÃO 1: local apenas, nunca vai para o git) ---
+# Tudo dentro de qualquer pasta "_private/" fica só na tua máquina.
+# Nota: usamos "/*" (e não só "/") para o git ainda conseguir re-incluir o README
+# abaixo — não é possível re-incluir um ficheiro se a própria pasta for ignorada.
+**/_private/*
+# ...mas mantemos o README explicativo versionado, para a equipa perceber a convenção.
+!**/_private/README.md
+notes-local/
+
+# --- Segredos (NUNCA versionar) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.kdbx
+secrets/
+
+# --- Build / dependências (Go + Svelte/Node) ---
+# Go
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+vendor/
+# Node / Svelte
+node_modules/
+.svelte-kit/
+build/
+.vercel/
+
+# --- Base de dados / volumes Docker locais ---
+*.sqlite
+*.db
+/data/
+/pgdata/
+
+# --- Sistema operativo / editor ---
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+*.swp

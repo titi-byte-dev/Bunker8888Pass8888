@@ -1,0 +1,46 @@
+---
+description: Convenções de Go (backend AegisPass)
+globs: **/*.go
+alwaysApply: false
+---
+
+# Convenções Go — AegisPass
+
+## Erros
+
+```go
+// Embrulhar o erro com %w preserva a "cadeia" original, permitindo a quem
+// chama usar errors.Is / errors.As. NUNCA engolir erros silenciosamente.
+if err != nil {
+    return fmt.Errorf("ao cifrar item do cofre: %w", err)
+}
+```
+
+## Recursos e context
+
+- Usar `defer` para libertar recursos (ficheiros, ligações, locks).
+- Funções de I/O recebem `context.Context` como **primeiro** parâmetro, para
+  suportar cancelamento e prazos.
+
+```go
+func (s *Store) Item(ctx context.Context, id string) (Item, error) {
+    // ctx propaga cancelamento: se o request HTTP morrer, a query à BD também.
+}
+```
+
+## Concorrência
+
+- Preferir `channels` a memória partilhada. Proteger estado partilhado com
+  `sync.Mutex` quando necessário.
+- Toda a goroutine deve ter uma forma clara de terminar (evitar fugas).
+
+## Estilo
+
+- Código formatado com `gofmt` (não negociável).
+- Nomes curtos em escopos curtos (`i`, `r`); descritivos em escopos amplos.
+- Sem dependências desnecessárias; preferir a biblioteca padrão.
+
+## Segurança (ver também `security-crypto.mdc`)
+
+- Nunca implementar cripto à mão — usar `crypto/*`.
+- Validar e sanitizar todo o input externo antes de usar.

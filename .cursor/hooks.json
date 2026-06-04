@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "prompt",
+        "prompt": "És um gate de segurança do repositório AegisPass. Analisa esta chamada de escrita/edição de ficheiro. NEGA (deny) se: (1) introduz um segredo hardcoded — bloco de chave privada (BEGIN PRIVATE KEY), password real, token/API key real, valores de .env, ou IBAN/NIF/dados de saúde reais; ou (2) cria/modifica um ficheiro dentro de uma pasta '_private/' que não seja o '_private/README.md'. Caso contrário, PERMITE (allow). Em caso de dúvida sobre um possível segredo, escolhe 'ask'. Input do hook: $ARGUMENTS",
+        "matcher": "Write|Edit|Delete",
+        "timeout": 15
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "type": "prompt",
+        "prompt": "És um gate de segurança do repositório AegisPass. Decide sobre este comando de shell. Usa 'ask' (pedir confirmação) se o comando for destrutivo ou puder expor segredos — por exemplo: imprimir/enviar ficheiros .env ou chaves, 'git push --force', remoções recursivas, ou uploads de ficheiros via curl/wget. PERMITE comandos normais de desenvolvimento, teste, build e leitura de git. Input do hook: $ARGUMENTS",
+        "timeout": 10
+      }
+    ]
+  }
+}

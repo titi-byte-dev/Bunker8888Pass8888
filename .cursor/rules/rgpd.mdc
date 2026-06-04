@@ -1,0 +1,36 @@
+---
+description: Regras de conformidade RGPD (dados pessoais e RH)
+globs: **/hr/**,**/rgpd/**,**/*employee*,**/*compliance*
+alwaysApply: false
+---
+
+# Conformidade RGPD — AegisPass
+
+Aplicar ao lidar com dados pessoais (RH, clientes, funcionários).
+
+## Tratamento de dados pessoais
+
+- ✅ **Cifragem campo-a-campo** de dados sensíveis (cartão de cidadão, IBAN,
+  salário, saúde) — cifrados no cliente antes de chegarem à API.
+- ✅ **Minimização:** recolher só o estritamente necessário.
+
+## Direito ao esquecimento (Art. 17)
+
+- ✅ Implementar via **crypto-shredding**: destruir a chave do titular torna os
+  dados irrecuperáveis sem partir backups/logs imutáveis.
+- ✅ Gerar **certificado criptográfico** de eliminação para auditoria.
+
+## Auditoria
+
+- ✅ Logs de acesso a dados sensíveis são **imutáveis** (hashing encadeado).
+- 🚫 Logs nunca contêm os dados pessoais em si — só metadados (quem, quando, o quê).
+
+## Não discriminação
+
+- ✅ Triagem de recrutamento "às cegas": ocultar género/etnia antes de apresentar
+  ao avaliador (humano ou agente).
+
+> ⚠️ **Nota:** conformidade RGPD é também organizacional (DPO, DPIA), não só
+> técnica. Estas regras ajudam a *demonstrar* conformidade técnica.
+
+Ver [`docs/roadmap/06-testing/rgpd-compliance-tests.md`](../../docs/roadmap/06-testing/rgpd-compliance-tests.md).

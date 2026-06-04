@@ -1,0 +1,41 @@
+---
+description: Estilo didático do projeto AegisPass — comentários que ensinam a linguagem e a documentação
+alwaysApply: true
+---
+
+# Estilo Didático — AegisPass
+
+Este é um projeto de aprendizagem além de produto. Todo o código e documentação
+devem **ensinar** quem lê (Go, Svelte/TypeScript, SQL, criptografia e segurança).
+
+## Comentários no código (EXCEÇÃO intencional)
+
+Ao contrário do hábito de evitar comentários óbvios, aqui **queremos** comentários
+didáticos. Devem explicar o *porquê* e detalhes da linguagem, não apenas o *quê*.
+
+```go
+// Em Go, `defer` adia a execução desta linha para o fim da função.
+// Usamo-lo para garantir que o ficheiro fecha mesmo que ocorra um erro a meio —
+// evita fugas de file descriptors (um recurso finito do sistema operativo).
+defer file.Close()
+```
+
+```go
+// AES-GCM precisa de um `nonce` (número usado uma só vez) ÚNICO por cifragem
+// com a mesma chave. Reutilizar um nonce quebra TODA a segurança do esquema,
+// por isso geramo-lo sempre a partir de uma fonte criptograficamente segura.
+nonce := make([]byte, gcm.NonceSize())
+```
+
+## Conceitos e segurança na documentação
+
+- Na **primeira** vez que um termo técnico aparece, explica-o numa nota curta
+  `> 💡 **Conceito:** ...` (ex: tenant, zero-knowledge, geofencing, TOTP, nonce).
+- Decisões de segurança levam uma nota `> ⚠️ **Segurança:** ...` que explica o
+  *risco* que estamos a mitigar, não só a regra.
+
+## Idioma
+
+- Conteúdo e explicações em **Português (Portugal)**.
+- Termos técnicos, nomes de código, IDs e identificadores em **inglês**
+  (ex: `goroutine`, `nonce`, `VAULT-001`, `Shared Vault`).

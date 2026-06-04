@@ -1,0 +1,42 @@
+---
+description: Convenções de Svelte + TypeScript (frontend AegisPass)
+globs: **/*.svelte,**/*.ts
+alwaysApply: false
+---
+
+# Convenções Svelte + TypeScript — AegisPass
+
+## Criptografia no cliente
+
+- A cifragem/decifragem acontece **no cliente** (Zero-Knowledge). Usar a
+  **WebCrypto API** (`crypto.subtle`), nunca bibliotecas cripto caseiras.
+
+```ts
+// Derivar a Master Key da Master Password com Argon2id (via WASM) ou PBKDF2
+// (WebCrypto nativo). A chave NUNCA é enviada ao servidor.
+const key = await crypto.subtle.deriveKey(
+  { name: "PBKDF2", salt, iterations: 600_000, hash: "SHA-256" },
+  baseKey,
+  { name: "AES-GCM", length: 256 },
+  false, // extractable: false → a chave não pode ser exportada/lida
+  ["encrypt", "decrypt"],
+);
+```
+
+> ⚠️ **Segurança:** `extractable: false` impede que a chave seja exportada do
+> objeto CryptoKey — reduz o risco de fuga acidental para logs ou rede.
+
+## Segredos
+
+- **Nunca** embutir segredos no bundle (ficam visíveis no browser).
+- A Master Key vive só em memória; nunca em `localStorage`/`sessionStorage`.
+
+## Estilo
+
+- TypeScript estrito (`strict: true`); evitar `any`.
+- Componentes pequenos e focados; lógica reutilizável em módulos `.ts`.
+- Estado com stores do Svelte; limpar subscrições no `onDestroy`.
+
+## Acessibilidade
+
+- Usar HTML semântico; objetivo WCAG 2.1 AA a médio prazo.
