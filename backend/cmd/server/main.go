@@ -16,6 +16,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
@@ -54,10 +55,14 @@ func main() {
 		sessionRepo := sessions.NewRepo(pool)
 		const sessionTTL = 24 * 60 * 60
 		hub := realtime.NewHub()
+		wipeSvc := security.NewWipeService(sessionRepo, hub, pool)
 		deps = httpapi.Deps{
-			Auth:  auth.NewService(userRepo, sessionRepo, sessionTTL),
-			Vault: vault.NewRepo(pool),
-			Hub:   hub,
+			Auth:     auth.NewService(userRepo, sessionRepo, sessionTTL),
+			Vault:    vault.NewRepo(pool),
+			Hub:      hub,
+			Wipe:     wipeSvc,
+			Users:    userRepo,
+			AdminKey: cfg.AdminKey,
 		}
 		logger.Info("base de dados ligada e migrada")
 	} else {

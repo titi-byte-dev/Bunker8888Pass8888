@@ -57,3 +57,16 @@ export interface VaultSyncEvent {
   item_type?: VaultItemType;
   updated_at?: string;
 }
+
+/** Ordem de remote wipe (VAULT-012) — apagar cache local + descartar Master Key. */
+export interface RemoteWipeEvent {
+  type: "security.remote_wipe";
+  reason?: string;
+  issued_at?: string;
+}
+
+export type RealtimeMessage = VaultSyncEvent | RemoteWipeEvent;
+
+export function isRemoteWipeEvent(msg: RealtimeMessage): msg is RemoteWipeEvent {
+  return msg.type === "security.remote_wipe";
+}
