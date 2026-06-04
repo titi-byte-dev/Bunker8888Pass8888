@@ -48,6 +48,7 @@ build/
 *.db
 /data/
 /pgdata/
+/backups/
 
 # --- Sistema operativo / editor ---
 .DS_Store

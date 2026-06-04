@@ -38,7 +38,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-004 | API Go: login por Auth Hash + sessões | 1 | M | 🟢 | VAULT-001 |
 | VAULT-005 | CRUD de itens (logins, notas, cartões) | 1 | M | 🟢 | VAULT-003 |
 | VAULT-006 | Sincronização em tempo real (WebSockets) | 1 | M | 🟢 | VAULT-005 |
-| VAULT-007 | Gerador de palavras-passe | 1 | S | ⚪ | — |
+| VAULT-007 | Gerador de palavras-passe | 1 | S | 🟢 | — |
 | VAULT-008 | Score de higiene (fraca/reutilizada) calculado no cliente | 1 | M | ⚪ | VAULT-005 |
 | VAULT-009 | 2FA / TOTP (RFC 6238) integrado | 1 | M | ⚪ | VAULT-005 |
 | VAULT-010 | Acesso por turnos (validação NTP + expurgo de chave) | 1 | L | ⚪ | VAULT-004 |

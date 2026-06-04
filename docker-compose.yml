@@ -20,6 +20,7 @@ services:
     volumes:
       # Persiste os dados entre reinicios. A pasta ./pgdata esta no .gitignore.
       - ./pgdata:/var/lib/postgresql/data
+      # Backups cifrados (.enc) ficam em ./backups (ver scripts/ e cmd/backup).
     healthcheck:
       # pg_isready confirma que o Postgres aceita ligacoes antes de marcar
       # o servico como "healthy" (o backend espera por isto).
