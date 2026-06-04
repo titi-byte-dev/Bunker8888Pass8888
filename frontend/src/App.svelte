@@ -17,6 +17,13 @@
     fetchRecoveryBackupStatus,
     recoverMasterKeyFromEmail,
   } from "./lib/vault/recovery";
+  import {
+    passkeysSupported,
+    registerPasskey,
+    unlockWithPasskeyAndPassword,
+    listPasskeys,
+    type PasskeyMeta,
+  } from "./lib/passkey";
   import type { LoginItem, VaultItemMeta } from "./lib/vault/types";
 
   const API = ""; // Vite proxy → localhost:8080
@@ -39,6 +46,10 @@
   let recoveryConfirmPw = $state("");
   let newRecoveryCode = $state("");
   let recoverCode = $state("");
+
+  let passkeyName = $state("");
+  let passkeys = $state<PasskeyMeta[]>([]);
+  const webAuthnOk = passkeysSupported();
 
   async function handleRegister() {
     busy = true;
@@ -70,9 +81,48 @@
       setMasterKey(masterKey);
       status = "Sessão iniciada.";
       recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
+      passkeys = await listPasskeys(API, t).catch(() => []);
       await refreshVault();
     } catch (e) {
       status = e instanceof Error ? e.message : "Erro no login";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handlePasskeyLogin() {
+    if (!email || !masterPassword) {
+      status = "Email e Master Password são necessários (passkey autentica o servidor; password desbloqueia o cofre ZK).";
+      return;
+    }
+    busy = true;
+    status = "A autenticar com passkey…";
+    try {
+      const { masterKey, token: t } = await unlockWithPasskeyAndPassword(API, email, masterPassword);
+      token = t;
+      saveSessionToken(t);
+      setMasterKey(masterKey);
+      status = "Sessão iniciada via passkey.";
+      recoveryConfigured = await fetchRecoveryBackupStatus(API, t);
+      passkeys = await listPasskeys(API, t).catch(() => []);
+      await refreshVault();
+    } catch (e) {
+      status = e instanceof Error ? e.message : "Passkey falhou";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handleRegisterPasskey() {
+    if (!token || !passkeyName) return;
+    busy = true;
+    try {
+      await registerPasskey(API, token, passkeyName);
+      passkeyName = "";
+      passkeys = await listPasskeys(API, token);
+      status = "Passkey registada.";
+    } catch (e) {
+      status = e instanceof Error ? e.message : "Registo passkey falhou";
     } finally {
       busy = false;
     }
@@ -213,7 +263,15 @@
         <button class="secondary" onclick={handleRegister} disabled={busy || !email || !masterPassword}>
           Registar
         </button>
+        {#if webAuthnOk}
+          <button class="secondary" onclick={handlePasskeyLogin} disabled={busy || !email || !masterPassword}>
+            Passkey
+          </button>
+        {/if}
       </div>
+      {#if webAuthnOk}
+        <p class="muted">Passkey autentica o servidor; a Master Password continua necessária para desbloquear o cofre (Zero-Knowledge).</p>
+      {/if}
     </section>
     {:else}
     <section class="card">
@@ -287,6 +345,22 @@
         {recoveryConfigured ? "Regenerar chave" : "Criar chave de recuperação"}
       </button>
     </section>
+
+    {#if webAuthnOk}
+    <section class="card">
+      <h2>Passkeys</h2>
+      <p class="muted">Autenticação phishing-resistant ao servidor. Regista após login com password.</p>
+      <ul>
+        {#each passkeys as pk}
+          <li>{pk.name} <span class="muted">({pk.created_at.slice(0, 10)})</span></li>
+        {:else}
+          <li class="muted">Nenhuma passkey registada.</li>
+        {/each}
+      </ul>
+      <label>Nome deste dispositivo <input bind:value={passkeyName} placeholder="ex: MacBook" /></label>
+      <button onclick={handleRegisterPasskey} disabled={busy || !passkeyName}>Registar passkey</button>
+    </section>
+    {/if}
   {/if}
 
   {#if status}

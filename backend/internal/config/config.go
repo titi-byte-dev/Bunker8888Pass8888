@@ -8,6 +8,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -32,6 +33,10 @@ type Config struct {
 	MTLSCAKey      string
 	MTLSServerCert string
 	MTLSServerKey  string
+	// WebAuthn / passkeys (VAULT-014)
+	WebAuthnRPDisplayName string
+	WebAuthnRPID          string
+	WebAuthnRPOrigins     []string
 }
 
 // Load lê a configuração do ambiente, aplicando valores por omissão.
@@ -47,6 +52,9 @@ func Load() Config {
 		MTLSCAKey:       getenv("AEGIS_MTLS_CA_KEY", ""),
 		MTLSServerCert:  getenv("AEGIS_MTLS_SERVER_CERT", ""),
 		MTLSServerKey:   getenv("AEGIS_MTLS_SERVER_KEY", ""),
+		WebAuthnRPDisplayName: getenv("AEGIS_WEBAUTHN_RP_NAME", "AegisPass"),
+		WebAuthnRPID:          getenv("AEGIS_WEBAUTHN_RP_ID", "localhost"),
+		WebAuthnRPOrigins:     splitCSV(getenv("AEGIS_WEBAUTHN_RP_ORIGINS", "http://localhost:5173,http://localhost:8080")),
 	}
 }
 
@@ -85,4 +93,19 @@ func getenvBool(key string, fallback bool) bool {
 		return fallback
 	}
 	return b
+}
+
+func splitCSV(s string) []string {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
