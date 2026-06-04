@@ -24,7 +24,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | INFRA-001 | Provisionar VPS (Debian/Ubuntu) + hardening SSH (só chaves) | 1 | M | ⚪ | — |
 | INFRA-002 | Configurar WireGuard (servidor) + firewall (só UDP aberta) | 1 | M | ⚪ | INFRA-001 |
 | INFRA-003 | Docker + Docker Compose; esqueleto de serviços | 1 | M | 🟢 | INFRA-001 |
-| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟡 | INFRA-003 |
+| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟢 | INFRA-003 |
 | INFRA-005 | Pipeline CI (lint, test, build Go + Svelte) | 1 | M | 🟢 | — |
 | INFRA-006 | Scaffold monorepo (`/backend` Go, `/frontend` Svelte, `/cli`) | 1 | S | 🟢 | — |
 
