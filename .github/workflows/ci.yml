@@ -1,0 +1,72 @@
+# ============================================================================
+# CI — Integracao Continua (INFRA-005)
+# ----------------------------------------------------------------------------
+# Didatico: o GitHub Actions corre estes "jobs" a cada push/PR. O objetivo e
+# que nada entre em main sem compilar e passar nos testes (porta de qualidade).
+# Os jobs correm em paralelo (backend e frontend sao independentes).
+# ============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela execucoes antigas do mesmo ref se chegar uma nova (poupa minutos).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          # Cache automatico dos modulos Go, usando o go.sum como chave.
+          cache-dependency-path: backend/go.sum
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test
+        run: go test ./... -race -count=1
+
+      - name: build server + cli
+        run: |
+          go build ./cmd/server
+          cd ../cli && go build .
+
+  frontend:
+    name: Frontend (Svelte)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # npm ci instala EXATAMENTE o que esta no package-lock.json (reproduzivel).
+      - name: install deps
+        run: npm ci
+
+      - name: type-check (svelte-check)
+        run: npm run check
+
+      - name: tests (vitest)
+        run: npm run test
