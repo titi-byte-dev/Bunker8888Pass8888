@@ -49,7 +49,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | VAULT-015 | Importação de palavras-passe | 1 | M | 🟢 | VAULT-005 |
 | VAULT-019 | Playground dev UI (login + cofre + import CSV) | 1 | M | 🟢 | VAULT-005 |
 | VAULT-016 | Acesso de Emergência (herdeiro digital, período de espera) | 1 | L | ⚪ | VAULT-004 |
-| VAULT-017 | CLI em Go (injeção de segredos via mTLS) | 1 | L | ⚪ | VAULT-004 |
+| VAULT-017 | CLI em Go (injeção de segredos via mTLS) | 1 | L | 🟢 | VAULT-004 |
 | VAULT-018 | Chave de recuperação (mitiga perda de Master Password) | 1 | M | 🟢 | VAULT-002 |
 
 ## HR — Recursos Humanos & RGPD
