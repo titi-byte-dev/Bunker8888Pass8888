@@ -14,6 +14,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
@@ -35,6 +36,7 @@ type Deps struct {
 	Devices   *clidevices.Repo
 	CLIca     *clidevices.CA
 	CLICertTTL time.Duration
+	Passkeys   *passkeys.Service
 	AdminKey string // vazio desactiva POST /api/admin/.../remote-wipe
 }
 
@@ -106,6 +108,7 @@ func NewRouter(deps Deps) http.Handler {
 		mux.HandleFunc("GET /api/vault/recovery-backup/lookup", handleGetRecoveryBackupByEmail(deps.Recovery))
 	}
 	registerCLIRoutes(mux, deps)
+	registerPasskeyRoutes(mux, deps, ap)
 
 	return mux
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
@@ -64,6 +65,7 @@ func main() {
 		geoRepo := geofence.NewRepo(pool)
 		recoveryRepo := recovery.NewRepo(pool)
 		deviceRepo := clidevices.NewRepo(pool)
+		passkeyRepo := passkeys.NewRepo(pool)
 
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
@@ -80,6 +82,20 @@ func main() {
 			cliCA = mtlsMat.CA
 		}
 
+		var passkeySvc *passkeys.Service
+		if len(cfg.WebAuthnRPOrigins) > 0 && cfg.WebAuthnRPID != "" {
+			var err error
+			passkeySvc, err = passkeys.NewService(passkeys.Config{
+				RPDisplayName: cfg.WebAuthnRPDisplayName,
+				RPID:          cfg.WebAuthnRPID,
+				RPOrigins:     cfg.WebAuthnRPOrigins,
+			}, passkeyRepo, userRepo)
+			if err != nil {
+				logger.Error("WebAuthn inválido", "err", err)
+				os.Exit(1)
+			}
+		}
+
 		deps = httpapi.Deps{
 			Auth:     auth.NewService(userRepo, sessionRepo, sessionTTL),
 			Vault:    vault.NewRepo(pool),
@@ -91,6 +107,7 @@ func main() {
 			Recovery: recoveryRepo,
 			Devices:  deviceRepo,
 			CLIca:    cliCA,
+			Passkeys: passkeySvc,
 			AdminKey: cfg.AdminKey,
 		}
 		logger.Info("base de dados ligada e migrada")
