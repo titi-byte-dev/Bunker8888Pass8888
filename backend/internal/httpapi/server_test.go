@@ -33,6 +33,17 @@ func TestRegister_RequiresBody(t *testing.T) {
 	}
 }
 
+func TestServerTime(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/time", nil)
+	rec := httptest.NewRecorder()
+
+	NewRouter(Deps{}).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status=%d, esperado 200", rec.Code)
+	}
+}
+
 func TestBearerToken(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("Authorization", "Bearer abc.def.ghi")

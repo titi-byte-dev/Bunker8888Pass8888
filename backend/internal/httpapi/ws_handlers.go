@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 )
 
 // wsUpgrader faz o "upgrade" HTTP → WebSocket.
@@ -27,7 +29,7 @@ var wsUpgrader = websocket.Upgrader{
 // Autenticação: o browser não permite headers customizados no WebSocket nativo,
 // por isso o token vai na query string (?token=...). ⚠️ Usar sempre WSS em
 // produção para o token não viajar em claro.
-func handleVaultWS(authSvc *auth.Service, hub *realtime.Hub) http.HandlerFunc {
+func handleVaultWS(authSvc *auth.Service, hub *realtime.Hub, shiftsRepo *shifts.Repo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		if token == "" {
@@ -38,6 +40,16 @@ func handleVaultWS(authSvc *auth.Service, hub *realtime.Hub) http.HandlerFunc {
 		if err != nil {
 			writeError(w, http.StatusUnauthorized, "sessão inválida")
 			return
+		}
+		if shiftsRepo != nil {
+			if err := assertUserWithinShift(r.Context(), shiftsRepo, userID); err != nil {
+				if errors.Is(err, shifts.ErrOutsideShift) {
+					writeError(w, http.StatusForbidden, "fora do horário de turno")
+					return
+				}
+				writeError(w, http.StatusInternalServerError, "erro interno")
+				return
+			}
 		}
 
 		conn, err := wsUpgrader.Upgrade(w, r, nil)
