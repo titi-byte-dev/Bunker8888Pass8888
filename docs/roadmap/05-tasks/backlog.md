@@ -23,17 +23,17 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 |---|---|---|---|---|---|
 | INFRA-001 | Provisionar VPS (Debian/Ubuntu) + hardening SSH (só chaves) | 1 | M | ⚪ | — |
 | INFRA-002 | Configurar WireGuard (servidor) + firewall (só UDP aberta) | 1 | M | ⚪ | INFRA-001 |
-| INFRA-003 | Docker + Docker Compose; esqueleto de serviços | 1 | M | ⚪ | INFRA-001 |
-| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | ⚪ | INFRA-003 |
+| INFRA-003 | Docker + Docker Compose; esqueleto de serviços | 1 | M | 🟢 | INFRA-001 |
+| INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟡 | INFRA-003 |
 | INFRA-005 | Pipeline CI (lint, test, build Go + Svelte) | 1 | M | ⚪ | — |
-| INFRA-006 | Scaffold monorepo (`/backend` Go, `/frontend` Svelte, `/cli`) | 1 | S | ⚪ | — |
+| INFRA-006 | Scaffold monorepo (`/backend` Go, `/frontend` Svelte, `/cli`) | 1 | S | 🟢 | — |
 
 ## VAULT — The Vault
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| VAULT-001 | Implementar Argon2id (derivação Master Key + Auth Hash) | 1 | M | ⚪ | INFRA-006 |
-| VAULT-002 | Cifragem AES-GCM-256 (cliente) + test vectors | 1 | M | ⚪ | VAULT-001 |
+| VAULT-001 | Implementar Argon2id (derivação Master Key + Auth Hash) | 1 | M | 🟢 | INFRA-006 |
+| VAULT-002 | Cifragem AES-GCM-256 (cliente) + test vectors | 1 | M | 🟢 | VAULT-001 |
 | VAULT-003 | Modelo de dados de itens do cofre (blobs cifrados) | 1 | S | ⚪ | INFRA-004 |
 | VAULT-004 | API Go: login por Auth Hash + sessões | 1 | M | ⚪ | VAULT-001 |
 | VAULT-005 | CRUD de itens (logins, notas, cartões) | 1 | M | ⚪ | VAULT-003 |
