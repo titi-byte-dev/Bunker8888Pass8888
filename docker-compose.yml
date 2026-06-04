@@ -1,0 +1,46 @@
+# ============================================================================
+# docker-compose — ambiente de desenvolvimento do AegisPass (INFRA-003/004)
+# ----------------------------------------------------------------------------
+# Didatico: o compose descreve varios servicos (containers) e como se ligam.
+# Corre tudo com:  docker compose up --build
+# As variaveis vem do ficheiro .env (copia de .env.example).
+# ============================================================================
+
+services:
+  # --- Base de dados PostgreSQL --------------------------------------------
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aegis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-aegis}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Persiste os dados entre reinicios. A pasta ./pgdata esta no .gitignore.
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready confirma que o Postgres aceita ligacoes antes de marcar
+      # o servico como "healthy" (o backend espera por isto).
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aegis} -d ${POSTGRES_DB:-aegis}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # --- API backend (Go) ----------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      AEGIS_HTTP_ADDR: ":8080"
+      # Dentro da rede do compose, o host da BD e o nome do servico: "db".
+      AEGIS_DATABASE_URL: "postgres://${POSTGRES_USER:-aegis}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-aegis}?sslmode=disable"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      db:
+        # So arranca o backend depois de a BD estar "healthy".
+        condition: service_healthy

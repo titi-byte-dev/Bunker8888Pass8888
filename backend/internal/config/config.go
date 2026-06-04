@@ -18,6 +18,10 @@ type Config struct {
 	// ShutdownTimeout é quanto tempo damos aos pedidos em curso para terminarem
 	// quando o servidor recebe um sinal de paragem (graceful shutdown).
 	ShutdownTimeout time.Duration
+	// DatabaseURL é a string de ligação ao PostgreSQL (DSN). Ainda não é usada
+	// (a camada de dados chega numa task seguinte), mas já é lida do ambiente
+	// para o docker-compose ficar coerente.
+	DatabaseURL string
 }
 
 // Load lê a configuração do ambiente, aplicando valores por omissão.
@@ -25,6 +29,7 @@ func Load() Config {
 	return Config{
 		HTTPAddr:        getenv("AEGIS_HTTP_ADDR", ":8080"),
 		ShutdownTimeout: getenvDuration("AEGIS_SHUTDOWN_TIMEOUT", 10*time.Second),
+		DatabaseURL:     getenv("AEGIS_DATABASE_URL", ""),
 	}
 }
 
