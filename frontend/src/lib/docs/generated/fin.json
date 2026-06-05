@@ -1,0 +1,61 @@
+{
+  "slug": "fin",
+  "title": "Finanças SaaS",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "frontend",
+    "backend"
+  ],
+  "feature": "fin",
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Monitorização de subscrições, custos mensais e alertas de licenças sem uso.",
+  "concepts": [
+    {
+      "id": "saas-subscription",
+      "title": "Subscrição SaaS",
+      "level": 1,
+      "html": "<p>Registo de um serviço pago: nome, custo, moeda, ciclo de facturação e data de\núltimo uso. Pode ligar-se a um login do cofre pelo ID do item (sem enviar a password).</p>\n"
+    },
+    {
+      "id": "unused-license-alert",
+      "title": "Alerta de licença sem uso",
+      "level": 2,
+      "html": "<p>Regra calculada <strong>no cliente</strong>: subscrição activa com <code>last_used_at</code> antigo ou\nem falta. Sugere rever acesso ou desactivar a licença no offboarding.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Onde encontrar na app",
+      "html": "<ul>\n<li><code>/fin</code> — painel de subscrições, totais e alertas</li>\n<li>Associar cada SaaS a um item do cofre para rastreio de uso</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Aprofundar: offboarding",
+      "html": "<p>Quando um funcionário sai, desactivar subscrições ligadas ao mesmo tempo que\nrevogar cofres evita pagar licenças órfãs. Ver percurso <strong>SaaS e licenças</strong>.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Técnico",
+      "html": "<p>Frontend: <code>frontend/src/lib/fin/</code>, rota <code>(app)/fin</code>. Backend: API de subscrições\ncom filtro <code>tenant_id</code>. Epic: <code>docs/roadmap/03-epics/epic-fintech.md</code>.\nOpen Banking e cartões efémeros são Fase 3 (<code>FIN-003+</code>).</p>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "vault",
+    "journey-saas-costs"
+  ],
+  "order": 5
+}

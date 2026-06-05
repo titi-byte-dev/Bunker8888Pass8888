@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T12:16:23.222Z",
+  "generatedAt": "2026-06-05T12:22:00.668Z",
   "categories": [
     {
       "id": "concepts",
@@ -161,6 +161,27 @@
       "order": 99
     },
     {
+      "slug": "journey-emergency-access",
+      "title": "Journey: Acesso de emergência (herdeiro digital)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "emergency_access",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Proprietário do cofre",
+      "order": 99
+    },
+    {
       "slug": "journey-employee-byod",
       "title": "Journey: Funcionário acede ao cofre (BYOD)",
       "category": "journeys",
@@ -179,6 +200,27 @@
       "summary": "",
       "related": [],
       "actor": "Funcionário",
+      "order": 99
+    },
+    {
+      "slug": "journey-passkey",
+      "title": "Journey: Registar e usar passkey",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "passkey",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Utilizador",
       "order": 99
     },
     {
@@ -221,6 +263,90 @@
       "summary": "",
       "related": [],
       "actor": "Admin/RH (a pedido do titular dos dados)",
+      "order": 99
+    },
+    {
+      "slug": "journey-saas-costs",
+      "title": "Journey: Controlar custos SaaS e licenças sem uso",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "saas_costs",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Gestor / Admin financeiro",
+      "order": 99
+    },
+    {
+      "slug": "journey-secret-link",
+      "title": "Journey: Enviar segredo com Secret Link efémero",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "secret_link",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Utilizador (remetente)",
+      "order": 99
+    },
+    {
+      "slug": "journey-sentinel",
+      "title": "Journey: Sentinel deteta login impossível",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "sentinel",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Funcionário (login)",
+      "order": 99
+    },
+    {
+      "slug": "journey-shared-vault",
+      "title": "Journey: Partilhar credenciais com a equipa (Shared Vault)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "shared_vault",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Admin ou membro da equipa",
       "order": 99
     },
     {
@@ -290,7 +416,10 @@
       "related": [
         "vault",
         "glossary",
-        "journey-remote-wipe"
+        "journey-remote-wipe",
+        "journey-sentinel",
+        "journey-emergency-access",
+        "journey-passkey"
       ],
       "order": 3
     },
@@ -313,9 +442,35 @@
       "summary": "Cofres partilhados, secret links e notas temporárias.",
       "related": [
         "vault",
-        "journey-admin-onboarding"
+        "journey-admin-onboarding",
+        "journey-shared-vault",
+        "journey-secret-link"
       ],
       "order": 4
+    },
+    {
+      "slug": "fin",
+      "title": "Finanças SaaS",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "frontend",
+        "backend"
+      ],
+      "feature": "fin",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Monitorização de subscrições, custos mensais e alertas de licenças sem uso.",
+      "related": [
+        "vault",
+        "journey-saas-costs"
+      ],
+      "order": 5
     },
     {
       "slug": "hr-rgpd",

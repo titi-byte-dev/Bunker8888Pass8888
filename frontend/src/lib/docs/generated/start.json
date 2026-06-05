@@ -32,7 +32,7 @@
     {
       "level": 2,
       "title": "Navegação da app",
-      "html": "<table>\n<thead>\n<tr>\n<th>Secção</th>\n<th>Para quê</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Cofre</strong></td>\n<td>Credenciais, notas, cartões, importação</td>\n</tr>\n<tr>\n<td><strong>Segurança</strong></td>\n<td>Higiene, breaches, dispositivos, Sentinel</td>\n</tr>\n<tr>\n<td><strong>Trabalho</strong></td>\n<td>Turnos, sandbox browser, CLI</td>\n</tr>\n<tr>\n<td><strong>Equipa</strong></td>\n<td>Cofres partilhados, secret links</td>\n</tr>\n<tr>\n<td><strong>RH</strong></td>\n<td>Fichas, contratos, onboarding, RGPD</td>\n</tr>\n<tr>\n<td><strong>Definições</strong></td>\n<td>Conta, tema, passkeys, <strong>esta documentação</strong></td>\n</tr>\n</tbody></table>\n",
+      "html": "<table>\n<thead>\n<tr>\n<th>Secção</th>\n<th>Para quê</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Cofre</strong></td>\n<td>Credenciais, notas, cartões, importação</td>\n</tr>\n<tr>\n<td><strong>Segurança</strong></td>\n<td>Higiene, breaches, dispositivos, Sentinel</td>\n</tr>\n<tr>\n<td><strong>Trabalho</strong></td>\n<td>Turnos, sandbox browser, CLI</td>\n</tr>\n<tr>\n<td><strong>Equipa</strong></td>\n<td>Cofres partilhados, secret links</td>\n</tr>\n<tr>\n<td><strong>RH</strong></td>\n<td>Fichas, contratos, onboarding, RGPD</td>\n</tr>\n<tr>\n<td><strong>Finanças</strong></td>\n<td>Custos SaaS, alertas de licenças sem uso (<code>/fin</code>)</td>\n</tr>\n<tr>\n<td><strong>Definições</strong></td>\n<td>Conta, tema, passkeys, <strong>esta documentação</strong></td>\n</tr>\n</tbody></table>\n",
       "flows": [],
       "collapsed": true
     },

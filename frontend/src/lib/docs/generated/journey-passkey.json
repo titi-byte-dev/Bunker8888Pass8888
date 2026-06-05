@@ -1,0 +1,319 @@
+{
+  "slug": "journey-passkey",
+  "title": "Journey: Registar e usar passkey",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "passkey",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Registar e usar passkey</h1>\n<blockquote>\n<p><strong>Ator:</strong> Utilizador · <strong>Epics:</strong> <code>VAULT</code>, <code>UI</code></p>\n</blockquote>\n<p>A passkey autentica a <strong>sessão HTTP</strong> com WebAuthn (biometria ou PIN do\ndispositivo) — mas a <strong>Master Key</strong> continua a vir só da Master Password\n(Zero-Knowledge).</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Browser ou SO com suporte WebAuthn (Secure Enclave / TPM).</li>\n<li>Utilizador com conta criada e pelo menos um login por password bem-sucedido.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant App as App (Svelte)\r\n    participant SE as Secure Enclave\r\n    participant G as Go API\r\n\r\n    Note over U,G: Registo (Definições)\r\n    U->>App: \"Registar passkey\" + nome\r\n    App->>G: GET opções de criação WebAuthn\r\n    G-->>App: challenge + user id\r\n    App->>SE: navigator.credentials.create()\r\n    SE-->>App: par de chaves (privada fica no dispositivo)\r\n    App->>G: POST credencial pública\r\n    G-->>App: passkey registada\r\n\r\n    Note over U,G: Login\r\n    U->>App: login com passkey\r\n    App->>G: GET opções de autenticação\r\n    G-->>App: challenge\r\n    App->>SE: navigator.credentials.get()\r\n    SE-->>App: assinatura do challenge\r\n    App->>G: POST verificação\r\n    G-->>App: token de sessão\r\n    App-->>U: redirecciona; cofre pede unlock (Master Password)",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "\"Registar passkey\" + nome"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "GET opções de criação WebAuthn"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "challenge + user id"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "SE",
+              "arrow": "->>",
+              "label": "navigator.credentials.create()"
+            },
+            {
+              "kind": "message",
+              "from": "SE",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "par de chaves (privada fica no dispositivo)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "POST credencial pública"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "passkey registada"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "login com passkey"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "GET opções de autenticação"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "challenge"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "SE",
+              "arrow": "->>",
+              "label": "navigator.credentials.get()"
+            },
+            {
+              "kind": "message",
+              "from": "SE",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "assinatura do challenge"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "POST verificação"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "token de sessão"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "U",
+              "arrow": "-->>",
+              "label": "redirecciona; cofre pede unlock (Master Password)"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "SE",
+                "label": "Secure Enclave",
+                "x": 400
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "App",
+                "label": "\"Registar passkey\" + nome",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "G",
+                "label": "GET opções de criação WebAuthn",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "G",
+                "target": "App",
+                "label": "challenge + user id",
+                "dashed": true
+              },
+              {
+                "id": "step-3",
+                "source": "App",
+                "target": "SE",
+                "label": "navigator.credentials.create()",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "SE",
+                "target": "App",
+                "label": "par de chaves (privada fica no dispositivo)",
+                "dashed": true
+              },
+              {
+                "id": "step-5",
+                "source": "App",
+                "target": "G",
+                "label": "POST credencial pública",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "G",
+                "target": "App",
+                "label": "passkey registada",
+                "dashed": true
+              },
+              {
+                "id": "step-7",
+                "source": "U",
+                "target": "App",
+                "label": "login com passkey",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "App",
+                "target": "G",
+                "label": "GET opções de autenticação",
+                "dashed": false
+              },
+              {
+                "id": "step-9",
+                "source": "G",
+                "target": "App",
+                "label": "challenge",
+                "dashed": true
+              },
+              {
+                "id": "step-10",
+                "source": "App",
+                "target": "SE",
+                "label": "navigator.credentials.get()",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "SE",
+                "target": "App",
+                "label": "assinatura do challenge",
+                "dashed": true
+              },
+              {
+                "id": "step-12",
+                "source": "App",
+                "target": "G",
+                "label": "POST verificação",
+                "dashed": false
+              },
+              {
+                "id": "step-13",
+                "source": "G",
+                "target": "App",
+                "label": "token de sessão",
+                "dashed": true
+              },
+              {
+                "id": "step-14",
+                "source": "App",
+                "target": "U",
+                "label": "redirecciona; cofre pede unlock (Master Password)",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Em <strong>Definições</strong>, o utilizador regista uma passkey com nome descritivo\n(ex.: &quot;MacBook Touch ID&quot;).</li>\n<li>O servidor envia um <em>challenge</em>; o dispositivo cria chave privada no Secure\nEnclave e devolve só a parte pública.</li>\n<li>No login, o utilizador escolhe passkey; o dispositivo assina o challenge sem\nrevelar a chave privada.</li>\n<li>Com token de sessão, a app pede <strong>unlock</strong> do cofre — Argon2id com Master\nPassword, como sempre.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>WebAuthn / passkey:</strong> autenticação por <strong>par de chaves assimétricas</strong> ligado\nao dispositivo. Resiste a phishing melhor que passwords — o browser só assina\npedidos do domínio correcto.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança — duas camadas:</strong> passkey = &quot;és tu para o servidor&quot;. Master\nPassword = &quot;consegues decifrar o cofre&quot;. Comprometer uma não compromete a outra\nautomaticamente.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Sem WebAuthn:</strong> login clássico por Auth Hash continua disponível.</li>\n<li><strong>Sentinel step-up:</strong> a mesma passkey pode servir de segundo factor no login\nsuspeito (ver journey Sentinel).</li>\n<li><strong>Revogação:</strong> em Definições ou <code>/security/devices</code>, remove passkeys perdidas.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Sessão HTTP activa sem enviar Master Password ao servidor.</li>\n<li>Master Key só em memória após unlock explícito.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Utilizador",
+  "order": 99
+}

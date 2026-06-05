@@ -54,7 +54,9 @@
   ],
   "related": [
     "vault",
-    "journey-admin-onboarding"
+    "journey-admin-onboarding",
+    "journey-shared-vault",
+    "journey-secret-link"
   ],
   "order": 4
 }

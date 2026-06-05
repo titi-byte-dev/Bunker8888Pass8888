@@ -9,7 +9,7 @@ feature: share
 level: 1
 in_app: true
 summary: Cofres partilhados, secret links e notas temporárias.
-related: [vault, journey-admin-onboarding]
+related: [vault, journey-admin-onboarding, journey-shared-vault, journey-secret-link]
 ---
 
 :::summary

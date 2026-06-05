@@ -1,0 +1,285 @@
+{
+  "slug": "journey-sentinel",
+  "title": "Journey: Sentinel deteta login impossível",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "sentinel",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Sentinel deteta login impossível</h1>\n<blockquote>\n<p><strong>Ator:</strong> Funcionário (login) · Admin (revisão) · <strong>Epics:</strong> <code>DW</code>, <code>VAULT</code></p>\n</blockquote>\n<p>Quando o padrão de acesso é geograficamente ou temporalmente incoerente, o\nSentinel Mode bloqueia o login até <strong>step-up</strong> adicional — sem desligar o\nZero-Knowledge.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Sentinel activo no tenant (DW-004).</li>\n<li>Último login registado com IP/GPS e timestamp fiável (NTP).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Funcionário\r\n    participant App as App (Svelte)\r\n    participant G as Go API\r\n    participant Adm as Admin\r\n\r\n    U->>App: login (Auth Hash) de localização nova\r\n    App->>G: POST /api/auth/login + contexto geo\r\n    G->>G: avalia viagem impossível / horário anómalo\r\n    alt padrão suspeito\r\n        G-->>App: 403 sentinel_step_up + challenge_id\r\n        App-->>U: banner: confirma identidade (passkey/GPS)\r\n        U->>App: completa step-up (WebAuthn ou geo)\r\n        App->>G: POST step-up/finish\r\n        G-->>App: token de sessão\r\n    else padrão normal\r\n        G-->>App: token de sessão\r\n    end\r\n    App-->>U: sessão activa; cofre exige unlock separado\r\n    G->>G: regista evento em /security/sentinel\r\n    Adm->>App: revê alertas no painel",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "login (Auth Hash) de localização nova"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "POST /api/auth/login + contexto geo"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "avalia viagem impossível / horário anómalo"
+            },
+            {
+              "kind": "branch",
+              "label": "alt padrão suspeito"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "403 sentinel_step_up + challenge_id"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "U",
+              "arrow": "-->>",
+              "label": "banner: confirma identidade (passkey/GPS)"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "completa step-up (WebAuthn ou geo)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "POST step-up/finish"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "token de sessão"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "token de sessão"
+            },
+            {
+              "kind": "branch",
+              "label": "end"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "U",
+              "arrow": "-->>",
+              "label": "sessão activa; cofre exige unlock separado"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "regista evento em /security/sentinel"
+            },
+            {
+              "kind": "message",
+              "from": "Adm",
+              "to": "App",
+              "arrow": "->>",
+              "label": "revê alertas no painel"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Funcionário",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "Adm",
+                "label": "Admin",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "App",
+                "label": "login (Auth Hash) de localização nova",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "G",
+                "label": "POST /api/auth/login + contexto geo",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "G",
+                "target": "G",
+                "label": "avalia viagem impossível / horário anómalo",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "G",
+                "target": "App",
+                "label": "403 sentinel_step_up + challenge_id",
+                "dashed": true
+              },
+              {
+                "id": "step-4",
+                "source": "App",
+                "target": "U",
+                "label": "banner: confirma identidade (passkey/GPS)",
+                "dashed": true
+              },
+              {
+                "id": "step-5",
+                "source": "U",
+                "target": "App",
+                "label": "completa step-up (WebAuthn ou geo)",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "App",
+                "target": "G",
+                "label": "POST step-up/finish",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "G",
+                "target": "App",
+                "label": "token de sessão",
+                "dashed": true
+              },
+              {
+                "id": "step-8",
+                "source": "G",
+                "target": "App",
+                "label": "token de sessão",
+                "dashed": true
+              },
+              {
+                "id": "step-9",
+                "source": "App",
+                "target": "U",
+                "label": "sessão activa; cofre exige unlock separado",
+                "dashed": true
+              },
+              {
+                "id": "step-10",
+                "source": "G",
+                "target": "G",
+                "label": "regista evento em /security/sentinel",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "Adm",
+                "target": "App",
+                "label": "revê alertas no painel",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>O funcionário tenta login a partir de um IP/GPS inconsistente com o último\nacesso (ex.: Lisboa há 10 min, Tokyo agora).</li>\n<li>A API recusa o token completo e devolve <code>sentinel_step_up</code> com um\n<code>challenge_id</code>.</li>\n<li>A app mostra um banner em <code>/auth/login</code> pedindo <strong>prova adicional</strong> —\npasskey registada ou confirmação de geolocalização.</li>\n<li>Após step-up bem-sucedido, emite-se o token HTTP; o cofre continua a exigir\nMaster Password (ZK intacto).</li>\n<li>O admin vê o evento em <code>/security/sentinel</code> com motivo legível.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Step-up authentication:</strong> a sessão &quot;normal&quot; não basta para contextos de\nrisco. Pedimos um segundo factor <strong>só quando o risco sobe</strong> — melhor UX que\n2FA obrigatório em cada clique.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> o Sentinel não substitui turnos nem geofencing — acrescenta\numa camada quando o padrão de login parece <strong>impossível</strong> mesmo dentro das regras\nbase.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Step-up falha:</strong> login negado; tentativa fica no log; admin pode forçar\nrevogação de sessões.</li>\n<li><strong>Dispositivo sem passkey:</strong> fallback para confirmação GPS ou contacto admin.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Sessão só emitida após step-up em caso de alerta.</li>\n<li>Evento auditável sem expor Master Key nem passwords.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Funcionário (login)",
+  "order": 99
+}
