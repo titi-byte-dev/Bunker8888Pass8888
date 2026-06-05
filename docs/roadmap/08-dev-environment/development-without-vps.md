@@ -45,7 +45,9 @@ Ver [`journey-crm-prospection.md`](../04-user-journeys/journey-crm-prospection.m
 ### Google
 
 - `/work/google` — estado do provider (`mock` em dev; `GET /api/work/google/status`)
-- `/work/google-dev` — Drive ZK + Sheets masking sem OAuth
+- `/work/google-dev` — Drive ZK (servidor ou localStorage) + Sheets masking
+
+Testar Drive no servidor: modo **Servidor** em `/work/google-dev` → blobs em `google_drive_files`.
 
 Ver [`journey-google-dev-stub.md`](../04-user-journeys/journey-google-dev-stub.md).
 

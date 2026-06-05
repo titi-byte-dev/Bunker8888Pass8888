@@ -54,6 +54,7 @@ código e IDs em **inglês** (`goroutine`, `nonce`, `VAULT-001`).
 | Sem VPS (stubs) | [`docs/roadmap/08-dev-environment/development-without-vps.md`](docs/roadmap/08-dev-environment/development-without-vps.md) |
 | VPS + integrações reais | [`docs/roadmap/10-production/README.md`](docs/roadmap/10-production/README.md) |
 | Matriz dev/prod por task | [`implementation-status.md`](docs/roadmap/10-production/implementation-status.md) |
+| Mobile Capacitor (UI-009) | [`mobile-capacitor.md`](docs/roadmap/08-dev-environment/mobile-capacitor.md) |
 
 Documentação in-app: `docs/product/` + `docs/developer/` → `npm run docs:build`.
 

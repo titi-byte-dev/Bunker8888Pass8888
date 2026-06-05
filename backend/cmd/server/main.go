@@ -23,6 +23,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/googledrive"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/googleworkspace"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -98,6 +99,7 @@ func main() {
 		openBankingSvc := openbanking.NewService(openbanking.NewRepo(pool), openbanking.MockProvider{})
 		googleCfg := googleworkspace.LoadConfigFromEnv()
 		googleSvc := googleworkspace.NewService(googleCfg, googleworkspace.SelectProvider(googleCfg))
+		googleDriveRepo := googledrive.NewRepo(pool)
 		opsRepo := ops.NewRepo(pool)
 		crmRepo := crm.NewRepo(pool)
 		agentAudit := guardian.NewAuditRepo(pool)
@@ -207,6 +209,7 @@ func main() {
 			Commissions:       commissionsRepo,
 			OpenBanking:       openBankingSvc,
 			GoogleWorkspace:   googleSvc,
+			GoogleDrive:       googleDriveRepo,
 			Ops:               opsRepo,
 			Agent:             agentReg,
 			AgentRunner:       agentRun,

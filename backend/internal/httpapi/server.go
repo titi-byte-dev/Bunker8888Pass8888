@@ -21,6 +21,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/googledrive"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/googleworkspace"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -73,6 +74,7 @@ type Deps struct {
 	Fin               *fin.Repo                  // nil desactiva endpoints /api/fin/*
 	OpenBanking       *openbanking.Service       // nil desactiva endpoints /api/fin/banking/*
 	GoogleWorkspace   *googleworkspace.Service   // nil desactiva endpoints /api/work/google/*
+	GoogleDrive       *googledrive.Repo          // nil desactiva /api/work/google/drive/*
 	Invoicing         *invoicing.Repo            // nil desactiva endpoints /api/fin/invoices/*
 	Commissions       *commissions.Repo          // nil desactiva endpoints /api/fin/commissions/*
 	Ops               *ops.Repo                  // nil desactiva endpoints /api/ops/*
@@ -289,6 +291,12 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.GoogleWorkspace != nil && deps.Auth != nil {
 		// Google Workspace (GOOGLE-001) — estado do provider mock ou service account.
 		mux.Handle("GET /api/work/google/status", requireAuth(deps.Auth, handleGoogleWorkspaceStatus(deps.GoogleWorkspace)))
+	}
+	if deps.GoogleDrive != nil && deps.Auth != nil {
+		// Drive ZK (GOOGLE-002) — blobs opacos; futuro external_id na API Google.
+		mux.Handle("GET /api/work/google/drive/files", requireAuth(deps.Auth, handleListDriveFiles(deps.GoogleDrive)))
+		mux.Handle("POST /api/work/google/drive/files", requireAuth(deps.Auth, handleCreateDriveFile(deps.GoogleDrive)))
+		mux.Handle("DELETE /api/work/google/drive/files/{id}", requireAuth(deps.Auth, handleDeleteDriveFile(deps.GoogleDrive)))
 	}
 	if deps.Ops != nil && deps.Auth != nil {
 		// Inventário operacional (AGENT-008).

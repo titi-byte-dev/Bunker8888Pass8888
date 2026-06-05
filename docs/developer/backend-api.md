@@ -64,6 +64,7 @@ bug de segurança — escrever testes negativos de isolamento.
 
 **Google & agentes**
 - `GET /api/work/google/status`
+- `GET/POST /api/work/google/drive/files`, `DELETE /api/work/google/drive/files/{id}`
 - `GET /api/agent/events`, `POST /api/agent/prospection/run`
 - `GET /api/agent/audit`, `GET /api/agent/orchestrator/status`
 

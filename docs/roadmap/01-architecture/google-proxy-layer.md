@@ -76,7 +76,7 @@ Ver [`../03-epics/epic-aliases-email.md`](../03-epics/epic-aliases-email.md).
 | Componente | Dev local | Produção | Código / rota |
 |---|---|---|---|
 | GOOGLE-001 OAuth/SA | 🟢 `mock` provider | 🟡 guia VPS | `internal/googleworkspace/`, `/work/google` |
-| GOOGLE-002 Drive ZK | 🟢 stub | ⚪ API Drive | `/work/google-dev`, `driveDevStore.ts` |
+| GOOGLE-002 Drive ZK | 🟢 API blobs + local | 🟡 upload Google API | `/work/google-dev`, `driveService.ts`, `POST /api/work/google/drive/files` |
 | GOOGLE-003 Sheets mask | 🟢 stub | ⚪ API Sheets | `masking.ts` |
 | GOOGLE-004 Gmail relay | ⚪ | ⚪ | depende MAIL-004 |
 

@@ -1,0 +1,8 @@
+{
+  "appId": "com.aegispass.app",
+  "appName": "AegisPass",
+  "webDir": "build",
+  "server": {
+    "androidScheme": "https"
+  }
+}

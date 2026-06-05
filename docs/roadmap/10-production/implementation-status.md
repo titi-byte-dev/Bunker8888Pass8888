@@ -39,7 +39,7 @@
 | Task | Dev | Produção |
 |---|---|---|
 | GOOGLE-001 | 🟢 mock + `/work/google` | 🟡 SA JSON na VPS |
-| GOOGLE-002/003 | 🟢 `/work/google-dev` | ⚪ APIs Drive/Sheets |
+| GOOGLE-002/003 | 🟢 `/work/google-dev` + API blobs | 🟡 API Google Drive real |
 | GOOGLE-004 | ⚪ | ⚪ Gmail relay |
 
 ## Agentes & ERP
@@ -55,7 +55,7 @@
 | Task | Estado |
 |---|---|
 | UI-001–008, UI-010 | 🟢 |
-| UI-009 Capacitor mobile | ⚪ |
+| UI-009 Capacitor mobile | 🟡 scaffold + guia |
 
 ## Próximos passos (prioridade)
 

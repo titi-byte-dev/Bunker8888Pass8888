@@ -40,14 +40,14 @@
           "id": "flow-1",
           "title": "",
           "type": "sequence",
-          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant UI as /work/google-dev\r\n    participant LS as localStorage\r\n\r\n    U->>UI: texto + upload\r\n    UI->>UI: AES-GCM(master_key)\r\n    UI->>LS: blob opaco\r\n    Note over LS: Vista Google = ilegível\r\n    U->>UI: Abrir no AegisPass\r\n    UI->>UI: decifra em memória",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant UI as /work/google-dev\r\n    participant API as POST /api/work/google/drive/files\r\n    participant LS as localStorage\r\n\r\n    U->>UI: upload + modo servidor ou local\r\n    UI->>UI: AES-GCM(master_key)\r\n    alt Servidor (GOOGLE-002)\r\n        UI->>API: blob opaco\r\n    else Offline\r\n        UI->>LS: blob opaco\r\n    end\r\n    U->>UI: Abrir no AegisPass\r\n    UI->>UI: decifra em memória",
           "steps": [
             {
               "kind": "message",
               "from": "U",
               "to": "UI",
               "arrow": "->>",
-              "label": "texto + upload"
+              "label": "upload + modo servidor ou local"
             },
             {
               "kind": "message",
@@ -57,11 +57,26 @@
               "label": "AES-GCM(master_key)"
             },
             {
+              "kind": "branch",
+              "label": "alt Servidor (GOOGLE-002)"
+            },
+            {
+              "kind": "message",
+              "from": "UI",
+              "to": "API",
+              "arrow": "->>",
+              "label": "blob opaco"
+            },
+            {
               "kind": "message",
               "from": "UI",
               "to": "LS",
               "arrow": "->>",
               "label": "blob opaco"
+            },
+            {
+              "kind": "branch",
+              "label": "end"
             },
             {
               "kind": "message",
@@ -92,9 +107,14 @@
                 "x": 200
               },
               {
+                "id": "API",
+                "label": "POST /api/work/google/drive/files",
+                "x": 400
+              },
+              {
                 "id": "LS",
                 "label": "localStorage",
-                "x": 400
+                "x": 600
               }
             ],
             "edges": [
@@ -102,7 +122,7 @@
                 "id": "step-0",
                 "source": "U",
                 "target": "UI",
-                "label": "texto + upload",
+                "label": "upload + modo servidor ou local",
                 "dashed": false
               },
               {
@@ -115,19 +135,26 @@
               {
                 "id": "step-2",
                 "source": "UI",
-                "target": "LS",
+                "target": "API",
                 "label": "blob opaco",
                 "dashed": false
               },
               {
                 "id": "step-3",
+                "source": "UI",
+                "target": "LS",
+                "label": "blob opaco",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
                 "source": "U",
                 "target": "UI",
                 "label": "Abrir no AegisPass",
                 "dashed": false
               },
               {
-                "id": "step-4",
+                "id": "step-5",
                 "source": "UI",
                 "target": "UI",
                 "label": "decifra em memória",
