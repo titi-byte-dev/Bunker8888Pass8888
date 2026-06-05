@@ -218,6 +218,20 @@
       </p>
       <a class="btn primary" href="/team/vaults">Abrir cofres partilhados</a>
     </section>
+
+    <!-- Painel E — secret links (SHARE-003) -->
+    <section class="panel">
+      <div class="panel-head">
+        <p class="eyebrow">Secret links</p>
+        <span class="pill on">Disponível</span>
+      </div>
+      <p class="panel-body">
+        Partilha um segredo de uso único com quem não tem conta. Cifrado no
+        dispositivo, guardado só em RAM com expiração; a chave viaja no fragmento
+        do link e nunca chega ao servidor.
+      </p>
+      <a class="btn primary" href="/team/links">Criar secret link</a>
+    </section>
   {/if}
 </section>
 

@@ -19,6 +19,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/secretlinks"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharedvaults"
@@ -46,6 +47,7 @@ type Deps struct {
 	Sentinel     *sentinel.Service
 	ShareKeys    *sharekeys.Repo    // nil desactiva endpoints /api/share/*
 	SharedVaults *sharedvaults.Repo // nil desactiva endpoints /api/share/vaults*
+	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -147,6 +149,15 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleListSharedVaultItems(deps.SharedVaults)))
 		mux.Handle("POST /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleCreateSharedVaultItem(deps.SharedVaults)))
 		mux.Handle("DELETE /api/share/vaults/{id}/items/{itemId}", requireAuth(deps.Auth, handleDeleteSharedVaultItem(deps.SharedVaults)))
+	}
+	if deps.SecretLinks != nil {
+		// Criar exige sessão (só utilizadores criam links).
+		if deps.Auth != nil {
+			mux.Handle("POST /api/share/links", requireAuth(deps.Auth, handleCreateSecretLink(deps.SecretLinks)))
+		}
+		// Consumir é PÚBLICO: a chave de cifra vive no fragmento do URL, que
+		// nunca chega ao servidor. Qualquer pessoa com o link o pode abrir 1x.
+		mux.HandleFunc("POST /api/share/links/{id}", handleConsumeSecretLink(deps.SecretLinks))
 	}
 
 	return mux
