@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import DocNav from "$lib/docs/DocNav.svelte";
+  import DocSearch from "$lib/docs/DocSearch.svelte";
   import { DOC_MANIFEST } from "$lib/docs/loader";
 
   let { children } = $props();
@@ -22,6 +23,7 @@
         <span class="current">{docTitle}</span>
       {/if}
     </nav>
+    <DocSearch />
     <DocNav pathname={page.url.pathname} />
   </aside>
   <div class="docs-main">

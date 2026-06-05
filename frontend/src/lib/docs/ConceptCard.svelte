@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { DocConcept } from "./types";
+  import { annotateGlossaryHtml } from "./glossary";
   import { LEVEL_LABELS, type DocComplexityLevel } from "./types";
 
   interface Props {
@@ -12,10 +13,11 @@
 
   const visible = $derived(concept.level <= maxVisibleLevel);
   const levelLabel = $derived(LEVEL_LABELS[concept.level as DocComplexityLevel] ?? "");
+  const bodyHtml = $derived(annotateGlossaryHtml(concept.html));
 </script>
 
 {#if visible}
-  <details class="concept-card" data-level={concept.level}>
+  <details class="concept-card" data-level={concept.level} id="concept-{concept.id}">
     <summary class="concept-summary">
       <span class="concept-icon" aria-hidden="true">💡</span>
       <span class="concept-title">{concept.title}</span>
@@ -25,7 +27,7 @@
       <span class="chevron" aria-hidden="true">▾</span>
     </summary>
     <div class="concept-body prose">
-      {@html concept.html}
+      {@html bodyHtml}
     </div>
   </details>
 {/if}
