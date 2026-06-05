@@ -12,6 +12,9 @@
   import type { BillingCycle, Subscription } from "$lib/fin/subscriptions";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { costSummary, detectAlerts, monthlyCost, type Alert } from "$lib/fin/alerts";
+  import { reportStaleAlerts } from "$lib/fin/financeAgentService";
+  import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
+  import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -35,6 +38,64 @@
   const summary = $derived(costSummary(subs));
   const alerts = $derived(detectAlerts(subs));
 
+  let agentEvents = $state<AgentEvent[]>([]);
+  let decidingId = $state<string | null>(null);
+  let reviewApproved = $state(false);
+
+  async function refreshEvents() {
+    try {
+      agentEvents = await listAgentEvents();
+    } catch {
+      agentEvents = [];
+    }
+  }
+
+  function isPendingSuggestion(ev: AgentEvent): boolean {
+    return ev.type === "orchestrator.action.suggested" && (ev.approvalStatus ?? "pending") === "pending";
+  }
+
+  async function handleReportToAgent() {
+    if (alerts.length === 0) return;
+    busy = true;
+    error = "";
+    try {
+      await reportStaleAlerts(alerts, subs);
+      await refreshEvents();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao reportar alertas";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handleApprove(ev: AgentEvent) {
+    decidingId = ev.id;
+    error = "";
+    try {
+      const result = await approveSuggestion(ev.id);
+      await refreshEvents();
+      if (result.action === "review_saas_licenses") {
+        reviewApproved = true;
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao aprovar";
+    } finally {
+      decidingId = null;
+    }
+  }
+
+  async function handleReject(ev: AgentEvent) {
+    decidingId = ev.id;
+    try {
+      await rejectSuggestion(ev.id);
+      await refreshEvents();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao rejeitar";
+    } finally {
+      decidingId = null;
+    }
+  }
+
   async function refresh() {
     loading = true;
     error = "";
@@ -50,8 +111,10 @@
 
   onMount(() => {
     locked = !getMasterKey();
-    if (!locked) refresh();
-    else loading = false;
+    if (!locked) {
+      refresh();
+      void refreshEvents();
+    } else loading = false;
   });
 
   function resetForm() {
@@ -136,9 +199,9 @@
 <section class="page">
   <header class="page-head">
     <div>
-      <p class="eyebrow">FIN-001/002 · Custos SaaS</p>
+      <p class="eyebrow">FIN-001/002 · AGENT-006 · Custos SaaS</p>
       <h1>Monitorização de Custos</h1>
-      <DocHelpLink />
+      <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />
     </div>
     <p class="lead">
       As subscrições são cifradas com a tua Master Key — só tu vês os custos. O
@@ -164,9 +227,45 @@
       </div>
     </section>
 
+    <section class="panel events">
+      <h2>Actividade dos agentes</h2>
+      {#if agentEvents.length === 0}
+        <p class="muted">Sem eventos recentes.</p>
+      {:else}
+        <ul class="event-list">
+          {#each agentEvents.slice(0, 6) as ev (ev.id)}
+            <li class:suggested={isPendingSuggestion(ev)}>
+              <div class="ev-body">
+                <span class="ev-label">{ev.label}</span>
+                {#if isPendingSuggestion(ev) && ev.payload.action === "review_saas_licenses"}
+                  <div class="ev-actions">
+                    <button type="button" class="btn approve" disabled={decidingId !== null || busy} onclick={() => handleApprove(ev)}>
+                      {decidingId === ev.id ? "…" : "Aprovar"}
+                    </button>
+                    <button type="button" class="btn reject" disabled={decidingId !== null} onclick={() => handleReject(ev)}>
+                      Rejeitar
+                    </button>
+                  </div>
+                {/if}
+              </div>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
+
+    {#if reviewApproved}
+      <p class="hint" role="status">Revisão aprovada — revê os alertas abaixo e cancela licenças inactivas.</p>
+    {/if}
+
     {#if alerts.length > 0}
       <section class="panel alerts">
-        <div class="panel-head"><p class="eyebrow">⚠️ Alertas ({alerts.length})</p></div>
+        <div class="panel-head">
+          <p class="eyebrow">⚠️ Alertas ({alerts.length})</p>
+          <button type="button" class="btn secondary sm" disabled={busy} onclick={handleReportToAgent}>
+            Pedir revisão ao agente
+          </button>
+        </div>
         <ul class="alert-list">
           {#each alerts as a (a.subscriptionId + a.kind)}
             <li class="alert" class:stale={a.kind === "stale"} class:orphan={a.kind === "orphan"}>
@@ -478,5 +577,56 @@
     margin: 0 0 var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-danger);
+  }
+  .events h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-base);
+  }
+  .event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .event-list li {
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+  }
+  .event-list li.suggested {
+    border-color: var(--color-accent);
+  }
+  .ev-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .ev-label {
+    font-size: var(--text-sm);
+  }
+  .ev-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .btn.secondary {
+    background: var(--color-bg-inset);
+  }
+  .btn.approve {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+    border-color: transparent;
+  }
+  .btn.reject {
+    color: var(--color-text-muted);
+  }
+  .hint {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
   }
 </style>

@@ -142,6 +142,7 @@ func main() {
 			orchestrator.NewOnboardingWorker(agentBus),
 			orchestrator.NewOperationsWorker(agentBus),
 			orchestrator.NewRecruitmentWorker(agentBus),
+			orchestrator.NewFinanceWorker(agentBus),
 		)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{

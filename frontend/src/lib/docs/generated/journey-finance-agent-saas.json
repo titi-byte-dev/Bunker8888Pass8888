@@ -1,0 +1,207 @@
+{
+  "slug": "journey-finance-agent-saas",
+  "title": "Journey: Agente financeiro sugere rever licenças SaaS (AGENT-006)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "finance_agent_saas",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Agente financeiro sugere rever licenças SaaS (AGENT-006)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Responsável financeiro · <strong>Epics:</strong> <code>AGENT</code>, <code>FIN</code></p>\n</blockquote>\n<p>Quando o dashboard detecta subscrições sem uso ou sem login no cofre, o\nutilizador pode reportar os alertas ao orquestrador. O agente financeiro\nsugere uma revisão — sem cancelar licenças automaticamente.</p>\n<blockquote>\n<p>💡 <strong>Conceito:</strong> Zero-Knowledge — o servidor recebe apenas IDs de subscrição;\nnomes, custos e credenciais nunca saem do browser em claro.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador activo com worker <code>finance</code> (AGENT-005).</li>\n<li>Subscrições registadas em <code>/fin</code> com Master Key desbloqueada.</li>\n<li>Pelo menos um alerta (licença «stale» ou «orphan»).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant FIN as /fin\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n\r\n    FIN->>FIN: detectAlerts() no cliente\r\n    U->>FIN: Pedir revisão ao agente\r\n    FIN->>API: POST /api/agent/finance/report-stale\r\n    Note over API: só subscription_ids + contagens\r\n    API->>Orq: fin.subscription.stale\r\n    Orq->>API: orchestrator.action.suggested\r\n    FIN->>API: GET /api/agent/events\r\n    Note over FIN: «Sugestão: rever licenças SaaS»\r\n    U->>FIN: Aprovar (AGENT-009)\r\n    FIN->>FIN: revê alertas e cancela manualmente",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "FIN",
+              "to": "FIN",
+              "arrow": "->>",
+              "label": "detectAlerts() no cliente"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "FIN",
+              "arrow": "->>",
+              "label": "Pedir revisão ao agente"
+            },
+            {
+              "kind": "message",
+              "from": "FIN",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/agent/finance/report-stale"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "fin.subscription.stale"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "FIN",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "FIN",
+              "arrow": "->>",
+              "label": "Aprovar (AGENT-009)"
+            },
+            {
+              "kind": "message",
+              "from": "FIN",
+              "to": "FIN",
+              "arrow": "->>",
+              "label": "revê alertas e cancela manualmente"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "FIN",
+                "label": "/fin",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 400
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "FIN",
+                "target": "FIN",
+                "label": "detectAlerts() no cliente",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "U",
+                "target": "FIN",
+                "label": "Pedir revisão ao agente",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "FIN",
+                "target": "API",
+                "label": "POST /api/agent/finance/report-stale",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "API",
+                "target": "Orq",
+                "label": "fin.subscription.stale",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "FIN",
+                "target": "API",
+                "label": "GET /api/agent/events",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "U",
+                "target": "FIN",
+                "label": "Aprovar (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "FIN",
+                "target": "FIN",
+                "label": "revê alertas e cancela manualmente",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Adiciona subscrições com custo e data de último uso antiga (ou sem login no cofre).</li>\n<li>O painel <strong>Alertas</strong> lista licenças candidatas a poupança.</li>\n<li>Clica <strong>Pedir revisão ao agente</strong> — envia só IDs ao servidor.</li>\n<li>No feed <strong>Actividade dos agentes</strong>, aparece <strong>Sugestão: rever licenças SaaS</strong>.</li>\n<li><strong>Aprova</strong> — revê a lista e desactiva/cancela subscrições inactivas manualmente.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Evento <code>fin.subscription.stale</code> auditado em <code>agent_events</code>.</li>\n<li>Nenhuma licença cancelada automaticamente; decisão final do utilizador.</li>\n</ul>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> reconciliação bancária completa (FIN-003 / Open Banking) fica\npara fase posterior — este journey cobre apenas alertas SaaS no cliente.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Responsável financeiro",
+  "order": 99
+}

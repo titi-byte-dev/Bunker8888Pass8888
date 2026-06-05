@@ -10,7 +10,7 @@ describe("doc help links (DOC-013)", () => {
 
   it("resolve cofre, finanças e segurança", () => {
     expect(resolveDocHelp("/vault")?.slug).toBe("vault");
-    expect(resolveDocHelp("/fin")?.slug).toBe("fin");
+    expect(resolveDocHelp("/fin")?.slug).toBe("journey-finance-agent-saas");
     expect(resolveDocHelp("/security/sentinel")?.slug).toBe("journey-sentinel");
   });
 

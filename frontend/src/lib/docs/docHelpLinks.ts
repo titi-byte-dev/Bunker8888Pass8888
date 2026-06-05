@@ -15,7 +15,7 @@ export const DOC_HELP_ROUTES: DocHelpRoute[] = [
   { prefix: "/team/vaults", slug: "journey-shared-vault", label: "Como funcionam os cofres partilhados?" },
   { prefix: "/team/notes", slug: "team-sharing", label: "Como funcionam as notas temporárias?" },
   { prefix: "/team", slug: "team-sharing", label: "Como funciona a partilha?" },
-  { prefix: "/fin", slug: "fin", label: "Como funciona a monitorização SaaS?" },
+  { prefix: "/fin", slug: "journey-finance-agent-saas", label: "Como funciona o agente financeiro?" },
   { prefix: "/crm", slug: "journey-crm-prospection", label: "Como funciona a prospeção CRM?" },
   { prefix: "/mail", slug: "journey-mail-alias-relay", label: "Como funcionam aliases e relay?" },
   { prefix: "/security/sentinel", slug: "journey-sentinel", label: "Como funciona o Sentinel?" },

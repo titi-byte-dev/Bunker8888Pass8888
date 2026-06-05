@@ -17,6 +17,8 @@ const (
 	OpsStockLow = "ops.stock.low"
 	// HRRecruitmentRun — triagem às cegas executada (AGENT-007).
 	HRRecruitmentRun = "hr.recruitment.run"
+	// FinSubscriptionStale — cliente reportou licenças SaaS sem uso (AGENT-006).
+	FinSubscriptionStale = "fin.subscription.stale"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).
