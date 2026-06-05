@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import AppSidebar from "$lib/shell/AppSidebar.svelte";
   import AppTabBar from "$lib/shell/AppTabBar.svelte";
+  import CommandPalette from "$lib/shell/CommandPalette.svelte";
   import { tabBarItems, visibleNavItems } from "$lib/shell/nav";
   import {
     loadThemePreference,
@@ -18,6 +20,18 @@
   let { children } = $props();
 
   let themeMode = $state<ThemeMode>(loadThemePreference());
+  let paletteOpen = $state(false);
+
+  onMount(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        paletteOpen = !paletteOpen;
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   function toggleTheme() {
     themeMode = cycleThemePreference(themeMode);
@@ -46,6 +60,9 @@
         <div class="topbar-spacer" aria-hidden="true"></div>
       {/if}
       <div class="topbar-actions">
+        <button type="button" class="palette-btn" onclick={() => (paletteOpen = true)} title="Command palette (Ctrl+K)">
+          ⌘K
+        </button>
         <button type="button" class="theme-btn" onclick={toggleTheme} title="Alternar tema">
           {themeModeLabel(themeMode)}
         </button>
@@ -64,6 +81,8 @@
 
   <AppTabBar items={tabs} pathname={page.url.pathname} />
 </div>
+
+<CommandPalette open={paletteOpen} onClose={() => (paletteOpen = false)} />
 
 <style>
   .app-shell {
@@ -118,6 +137,22 @@
   }
 
   .logout-btn:hover {
+    color: var(--color-text);
+    background: var(--color-bg-surface);
+  }
+
+  .palette-btn {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    cursor: pointer;
+  }
+
+  .palette-btn:hover {
     color: var(--color-text);
     background: var(--color-bg-surface);
   }

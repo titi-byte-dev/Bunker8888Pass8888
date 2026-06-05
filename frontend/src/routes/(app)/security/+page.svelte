@@ -11,6 +11,12 @@
 
   <ul class="links">
     <li>
+      <a href="/security/hygiene">
+        <strong>Higiene de passwords</strong>
+        <span>Score no cliente + verificação de fugas k-anonymity (UI-007 / DW-001)</span>
+      </a>
+    </li>
+    <li>
       <a href="/security/emergency">
         <strong>Acesso de emergência</strong>
         <span>Herdeiro digital, countdown, aprovar/rejeitar (VAULT-016)</span>
@@ -18,7 +24,7 @@
     </li>
   </ul>
 
-  <p class="muted">Score de higiene, breaches e dispositivos — em breve (UI-007).</p>
+  <p class="muted">Dispositivos e sessões — em breve.</p>
 </section>
 
 <style>
