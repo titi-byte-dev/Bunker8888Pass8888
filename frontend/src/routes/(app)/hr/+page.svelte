@@ -293,7 +293,10 @@
       <p class="eyebrow">HR-001 · Cifragem campo-a-campo</p>
       <h1>Fichas de Empregado</h1>
     </div>
-    <a class="btn ghost report-link" href="/hr/compliance">Relatório RGPD →</a>
+    <span class="report-link">
+      <a class="btn ghost" href="/hr/onboarding">Onboarding →</a>
+      <a class="btn ghost" href="/hr/compliance">Relatório RGPD →</a>
+    </span>
     <p class="lead">
       Cada campo da ficha é cifrado <strong>de forma independente</strong>, com a
       sua própria chave. Essa chave é embrulhada com a tua Master Key — o servidor
@@ -758,8 +761,11 @@
     gap: var(--space-2);
   }
   .report-link {
-    display: inline-block;
+    display: inline-flex;
+    gap: var(--space-2);
     margin-top: var(--space-3);
+  }
+  .report-link a {
     text-decoration: none;
   }
   .btn.ghost {
