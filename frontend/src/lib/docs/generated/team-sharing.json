@@ -1,0 +1,57 @@
+{
+  "slug": "team-sharing",
+  "title": "Equipa e partilha",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user"
+  ],
+  "layer": [
+    "frontend",
+    "backend"
+  ],
+  "feature": "share",
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Cofres partilhados, secret links e notas temporárias.",
+  "concepts": [
+    {
+      "id": "shared-vault",
+      "title": "Shared Vault",
+      "level": 1,
+      "html": "<p>Cofre com <strong>vários membros</strong> e papéis (ler, editar, administrar). Cada utilizador tem\nchaves assimétricas; o conteúdo re-cifrado por membro mantém Zero-Knowledge face ao\nservidor.</p>\n"
+    },
+    {
+      "id": "secret-link",
+      "title": "Secret link efémero",
+      "level": 2,
+      "html": "<p>Link de uso único ou temporário que serve o segredo <strong>da RAM</strong> — não persiste em claro\nem disco no servidor. Ideal para credenciais de projeto ou onboarding rápido.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Onde encontrar na app",
+      "html": "<ul>\n<li><code>/team/vaults</code> — cofres partilhados</li>\n<li><code>/team/links</code> — secret links</li>\n<li><code>/team/notes</code> — notas auto-destrutivas</li>\n</ul>\n",
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Aprofundar: notas temporárias",
+      "html": "<p>Notas com <strong>TTL</strong> (<em>time-to-live</em>): após expirar, o conteúdo deixa de estar disponível.\nÚtil para partilhar IBAN ou códigos de um só uso sem rasto permanente.</p>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Técnico",
+      "html": "<p>Backend: <code>backend/internal/sharing/</code>. Frontend: <code>frontend/src/routes/(app)/team/</code>.\nEpic: <code>docs/roadmap/03-epics/epic-sharing.md</code>.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "vault",
+    "journey-admin-onboarding"
+  ],
+  "order": 4
+}

@@ -1,0 +1,50 @@
+{
+  "slug": "start",
+  "title": "Começar no AegisPass",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user"
+  ],
+  "layer": [
+    "product"
+  ],
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Primeiros passos — sessão, desbloqueio do cofre e navegação da app.",
+  "concepts": [
+    {
+      "id": "login-vs-unlock",
+      "title": "Login ≠ Desbloquear cofre",
+      "level": 1,
+      "html": "<p><strong>Login</strong> (ou passkey) autentica a tua sessão HTTP — o servidor sabe que és tu.\n<strong>Unlock</strong> deriva a Master Key localmente para decifrar itens. Podes estar autenticado\ne o cofre continuar bloqueado até introduzires a Master Password.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Fluxo recomendado (primeira vez)",
+      "html": "<ol>\n<li><strong>Registo</strong> — defines Master Password; o cliente envia só o Auth Hash.</li>\n<li><strong>Login</strong> — sessão activa; opcionalmente registas uma <strong>passkey</strong> em Definições.</li>\n<li><strong>Unlock</strong> — desbloqueias o cofre com a Master Password (ou recovery key).</li>\n<li><strong>Cofre</strong> — consultas, crias e editas logins, notas e cartões.</li>\n<li><strong>Segurança</strong> — revê higiene, dispositivos e políticas do teu turno.</li>\n</ol>\n",
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Navegação da app",
+      "html": "<table>\n<thead>\n<tr>\n<th>Secção</th>\n<th>Para quê</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Cofre</strong></td>\n<td>Credenciais, notas, cartões, importação</td>\n</tr>\n<tr>\n<td><strong>Segurança</strong></td>\n<td>Higiene, breaches, dispositivos, Sentinel</td>\n</tr>\n<tr>\n<td><strong>Trabalho</strong></td>\n<td>Turnos, sandbox browser, CLI</td>\n</tr>\n<tr>\n<td><strong>Equipa</strong></td>\n<td>Cofres partilhados, secret links</td>\n</tr>\n<tr>\n<td><strong>RH</strong></td>\n<td>Fichas, contratos, onboarding, RGPD</td>\n</tr>\n<tr>\n<td><strong>Definições</strong></td>\n<td>Conta, tema, passkeys, <strong>esta documentação</strong></td>\n</tr>\n</tbody></table>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Para programadores: arranque local",
+      "html": "<pre><code class=\"language-bash\">docker compose up --build   # API + PostgreSQL\ncd frontend &amp;&amp; npm run dev  # SvelteKit em :5173\n</code></pre>\n<p>A API expõe <code>GET /healthz</code>. O proxy Vite encaminha <code>/api/*</code> para <code>localhost:8080</code>.\nDocumentação técnica: secção <strong>Programador</strong> neste mesmo painel.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "glossary",
+    "vault",
+    "security"
+  ],
+  "order": 1
+}

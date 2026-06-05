@@ -1,0 +1,346 @@
+{
+  "generatedAt": "2026-06-05T11:31:25.914Z",
+  "categories": [
+    {
+      "id": "concepts",
+      "label": "Conceitos"
+    },
+    {
+      "id": "product",
+      "label": "Funcionalidades"
+    },
+    {
+      "id": "developer",
+      "label": "Programador"
+    },
+    {
+      "id": "competitive",
+      "label": "Concorrência"
+    },
+    {
+      "id": "journeys",
+      "label": "Percursos"
+    }
+  ],
+  "levelLabels": {
+    "1": "Essencial",
+    "2": "Intermédio",
+    "3": "Técnico"
+  },
+  "docs": [
+    {
+      "slug": "competitive-landscape",
+      "title": "Panorama competitivo",
+      "category": "competitive",
+      "categoryLabel": "Concorrência",
+      "audience": [
+        "developer",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "level": 2,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Concorrentes, abordagens tecnológicas e ideias validadas para o roadmap.",
+      "related": [
+        "vault",
+        "hr-rgpd"
+      ],
+      "order": 1
+    },
+    {
+      "slug": "glossary",
+      "title": "Glossário de conceitos-chave",
+      "category": "concepts",
+      "categoryLabel": "Conceitos",
+      "audience": [
+        "user",
+        "developer"
+      ],
+      "layer": [
+        "product"
+      ],
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Termos fundamentais do AegisPass — a base para perceber cofre, segurança e RGPD.",
+      "related": [
+        "vault",
+        "security",
+        "developer-crypto"
+      ],
+      "order": 1
+    },
+    {
+      "slug": "developer-index",
+      "title": "Guia do programador",
+      "category": "developer",
+      "categoryLabel": "Programador",
+      "audience": [
+        "developer"
+      ],
+      "layer": [
+        "fullstack"
+      ],
+      "level": 2,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Estrutura do monorepo, convenções e onde começar a contribuir.",
+      "related": [
+        "developer-crypto",
+        "developer-api",
+        "glossary"
+      ],
+      "order": 1
+    },
+    {
+      "slug": "developer-crypto",
+      "title": "Criptografia no frontend",
+      "category": "developer",
+      "categoryLabel": "Programador",
+      "audience": [
+        "developer"
+      ],
+      "layer": [
+        "frontend"
+      ],
+      "feature": "vault",
+      "level": 3,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Argon2id, AES-GCM, Master Key e fluxos no browser.",
+      "related": [
+        "glossary",
+        "vault",
+        "developer-api"
+      ],
+      "order": 2
+    },
+    {
+      "slug": "developer-api",
+      "title": "Backend e API",
+      "category": "developer",
+      "categoryLabel": "Programador",
+      "audience": [
+        "developer"
+      ],
+      "layer": [
+        "backend"
+      ],
+      "level": 3,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Servidor Go, autenticação, multi-tenancy e módulos internos.",
+      "related": [
+        "developer-crypto",
+        "glossary"
+      ],
+      "order": 3
+    },
+    {
+      "slug": "journey-admin-onboarding",
+      "title": "Journey: Onboarding de novo funcionário",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "admin_onboarding",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Admin/RH",
+      "order": 99
+    },
+    {
+      "slug": "journey-employee-byod",
+      "title": "Journey: Funcionário acede ao cofre (BYOD)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "employee_byod",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Funcionário",
+      "order": 99
+    },
+    {
+      "slug": "journey-remote-wipe",
+      "title": "Journey: Remote Wipe de dados corporativos",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "remote_wipe",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Admin/RH",
+      "order": 99
+    },
+    {
+      "slug": "journey-rgpd-erasure",
+      "title": "Journey: Direito ao Esquecimento (RGPD Art. 17)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "rgpd_erasure",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Admin/RH (a pedido do titular dos dados)",
+      "order": 99
+    },
+    {
+      "slug": "start",
+      "title": "Começar no AegisPass",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user"
+      ],
+      "layer": [
+        "product"
+      ],
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Primeiros passos — sessão, desbloqueio do cofre e navegação da app.",
+      "related": [
+        "glossary",
+        "vault",
+        "security"
+      ],
+      "order": 1
+    },
+    {
+      "slug": "vault",
+      "title": "O Cofre (Vault)",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user",
+        "developer"
+      ],
+      "layer": [
+        "frontend",
+        "backend"
+      ],
+      "feature": "vault",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Guardar e sincronizar credenciais com cifragem Zero-Knowledge.",
+      "related": [
+        "glossary",
+        "security",
+        "developer-crypto",
+        "journey-employee-byod"
+      ],
+      "order": 2
+    },
+    {
+      "slug": "security",
+      "title": "Segurança e confiança",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "vault",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Higiene, dispositivos, turnos, geofencing, Sentinel e emergência.",
+      "related": [
+        "vault",
+        "glossary",
+        "journey-remote-wipe"
+      ],
+      "order": 3
+    },
+    {
+      "slug": "team-sharing",
+      "title": "Equipa e partilha",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user"
+      ],
+      "layer": [
+        "frontend",
+        "backend"
+      ],
+      "feature": "share",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Cofres partilhados, secret links e notas temporárias.",
+      "related": [
+        "vault",
+        "journey-admin-onboarding"
+      ],
+      "order": 4
+    },
+    {
+      "slug": "hr-rgpd",
+      "title": "RH e conformidade RGPD",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "frontend",
+        "backend"
+      ],
+      "feature": "hr",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Fichas cifradas, contratos, onboarding e direito ao esquecimento.",
+      "related": [
+        "glossary",
+        "journey-rgpd-erasure",
+        "journey-admin-onboarding"
+      ],
+      "order": 5
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "slug": "developer-crypto",
+  "title": "Criptografia no frontend",
+  "category": "developer",
+  "categoryLabel": "Programador",
+  "audience": [
+    "developer"
+  ],
+  "layer": [
+    "frontend"
+  ],
+  "feature": "vault",
+  "level": 3,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Argon2id, AES-GCM, Master Key e fluxos no browser.",
+  "concepts": [
+    {
+      "id": "argon2id-client",
+      "title": "Argon2id no browser",
+      "level": 2,
+      "html": "<p><code>hash-wasm</code> deriva a Master Key e o Auth Hash a partir da Master Password + salt.\nParâmetros de custo elevados mitigam brute-force offline sobre o Auth Hash armazenado.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 3,
+      "title": "Ficheiros-chave",
+      "html": "<table>\n<thead>\n<tr>\n<th>Ficheiro</th>\n<th>Papel</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>frontend/src/lib/crypto.ts</code></td>\n<td>AES-GCM, bytes, helpers</td>\n</tr>\n<tr>\n<td><code>frontend/src/lib/vault/password.ts</code></td>\n<td>Derivação Argon2id</td>\n</tr>\n<tr>\n<td><code>frontend/src/lib/vault/items.ts</code></td>\n<td>Serialização + blob</td>\n</tr>\n<tr>\n<td><code>frontend/src/lib/vault/masterKeyStore.ts</code></td>\n<td>Chave em memória volátil</td>\n</tr>\n<tr>\n<td><code>frontend/src/lib/passkey.ts</code></td>\n<td>WebAuthn (sessão HTTP)</td>\n</tr>\n</tbody></table>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> <code>CryptoKey</code> com <code>extractable: false</code> onde possível; nunca\n<code>localStorage</code> para Master Key.</p>\n</blockquote>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Fluxo de um item",
+      "html": "<ol>\n<li>Utilizador preenche formulário (login/note/card)</li>\n<li>JSON serializado → UTF-8 bytes</li>\n<li><code>encrypt()</code> gera nonce único + ciphertext AES-GCM-256</li>\n<li>Blob base64 enviado na API; servidor guarda sem decifrar</li>\n<li>Leitura inversa com Master Key em memória após unlock</li>\n</ol>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "glossary",
+    "vault",
+    "developer-api"
+  ],
+  "order": 2
+}

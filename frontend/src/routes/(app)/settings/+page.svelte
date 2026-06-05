@@ -124,6 +124,15 @@
     </section>
 
     <section class="block">
+      <h2>Documentação</h2>
+      <p class="hint">
+        Aprende a usar o AegisPass por níveis de complexidade — conceitos-chave em
+        dropdowns, secções técnicas colapsáveis. Fonte única em <code>docs/</code>.
+      </p>
+      <a href="/settings/docs" class="docs-link">Abrir documentação</a>
+    </section>
+
+    <section class="block">
       <h2>Passkeys</h2>
       {#if !webauthnOk}
         <p class="muted">WebAuthn não suportado neste browser.</p>
@@ -321,5 +330,22 @@
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+  }
+
+  .docs-link {
+    display: inline-flex;
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-muted);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .docs-link:hover {
+    background: color-mix(in srgb, var(--color-accent) 20%, var(--color-bg-surface));
   }
 </style>

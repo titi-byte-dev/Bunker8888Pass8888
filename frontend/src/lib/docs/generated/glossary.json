@@ -1,0 +1,69 @@
+{
+  "slug": "glossary",
+  "title": "Glossário de conceitos-chave",
+  "category": "concepts",
+  "categoryLabel": "Conceitos",
+  "audience": [
+    "user",
+    "developer"
+  ],
+  "layer": [
+    "product"
+  ],
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Termos fundamentais do AegisPass — a base para perceber cofre, segurança e RGPD.",
+  "concepts": [
+    {
+      "id": "zero-knowledge",
+      "title": "Zero-Knowledge",
+      "level": 1,
+      "html": "<p>O servidor <strong>nunca</strong> vê dados sensíveis em claro nem a <strong>Master Key</strong>. Cifragem e\ndecifragem acontecem no teu dispositivo (<em>client-side</em>). Mesmo com acesso à base de\ndados, um atacante só encontra blobs ilegíveis.</p>\n"
+    },
+    {
+      "id": "master-key",
+      "title": "Master Key e Master Password",
+      "level": 1,
+      "html": "<p>A <strong>Master Password</strong> é o que memorizas. A <strong>Master Key</strong> é derivada dela com\n<strong>Argon2id</strong> e vive só em memória no browser. O servidor recebe apenas o <strong>Auth Hash</strong>\n— uma derivação distinta que prova identidade sem revelar a chave de cifragem.</p>\n"
+    },
+    {
+      "id": "tenant",
+      "title": "Tenant (empresa isolada)",
+      "level": 1,
+      "html": "<p>Cada empresa-cliente é um <strong>tenant</strong>: os seus dados nunca se misturam com os de outra.\nA API e o PostgreSQL aplicam <code>tenant_id</code> em cada operação; a <strong>RLS</strong> (<em>Row-Level Security</em>)\né rede de segurança na base de dados.</p>\n"
+    },
+    {
+      "id": "nonce",
+      "title": "Nonce",
+      "level": 2,
+      "html": "<p>Número usado <strong>uma só vez</strong> por operação de cifragem AES-GCM. Reutilizar um nonce com a\nmesma chave destrói a confidencialidade do esquema — por isso geramo-lo sempre com\n<code>crypto.getRandomValues</code> / <code>crypto/rand</code>.</p>\n"
+    },
+    {
+      "id": "totp",
+      "title": "TOTP (2FA)",
+      "level": 2,
+      "html": "<p>Código de 6 dígitos que muda a cada ~30 segundos, gerado a partir de um segredo partilhado\ne da hora actual (RFC 6238). No AegisPass o segredo TOTP fica <strong>cifrado no cofre</strong> — o\nservidor nunca o vê em claro.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 2,
+      "title": "Aprofundar: pilares Zero-Trust",
+      "html": "<table>\n<thead>\n<tr>\n<th>Pilar</th>\n<th>O que significa na prática</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Rede</td>\n<td>Túnel WireGuard antes de falar com a API</td>\n</tr>\n<tr>\n<td>Identidade</td>\n<td>Auth Hash + sessão + passkeys</td>\n</tr>\n<tr>\n<td>Contexto</td>\n<td>Turno (NTP), geofencing, dispositivo registado</td>\n</tr>\n<tr>\n<td>Dados</td>\n<td>Blobs cifrados; score de higiene calculado no cliente</td>\n</tr>\n</tbody></table>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Técnico: onde vive cada segredo",
+      "html": "<table>\n<thead>\n<tr>\n<th>Segredo</th>\n<th>Onde</th>\n<th>Nunca</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Master Key</td>\n<td>Memória do browser (volátil)</td>\n<td>Servidor, localStorage</td>\n</tr>\n<tr>\n<td>Auth Hash</td>\n<td>PostgreSQL (hash one-way)</td>\n<td>Transmitido em claro após registo</td>\n</tr>\n<tr>\n<td>Blobs do cofre</td>\n<td>PostgreSQL (cifrados)</td>\n<td>Decifrados no servidor</td>\n</tr>\n<tr>\n<td>Segredo TOTP</td>\n<td>Dentro do blob cifrado</td>\n<td>Logs ou API em claro</td>\n</tr>\n</tbody></table>\n<p>Ver implementação: <code>frontend/src/lib/crypto.ts</code>, <code>backend/pkg/crypto/</code>.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "vault",
+    "security",
+    "developer-crypto"
+  ],
+  "order": 1
+}

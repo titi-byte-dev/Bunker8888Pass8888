@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "docs:build": "node ../scripts/build-docs.mjs",
+    "predev": "npm run docs:build",
+    "prebuild": "npm run docs:build",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
