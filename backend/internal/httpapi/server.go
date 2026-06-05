@@ -192,6 +192,9 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/hr/employees/{id}/fields/{field}/shred", requireAuth(deps.Auth, handleShredEmployeeField(deps.HR)))
 		mux.Handle("POST /api/hr/employees/{id}/shred", requireAuth(deps.Auth, handleShredEmployeeRecord(deps.HR)))
 		mux.Handle("GET /api/hr/certificates", requireAuth(deps.Auth, handleListErasureCertificates(deps.HR)))
+		// Logs imutáveis (HR-002) + relatório de conformidade RGPD (HR-008).
+		mux.Handle("GET /api/hr/audit", requireAuth(deps.Auth, handleListAuditLog(deps.HR)))
+		mux.Handle("GET /api/hr/compliance-report", requireAuth(deps.Auth, handleComplianceReport(deps.HR)))
 	}
 
 	return mux

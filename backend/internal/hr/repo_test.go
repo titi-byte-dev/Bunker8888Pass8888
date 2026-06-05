@@ -160,6 +160,44 @@ func TestEmployeeRecords_Integration(t *testing.T) {
 		t.Fatalf("após ShredRecord esperava 2 certificados, got %d", len(certs2))
 	}
 
+	// --- Logs imutaveis encadeados (HR-002) ---------------------------------
+	// As accoes acima (create, puts, shred, shred-record) ja escreveram na cadeia.
+	ok, broken, err := repo.VerifyAudit(ctx, ownerID)
+	if err != nil || !ok {
+		t.Fatalf("VerifyAudit: ok=%v broken=%d err=%v", ok, broken, err)
+	}
+	entries, err := repo.ListAudit(ctx, ownerID)
+	if err != nil || len(entries) == 0 {
+		t.Fatalf("ListAudit: entries=%d err=%v", len(entries), err)
+	}
+	// Seq comeca em 1 e o primeiro encadeia ao GENESIS.
+	if entries[0].Seq != 1 || entries[0].PrevHash != "GENESIS" {
+		t.Fatalf("primeira entrada inesperada: %+v", entries[0])
+	}
+	// Adulterar uma entrada antiga tem de partir a cadeia.
+	if _, err := pool.Exec(ctx,
+		`UPDATE audit_log SET detail = 'forjado' WHERE owner_id = $1 AND seq = 1`, ownerID,
+	); err != nil {
+		t.Fatal(err)
+	}
+	ok, broken, err = repo.VerifyAudit(ctx, ownerID)
+	if err != nil || ok || broken != 1 {
+		t.Fatalf("cadeia adulterada: ok=%v broken=%d err=%v (esperado ok=false broken=1)", ok, broken, err)
+	}
+
+	// --- Relatorio de conformidade RGPD (HR-008) ----------------------------
+	rep, err := repo.ComplianceReportFor(ctx, ownerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.RecordCount != 1 || rep.CertificateCount != 2 {
+		t.Fatalf("relatorio com contagens inesperadas: %+v", rep)
+	}
+	// A cadeia foi adulterada acima, logo o relatorio reflecte invalidade.
+	if rep.AuditChainValid || rep.AuditBrokenSeq != 1 {
+		t.Fatalf("relatorio deveria reportar cadeia partida: %+v", rep)
+	}
+
 	// --- Listagem e remoção da ficha ----------------------------------------
 	recs, err := repo.ListRecords(ctx, ownerID)
 	if err != nil || len(recs) != 1 {

@@ -216,3 +216,56 @@ func handleListErasureCertificates(repo *hr.Repo) http.HandlerFunc {
 		writeJSON(w, http.StatusOK, map[string]any{"certificates": out})
 	}
 }
+
+// --- Logs imutáveis (HR-002) + relatório de conformidade (HR-008) ------------
+
+func auditEntryJSON(e *hr.AuditEntry) map[string]any {
+	return map[string]any{
+		"owner_id":    e.OwnerID,
+		"seq":         e.Seq,
+		"action":      e.Action,
+		"detail":      e.Detail,
+		"occurred_at": e.OccurredAt,
+		"prev_hash":   e.PrevHash,
+		"entry_hash":  e.EntryHash,
+	}
+}
+
+// handleListAuditLog devolve a cadeia de auditoria do utilizador (verificável
+// no cliente recalculando os hashes encadeados).
+func handleListAuditLog(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		entries, err := repo.ListAudit(r.Context(), userID)
+		if mapHRError(w, err) {
+			return
+		}
+		out := make([]map[string]any, 0, len(entries))
+		for i := range entries {
+			out = append(out, auditEntryJSON(&entries[i]))
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"entries": out})
+	}
+}
+
+// handleComplianceReport devolve o relatório de conformidade RGPD (metadados +
+// estado da cadeia de auditoria). O cliente formata-o para PDF.
+func handleComplianceReport(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		rep, err := repo.ComplianceReportFor(r.Context(), userID)
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"generated_at":         rep.GeneratedAt,
+			"record_count":         rep.RecordCount,
+			"active_field_count":   rep.ActiveFieldCount,
+			"shredded_field_count": rep.ShreddedFieldCount,
+			"certificate_count":    rep.CertificateCount,
+			"audit_entry_count":    rep.AuditEntryCount,
+			"audit_chain_valid":    rep.AuditChainValid,
+			"audit_broken_seq":     rep.AuditBrokenSeq,
+		})
+	}
+}
