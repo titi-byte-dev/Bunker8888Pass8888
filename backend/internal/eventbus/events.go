@@ -15,6 +15,10 @@ const (
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).
 	OrchestratorActionSuggested = "orchestrator.action.suggested"
+	// OrchestratorActionApproved — utilizador aprovou uma sugestão (AGENT-009).
+	OrchestratorActionApproved = "orchestrator.action.approved"
+	// OrchestratorActionRejected — utilizador rejeitou uma sugestão (AGENT-009).
+	OrchestratorActionRejected = "orchestrator.action.rejected"
 	// WildcardSubscribe recebe todos os tipos (só uso interno/debug).
 	WildcardSubscribe = "*"
 )

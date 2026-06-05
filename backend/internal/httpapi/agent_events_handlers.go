@@ -29,6 +29,10 @@ func handleListAgentEvents(store *eventbus.PGStore) http.HandlerFunc {
 				"created_at": rec.CreatedAt,
 			})
 		}
+		if err := enrichEventsWithApprovalStatus(r.Context(), store, userID, out); err != nil {
+			writeError(w, http.StatusInternalServerError, "falha ao enriquecer eventos")
+			return
+		}
 		writeJSON(w, http.StatusOK, map[string]any{"events": out})
 	}
 }
