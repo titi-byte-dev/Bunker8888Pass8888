@@ -34,7 +34,8 @@
           "title": "",
           "type": "flowchart",
           "source": "flowchart TB\r\n    A[\"RH aprova contratação\"] --> B[\"Cria ficha de empregado cifrada\"]\r\n    B --> C[\"Gera alias de e-mail corporativo\"]\r\n    C --> D[\"Atribui cofre(s) da equipa (Shared Vault)\"]\r\n    D --> E[\"Gera chaves de acesso / credenciais iniciais\"]\r\n    E --> F[\"Emite contrato p/ assinatura digital\"]\r\n    F --> G[\"Envia manual de boas-vindas\"]\r\n    G --> H[\"Funcionário define a sua Master Password\"]",
-          "steps": []
+          "steps": [],
+          "renderer": "mermaid"
         }
       ],
       "collapsed": true
@@ -63,7 +64,8 @@
           "title": "",
           "type": "flowchart",
           "source": "flowchart LR\r\n    X[\"Funcionário sai\"] --> Y[\"Revoga sessões + cofres (< 1s)\"]\r\n    Y --> Z[\"Remote wipe de dados corporativos\"]\r\n    Z --> W[\"Desativa aliases + revoga cartões SaaS\"]\r\n    W --> V[\"Opção: erasure RGPD (Art. 17)\"]",
-          "steps": []
+          "steps": [],
+          "renderer": "mermaid"
         }
       ],
       "collapsed": true

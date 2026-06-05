@@ -69,7 +69,8 @@ function parseSequenceSteps(source) {
       steps.push({ kind: "branch", label: t });
       continue;
     }
-    const m = t.match(/^(\S+)\s*(->>?|-->>)\s*(\S+)\s*:\s*(.+)$/);
+    // -->> antes de ->> para não partir G-->>App em tokens errados
+    const m = t.match(/^([A-Za-z0-9]+)\s*(-->>|->>|->)\s*([A-Za-z0-9]+)\s*:\s*(.+)$/);
     if (m) {
       steps.push({
         kind: "message",
@@ -83,6 +84,76 @@ function parseSequenceSteps(source) {
   return steps;
 }
 
+/** Participantes declarados no sequenceDiagram (participant X as Label). */
+function parseParticipants(source) {
+  const out = [];
+  for (const line of source.split("\n")) {
+    const m = line.trim().match(/^participant\s+(\S+)\s+as\s+(.+)$/);
+    if (m) out.push({ id: m[1], label: m[2].trim() });
+  }
+  return out;
+}
+
+function normalizeParticipantId(id) {
+  return id.replace(/-+$/, "");
+}
+
+/**
+ * Converte sequenceDiagram em grafo para Svelte Flow (DOC-011/012).
+ * Layout horizontal: actores em fila; arestas = mensagens.
+ */
+function sequenceToGraph(source, steps) {
+  const participants = parseParticipants(source);
+  const messages = steps.filter((s) => s.kind === "message");
+  const labels = new Map(participants.map((p) => [p.id, p.label]));
+
+  for (const msg of messages) {
+    const from = normalizeParticipantId(msg.from);
+    const to = normalizeParticipantId(msg.to);
+    if (!labels.has(from)) labels.set(from, from);
+    if (!labels.has(to)) labels.set(to, to);
+  }
+
+  const order = participants.length
+    ? participants.map((p) => p.id)
+    : [...labels.keys()];
+  for (const id of labels.keys()) {
+    if (!order.includes(id)) order.push(id);
+  }
+
+  const nodes = order.map((id, i) => ({
+    id,
+    label: labels.get(id) ?? id,
+    x: i * 200,
+  }));
+
+  const edges = messages.map((msg, i) => ({
+    id: `step-${i}`,
+    source: normalizeParticipantId(msg.from),
+    target: normalizeParticipantId(msg.to),
+    label: msg.label,
+    dashed: msg.arrow.includes("--"),
+  }));
+
+  return { nodes, edges };
+}
+
+/** Acrescenta renderer (mermaid | svelteflow) e grafo pré-calculado. */
+function enrichFlow(flow, attrs = {}) {
+  const out = { ...flow };
+  const wantsSvelte =
+    attrs.renderer === "svelteflow" ||
+    (attrs.renderer !== "mermaid" && out.type === "sequence" && out.steps?.length > 0);
+
+  if (wantsSvelte && out.type === "sequence") {
+    out.renderer = "svelteflow";
+    out.graph = sequenceToGraph(out.source, out.steps);
+  } else {
+    out.renderer = "mermaid";
+  }
+  return out;
+}
+
 /** Substitui blocos mermaid por comentários HTML (placeholders para o Svelte). */
 function injectFlowPlaceholders(text, flows, flowCounter) {
   let counter = flowCounter;
@@ -91,13 +162,15 @@ function injectFlowPlaceholders(text, flows, flowCounter) {
     const source = raw.trim();
     const id = `flow-${counter}`;
     const type = detectMermaidType(source);
-    flows.push({
-      id,
-      title: "",
-      type,
-      source,
-      steps: type === "sequence" ? parseSequenceSteps(source) : [],
-    });
+    flows.push(
+      enrichFlow({
+        id,
+        title: "",
+        type,
+        source,
+        steps: type === "sequence" ? parseSequenceSteps(source) : [],
+      }),
+    );
     return `\n<!--DOC_FLOW:${id}-->\n`;
   });
   return { text: replaced, counter };
@@ -201,13 +274,16 @@ function extractBlocks(body) {
       const source = inner.replace(/^```mermaid\s*\n?|\n?```$/g, "").trim();
       const id = attrs.id ?? `flow-${sections.length + 1}`;
       const type = attrs.type ?? detectMermaidType(source);
-      const flow = {
-        id,
-        title: attrs.title ?? "Fluxo",
-        type,
-        source,
-        steps: type === "sequence" ? parseSequenceSteps(source) : [],
-      };
+      const flow = enrichFlow(
+        {
+          id,
+          title: attrs.title ?? "Fluxo",
+          type,
+          source,
+          steps: type === "sequence" ? parseSequenceSteps(source) : [],
+        },
+        attrs,
+      );
       sections.push({
         level: Number(attrs.level ?? 2),
         title: flow.title,

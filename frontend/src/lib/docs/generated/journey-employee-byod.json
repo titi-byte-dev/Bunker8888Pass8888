@@ -83,9 +83,9 @@
             },
             {
               "kind": "message",
-              "from": "G-",
+              "from": "G",
               "to": "App",
-              "arrow": "->>",
+              "arrow": "-->>",
               "label": "acesso negado / alerta RH"
             },
             {
@@ -104,16 +104,16 @@
             },
             {
               "kind": "message",
-              "from": "DB-",
+              "from": "DB",
               "to": "G",
-              "arrow": "->>",
+              "arrow": "-->>",
               "label": "blobs cifrados (RLS aplicada)"
             },
             {
               "kind": "message",
-              "from": "G-",
+              "from": "G",
               "to": "App",
-              "arrow": "->>",
+              "arrow": "-->>",
               "label": "blobs cifrados"
             },
             {
@@ -125,16 +125,132 @@
             },
             {
               "kind": "message",
-              "from": "App-",
+              "from": "App",
               "to": "U",
-              "arrow": "->>",
+              "arrow": "-->>",
               "label": "mostra cofre"
             },
             {
               "kind": "branch",
               "label": "end"
             }
-          ]
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Funcionário",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "VPN",
+                "label": "WireGuard",
+                "x": 400
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 600
+              },
+              {
+                "id": "DB",
+                "label": "PostgreSQL",
+                "x": 800
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "App",
+                "label": "abre app + Master Password",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "VPN",
+                "label": "ativa túnel silenciosamente",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "App",
+                "target": "App",
+                "label": "Argon2id → Master Key (local) + Auth Hash",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "App",
+                "target": "G",
+                "label": "login (Auth Hash) via túnel",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "G",
+                "target": "G",
+                "label": "valida turno (NTP) + geofencing (IP/GPS)",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "G",
+                "target": "App",
+                "label": "acesso negado / alerta RH",
+                "dashed": true
+              },
+              {
+                "id": "step-6",
+                "source": "App",
+                "target": "App",
+                "label": "garante que não há chave em memória",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "G",
+                "target": "DB",
+                "label": "SET LOCAL app.tenant_id + lê blobs",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "DB",
+                "target": "G",
+                "label": "blobs cifrados (RLS aplicada)",
+                "dashed": true
+              },
+              {
+                "id": "step-9",
+                "source": "G",
+                "target": "App",
+                "label": "blobs cifrados",
+                "dashed": true
+              },
+              {
+                "id": "step-10",
+                "source": "App",
+                "target": "App",
+                "label": "decifra com Master Key (em memória)",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "App",
+                "target": "U",
+                "label": "mostra cofre",
+                "dashed": true
+              }
+            ]
+          }
         }
       ],
       "collapsed": true
