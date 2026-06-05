@@ -100,8 +100,10 @@ func NewRouter(deps Deps) http.Handler {
 	mux.HandleFunc("GET /healthz", handleHealth)
 	mux.HandleFunc("GET /api/time", handleServerTime)
 	if deps.MailIngest != nil && deps.MailWebhookSecret != "" {
-		// Webhook Mailpit (MAIL-002) — sem auth; protegido por segredo na query string.
+		// Webhook Mailpit (MAIL-002 dev) — sem auth; protegido por segredo na query.
 		mux.HandleFunc("POST /api/mail/webhook/mailpit", handleMailpitWebhook(deps.MailIngest, deps.MailWebhookSecret, deps.AgentBus))
+		// Ingest SMTP Postfix (MAIL-002 prod) — mesmo segredo, JSON do pipe.
+		mux.HandleFunc("POST /api/mail/ingest", handleSMTPIngest(deps.MailIngest, deps.MailWebhookSecret, deps.AgentBus))
 	}
 
 	if deps.Auth != nil {

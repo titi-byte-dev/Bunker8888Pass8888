@@ -54,8 +54,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      # required: false — em prod (sem Mailpit) o backend arranca na mesma.
       mailpit:
         condition: service_started
+        required: false
 
   # --- Mailpit (SMTP de desenvolvimento — MAIL-002) ------------------------
   # Didático: Mailpit apanha e-mail SMTP sem enviar para a Internet real.

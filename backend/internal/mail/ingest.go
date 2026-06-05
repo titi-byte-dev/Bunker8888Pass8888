@@ -3,7 +3,6 @@ package mail
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -44,75 +43,18 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 	if err != nil || summary.ID == "" {
 		return nil, ErrInvalidWebhook
 	}
-	var alias *Alias
-	for _, addr := range summary.RecipientAddresses() {
-		if !strings.HasSuffix(addr, "@"+AliasDomain) {
-			continue
-		}
-		a, err := s.Aliases.GetActiveAliasByAddress(ctx, addr)
-		if err == nil {
-			alias = a
-			break
-		}
+	alias, usedAddr, err := s.resolveAliasFromRecipients(ctx, summary.RecipientAddresses())
+	if err != nil {
+		return nil, err
 	}
 	if alias == nil {
 		return &IngestResult{MessageID: summary.ID, Status: "ignored"}, ErrWebhookIgnored
-	}
-	if s.Limiter != nil {
-		if err := s.Limiter.AllowInbound(ctx, alias.OwnerID); err != nil {
-			return nil, err
-		}
 	}
 	body, err := s.fetchBody(ctx, summary)
 	if err != nil {
 		return nil, err
 	}
-	from := summary.FromAddress()
-	if from == "" {
-		from = "unknown@unknown"
-	}
-	subject := strings.TrimSpace(summary.Subject)
-	if subject == "" {
-		subject = "(sem assunto)"
-	}
-	msg, err := s.Inbox.CreateInboxMessage(ctx, alias.OwnerID, from, subject, body)
-	if err != nil {
-		return nil, fmt.Errorf("mail: criar inbox: %w", err)
-	}
-	preview := body
-	if len(preview) > 200 {
-		preview = preview[:200]
-	}
-	result := &IngestResult{
-		MessageID:   summary.ID,
-		AliasUsed:   alias.AliasAddress,
-		InboxID:     msg.ID,
-		OwnerID:     alias.OwnerID,
-		FromEmail:   from,
-		Subject:     subject,
-		BodyPreview: preview,
-		Status:      "ingested",
-	}
-	if s.Limiter != nil {
-		_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirInbound, from, alias.AliasAddress)
-	}
-	if s.Relay != nil {
-		relayOK := s.Limiter == nil
-		if s.Limiter != nil {
-			relayOK = s.Limiter.AllowRelay(ctx, alias.ID) == nil
-		}
-		if relayOK {
-			if relayOut, err := s.Relay.ForwardInbound(ctx, alias, from, subject, body); err == nil && relayOut != nil {
-				result.Relayed = true
-				result.RelayTo = relayOut.To
-				if s.Limiter != nil {
-					_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirOutboundRelay, alias.AliasAddress, relayOut.To)
-				}
-			}
-		}
-		// Falha de relay não bloqueia ingestão na inbox — registo local primeiro.
-	}
-	return result, nil
+	return s.ingestAliasMessage(ctx, alias, usedAddr, summary.ID, summary.FromAddress(), summary.Subject, body)
 }
 
 func (s *IngestService) fetchBody(ctx context.Context, summary *mailpitSummary) (string, error) {

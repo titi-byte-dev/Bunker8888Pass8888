@@ -78,12 +78,12 @@ Ver [`journey-guardian-audit.md`](../04-user-journeys/journey-guardian-audit.md)
 
 ## O que continua a exigir produção
 
-| Task | Porquê |
-|---|---|
-| INFRA-001/002 | VPS, WireGuard, firewall |
-| MAIL-002/003 | SMTP/IMAP + SPF/DKIM/DMARC reais |
-| FIN-003 (real) | Certificados mTLS + TPP/banco |
-| GOOGLE-001–004 | OAuth2 Service Account Google |
+| Task | Porquê | Guia |
+|---|---|---|
+| INFRA-001/002 | VPS, WireGuard, firewall | [`10-production/`](../10-production/README.md) |
+| MAIL-002/003 | Postfix + SPF/DKIM/DMARC | [`mail-002-003-production.md`](../10-production/mail-002-003-production.md) |
+| FIN-003 (real) | Certificados mTLS + TPP/banco | [`fin-003-open-banking.md`](../10-production/fin-003-open-banking.md) |
+| GOOGLE-001–004 | OAuth2 Service Account Google | [`google-001-oauth.md`](../10-production/google-001-oauth.md) |
 
 Quando a VPS estiver pronta, trocar stubs por variáveis `AEGIS_OB_*` e OAuth — a arquitetura
-já está preparada.
+já está preparada. Checklist: [`journey-vps-deploy.md`](../04-user-journeys/journey-vps-deploy.md).

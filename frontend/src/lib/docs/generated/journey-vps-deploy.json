@@ -1,0 +1,45 @@
+{
+  "slug": "journey-vps-deploy",
+  "title": "Journey — Deploy VPS (INFRA-001 → produção)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "vps_deploy",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey — Deploy VPS (INFRA-001 → produção)</h1>\n<blockquote>\n<p><strong>Ator:</strong> titi (admin) · <strong>Pré-requisito:</strong> VPS nova + domínio para e-mail</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Checklist",
+      "html": "<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Passo</th>\n<th>Doc</th>\n<th>Verificação</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>1</td>\n<td>Gerar chave SSH Ed25519</td>\n<td><a href=\"../10-production/infra-001-vps-hardening.md\">infra-001</a></td>\n<td><code>ssh titi@IP</code> funciona</td>\n</tr>\n<tr>\n<td>2</td>\n<td><code>01-ssh-hardening.sh</code></td>\n<td>infra-001</td>\n<td>Password SSH desactivada</td>\n</tr>\n<tr>\n<td>3</td>\n<td><code>02-wireguard-server.sh</code></td>\n<td><a href=\"../10-production/infra-002-wireguard-firewall.md\">infra-002</a></td>\n<td><code>ping 10.8.0.1</code></td>\n</tr>\n<tr>\n<td>4</td>\n<td>Importar <code>titi.conf</code> no portátil</td>\n<td>infra-002</td>\n<td>Túnel activo</td>\n</tr>\n<tr>\n<td>5</td>\n<td><code>03-ufw-firewall.sh</code></td>\n<td>infra-002</td>\n<td><code>nmap</code> só mostra 51820/25</td>\n</tr>\n<tr>\n<td>6</td>\n<td><code>.env</code> + compose prod</td>\n<td><a href=\"../10-production/production-deploy.md\">production-deploy</a></td>\n<td><code>/healthz</code> OK</td>\n</tr>\n<tr>\n<td>7</td>\n<td>Postfix + pipe ingest</td>\n<td><a href=\"../10-production/mail-002-003-production.md\">mail-002</a></td>\n<td>E-mail na inbox</td>\n</tr>\n<tr>\n<td>8</td>\n<td>SPF/DKIM/DMARC</td>\n<td>mail-002</td>\n<td>mail-tester.com ≥ 8/10</td>\n</tr>\n<tr>\n<td>9</td>\n<td><code>AEGIS_OB_*</code> (opcional)</td>\n<td><a href=\"../10-production/fin-003-open-banking.md\">fin-003</a></td>\n<td>provider ≠ mock</td>\n</tr>\n<tr>\n<td>10</td>\n<td>Google SA (opcional)</td>\n<td><a href=\"../10-production/google-001-oauth.md\">google-001</a></td>\n<td>Drive API OK</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Rollback",
+      "html": "<ul>\n<li>Consola do provider (KVM) se SSH falhar após hardening</li>\n<li><code>sudo ufw disable</code> só em emergência (restaura regras depois)</li>\n<li>Dev local continua disponível: <a href=\"../08-dev-environment/development-without-vps.md\"><code>development-without-vps.md</code></a></li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "titi (admin)",
+  "order": 99
+}

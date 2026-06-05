@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -10,6 +11,16 @@ import (
 )
 
 func handleMailpitWebhook(svc *mail.IngestService, secret string, bus *eventbus.Bus) http.HandlerFunc {
+	return mailIngestHandler(svc, secret, bus, svc.ProcessMailpitWebhook)
+}
+
+func handleSMTPIngest(svc *mail.IngestService, secret string, bus *eventbus.Bus) http.HandlerFunc {
+	return mailIngestHandler(svc, secret, bus, svc.ProcessSMTPIngest)
+}
+
+type mailIngestFn func(context.Context, []byte) (*mail.IngestResult, error)
+
+func mailIngestHandler(svc *mail.IngestService, secret string, bus *eventbus.Bus, ingest mailIngestFn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if secret == "" || r.URL.Query().Get("secret") != secret {
 			writeError(w, http.StatusUnauthorized, "webhook não autorizado")
@@ -20,7 +31,7 @@ func handleMailpitWebhook(svc *mail.IngestService, secret string, bus *eventbus.
 			writeError(w, http.StatusBadRequest, "corpo inválido")
 			return
 		}
-		result, err := svc.ProcessMailpitWebhook(r.Context(), raw)
+		result, err := ingest(r.Context(), raw)
 		if errors.Is(err, mail.ErrWebhookIgnored) {
 			writeJSON(w, http.StatusOK, map[string]any{"status": "ignored", "result": result})
 			return
@@ -45,7 +56,7 @@ func handleMailpitWebhook(svc *mail.IngestService, secret string, bus *eventbus.
 				"body_preview": result.BodyPreview,
 				"relayed":      result.Relayed,
 				"relay_to":     result.RelayTo,
-				"mailpit_id":   result.MessageID,
+				"message_id":   result.MessageID,
 			})
 		}
 		writeJSON(w, http.StatusCreated, map[string]any{"status": "ingested", "result": result})

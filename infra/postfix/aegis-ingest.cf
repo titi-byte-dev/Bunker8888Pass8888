@@ -1,0 +1,5 @@
+# Postfix transport map — encaminha domínio de aliases para o pipe AegisPass
+# Depois de editar: postmap /etc/postfix/aegis-ingest.cf && systemctl reload postfix
+#
+# Substitui aegis.email pelo teu domínio real (MAIL-003)
+aegis.email    aegis-ingest:

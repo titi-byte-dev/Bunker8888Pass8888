@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T18:10:33.846Z",
+  "generatedAt": "2026-06-05T18:15:51.936Z",
   "categories": [
     {
       "id": "concepts",
@@ -620,6 +620,27 @@
       "summary": "",
       "related": [],
       "actor": "Admin ou membro da equipa",
+      "order": 99
+    },
+    {
+      "slug": "journey-vps-deploy",
+      "title": "Journey — Deploy VPS (INFRA-001 → produção)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "vps_deploy",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "titi (admin)",
       "order": 99
     },
     {

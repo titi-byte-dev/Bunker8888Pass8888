@@ -1,0 +1,30 @@
+# ============================================================================
+# docker-compose.prod.yml — overlay de produção (INFRA-003/004)
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ----------------------------------------------------------------------------
+# Didático: um "overlay" sobrepõe só o que muda face ao dev — não duplicamos
+# todo o ficheiro. Em prod a BD não expõe portas; Mailpit sai; mTLS manual.
+# ============================================================================
+
+services:
+  db:
+    ports: []   # BD só acessível na rede interna Docker
+    restart: always
+
+  backend:
+    restart: always
+    environment:
+      AEGIS_MTLS_AUTO_DEV: "false"
+      # MAIL-002 prod: relay via Postfix no host (não Mailpit)
+      AEGIS_SMTP_RELAY_HOST: ${AEGIS_SMTP_RELAY_HOST:-host.docker.internal:25}
+      AEGIS_MAILPIT_URL: ""   # ingest via /api/mail/ingest (Postfix pipe)
+    ports:
+      # API só em localhost da VPS — aceder via WireGuard ou reverse proxy
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Mailpit é só para dev — em produção usa-se Postfix no host (MAIL-002)
+  mailpit:
+    profiles:
+      - dev-only

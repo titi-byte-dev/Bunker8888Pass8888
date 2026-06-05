@@ -21,8 +21,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| INFRA-001 | Provisionar VPS (Debian/Ubuntu) + hardening SSH (só chaves) | 1 | M | ⚪ | — |
-| INFRA-002 | Configurar WireGuard (servidor) + firewall (só UDP aberta) | 1 | M | ⚪ | INFRA-001 |
+| INFRA-001 | Provisionar VPS (Debian/Ubuntu) + hardening SSH (só chaves) | 1 | M | 🟡 | — |
+| INFRA-002 | Configurar WireGuard (servidor) + firewall (só UDP aberta) | 1 | M | 🟡 | INFRA-001 |
 | INFRA-003 | Docker + Docker Compose; esqueleto de serviços | 1 | M | 🟢 | INFRA-001 |
 | INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟢 | INFRA-003 |
 | INFRA-005 | Pipeline CI (lint, test, build Go + Svelte) | 1 | M | 🟢 | — |
@@ -89,7 +89,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 |---|---|---|---|---|---|
 | MAIL-001 | Geração de aliases + reencaminhamento | 1 | M | 🟢 | INFRA-003 |
 | MAIL-002 | Servidor de e-mail open-source (SMTP/IMAP) na VPS | 1 | L | 🟡 | INFRA-003 |
-| MAIL-003 | SPF/DKIM/DMARC + domínio personalizado | 2 | M | ⚪ | MAIL-002 |
+| MAIL-003 | SPF/DKIM/DMARC + domínio personalizado | 2 | M | 🟡 | MAIL-002 |
 | MAIL-004 | Compor/iniciar e-mail a partir do alias (relay) | 2 | M | 🟢 | MAIL-002 |
 | MAIL-005 | Rate limiting / anti open-relay | 2 | M | 🟢 | MAIL-002 |
 
@@ -172,7 +172,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| GOOGLE-001 | OAuth2 + Service Account (Workspace) | 2 | L | ⚪ | INFRA-006 |
+| GOOGLE-001 | OAuth2 + Service Account (Workspace) | 2 | L | 🟡 | INFRA-006 |
 | GOOGLE-002 | Cifragem ZK de ficheiros Drive/Docs | 2 | L | 🟡 | VAULT-002, GOOGLE-001 |
 | GOOGLE-003 | Data masking dinâmico em Sheets (regex + tokens) | 2 | L | 🟡 | GOOGLE-001 |
 | GOOGLE-004 | Relay Gmail com aliases + PGP | 2 | M | ⚪ | MAIL-004, GOOGLE-001 |
