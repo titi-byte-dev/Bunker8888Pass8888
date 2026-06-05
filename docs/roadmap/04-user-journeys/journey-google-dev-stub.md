@@ -15,16 +15,11 @@ Simula Drive cifrado e mascaramento Sheets **sem** ligar à Google.
 sequenceDiagram
     participant U as Utilizador
     participant UI as /work/google-dev
-    participant API as POST /api/work/google/drive/files
-    participant LS as localStorage
+    participant API as API Drive ZK
 
-    U->>UI: upload + modo servidor ou local
+    U->>UI: upload (servidor ou local)
     UI->>UI: AES-GCM(master_key)
-    alt Servidor (GOOGLE-002)
-        UI->>API: blob opaco
-    else Offline
-        UI->>LS: blob opaco
-    end
+    UI->>API: blob opaco
     U->>UI: Abrir no AegisPass
     UI->>UI: decifra em memória
 ```

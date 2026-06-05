@@ -8,8 +8,6 @@ const base = (stage: Lead["stage"]): Lead => ({
   email: "a@x.pt",
   stage,
   source: "manual",
-  createdAt: "",
-  updatedAt: "",
 });
 
 describe("computeFunnelMetrics", () => {
