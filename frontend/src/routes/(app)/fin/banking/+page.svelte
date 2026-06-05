@@ -133,7 +133,7 @@
       <h1>Open Banking</h1>
       <DocHelpLink slug="journey-finance-agent-reconcile" label="Como funciona a reconciliação?" />
     </div>
-    <a class="back" href="/fin">← Custos</a>
+    <a class="back" href="/fin/costs">← Custos</a>
   </header>
 
   <p class="lead">

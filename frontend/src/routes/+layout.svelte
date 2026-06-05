@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { initTheme } from "$lib/design";
+  import { initTheme, initPalette } from "$lib/design";
   import "$lib/design/tokens.css";
   import "$lib/motion/motion.css";
 
@@ -8,6 +8,8 @@
 
   onMount(() => {
     initTheme();
+    // tenantDefault chegara da config da empresa (white-label); por agora undefined.
+    initPalette();
   });
 </script>
 

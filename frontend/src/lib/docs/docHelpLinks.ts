@@ -21,6 +21,7 @@ export const DOC_HELP_ROUTES: DocHelpRoute[] = [
   { prefix: "/security/guardian", slug: "journey-guardian-audit", label: "Como auditar o Guardião?" },
   { prefix: "/fin/invoices", slug: "journey-erp-flow-dev", label: "Como funciona o fluxo ERP?" },
   { prefix: "/fin/banking", slug: "journey-finance-agent-reconcile", label: "Como funciona a reconciliação?" },
+  { prefix: "/fin/costs", slug: "journey-finance-agent-saas", label: "Como funciona o agente financeiro?" },
   { prefix: "/fin", slug: "journey-finance-agent-saas", label: "Como funciona o agente financeiro?" },
   { prefix: "/crm", slug: "journey-crm-prospection", label: "Como funciona a prospeção CRM?" },
   { prefix: "/mail", slug: "journey-mail-alias-relay", label: "Como funcionam aliases e relay?" },

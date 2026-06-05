@@ -5,6 +5,11 @@
     setThemePreference,
     themeModeLabel,
     type ThemeMode,
+    PALETTES,
+    loadPalettePreference,
+    setPalettePreference,
+    paletteLabel,
+    type PaletteId,
   } from "$lib/design";
   import { fetchSessionProfile } from "$lib/auth/session-api";
   import { loadUserEmail } from "$lib/session";
@@ -15,6 +20,7 @@
   import { loadSessionToken } from "$lib/session";
 
   let themeMode = $state<ThemeMode>(loadThemePreference());
+  let palette = $state<PaletteId>(loadPalettePreference());
   let email = $state(loadUserEmail() ?? "");
   let passkeys = $state<PasskeyMeta[]>([]);
   let passkeyName = $state("");
@@ -29,6 +35,12 @@
     themeMode = mode;
     setThemePreference(mode);
     status = `Tema: ${themeModeLabel(mode)}.`;
+  }
+
+  function setPalette(id: PaletteId) {
+    palette = id;
+    setPalettePreference(id);
+    status = `Paleta: ${paletteLabel(id)}.`;
   }
 
   async function refreshPasskeys() {
@@ -118,6 +130,30 @@
             onclick={() => setTheme(mode)}
           >
             {themeModeLabel(mode)}
+          </button>
+        {/each}
+      </div>
+
+      <p class="hint">
+        Paleta de identidade — muda só a cor de marca, não o layout. A empresa pode
+        definir uma paleta por omissão (white-label); o modo claro/escuro mantém-se.
+      </p>
+      <div class="palette-grid" role="radiogroup" aria-label="Paleta">
+        {#each PALETTES as p (p.id)}
+          <button
+            type="button"
+            class="palette-card"
+            class:active={palette === p.id}
+            role="radio"
+            aria-checked={palette === p.id}
+            onclick={() => setPalette(p.id)}
+          >
+            <span class="swatch" style="background:{p.swatch}" aria-hidden="true"></span>
+            <span class="p-name">
+              {p.label}
+              {#if palette === p.id}<span class="p-on" aria-hidden="true">✓</span>{/if}
+            </span>
+            <span class="p-desc">{p.personality}</span>
           </button>
         {/each}
       </div>
@@ -249,6 +285,71 @@
   .theme-opt.active {
     border-color: var(--color-accent);
     background: var(--color-accent-muted);
+  }
+
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .palette-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-items: center;
+    text-align: left;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .palette-card:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .palette-card.active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+
+  .swatch {
+    grid-row: 1 / span 2;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .p-name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .p-on {
+    color: var(--color-accent);
+  }
+
+  .p-desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    line-height: 1.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .palette-card {
+      transition: none;
+    }
   }
 
   .list {

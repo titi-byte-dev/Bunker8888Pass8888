@@ -71,8 +71,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | UI-010 | Catálogo componentes (Storybook ou página dev) | 1 | M | 🟢 | UI-001 |
 | UI-011 | `ROUTE_TREE` + sidebar hierárquica + breadcrumbs | 1 | L | 🟢 | UI-002 |
 | UI-012 | `lib/ui/` — PageShell, Panel, Button, Field, Eyebrow, EmptyState, HubLinks, StatusBanner, Breadcrumbs | 1 | M | 🟢 | UI-001, UI-010 |
-| UI-013 | Paletas múltiplas (Aegis, Aurora, Midnight, Paper) + picker `/settings` | 1 | M | ⚪ | UI-001 |
-| UI-014 | Hubs `/fin`, `/team`; remover sub-rotas flat da sidebar | 1 | S | ⚪ | UI-011 |
+| UI-013 | Paletas múltiplas (Aegis, Aurora, Midnight, Paper) + picker `/settings`; `data-palette` ⊥ `data-theme`; resolução por tenant (white-label); contraste AA testado | 1 | M | 🟢 | UI-001 |
+| UI-014 | Hubs `/fin`, `/team` via `HubLinks` derivados da `ROUTE_TREE`; custos SaaS movidos p/ `/fin/costs` | 1 | S | 🟢 | UI-011 |
 | UI-015 | DataTable, MetricCard, ListRow | 2 | M | ⚪ | UI-012 |
 | UI-016 | Migração páginas para `PageShell` (começar `/fin/*`) | 2 | L | ⚪ | UI-011, UI-012 |
 | UI-017 | Toast, Skeleton, ConfirmDialog | 1 | M | ⚪ | UI-012 |

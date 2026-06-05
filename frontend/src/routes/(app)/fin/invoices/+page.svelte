@@ -220,7 +220,7 @@
       <h1>Faturacao</h1>
       <p class="muted">Pro-forma, faturas e recibos com numeracao legal (FIN-006).</p>
     </div>
-    <a class="link" href="/fin">&larr; Custos</a>
+    <a class="link" href="/fin/costs">&larr; Custos</a>
   </header>
 
   {#if locked}
