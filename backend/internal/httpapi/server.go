@@ -19,6 +19,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/crm"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -68,6 +69,8 @@ type Deps struct {
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
 	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
+	AgentBus     *eventbus.Bus       // nil desactiva publicação de eventos
+	AgentEvents  *eventbus.PGStore   // nil desactiva GET /api/agent/events
 	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
@@ -87,7 +90,7 @@ func NewRouter(deps Deps) http.Handler {
 	mux.HandleFunc("GET /api/time", handleServerTime)
 	if deps.MailIngest != nil && deps.MailWebhookSecret != "" {
 		// Webhook Mailpit (MAIL-002) — sem auth; protegido por segredo na query string.
-		mux.HandleFunc("POST /api/mail/webhook/mailpit", handleMailpitWebhook(deps.MailIngest, deps.MailWebhookSecret))
+		mux.HandleFunc("POST /api/mail/webhook/mailpit", handleMailpitWebhook(deps.MailIngest, deps.MailWebhookSecret, deps.AgentBus))
 	}
 
 	if deps.Auth != nil {
@@ -253,12 +256,15 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.Agent != nil && deps.AgentRunner != nil && deps.Auth != nil {
 		// Sistema de tools para agentes (AGENT-001) + auditoria Guardião (AGENT-002).
 		mux.Handle("GET /api/agent/tools", requireAuth(deps.Auth, handleListAgentTools(deps.Agent)))
-		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner, deps.AgentAudit)))
+		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner, deps.AgentAudit, deps.AgentBus)))
 		if deps.AgentAudit != nil {
 			mux.Handle("GET /api/agent/audit", requireAuth(deps.Auth, handleListAgentAudit(deps.AgentAudit)))
 		}
 		if deps.Prospection != nil {
-			mux.Handle("POST /api/agent/prospection/run", requireAuth(deps.Auth, handleRunProspection(deps.Prospection, deps.AgentAudit)))
+			mux.Handle("POST /api/agent/prospection/run", requireAuth(deps.Auth, handleRunProspection(deps.Prospection, deps.AgentAudit, deps.AgentBus)))
+		}
+		if deps.AgentEvents != nil {
+			mux.Handle("GET /api/agent/events", requireAuth(deps.Auth, handleListAgentEvents(deps.AgentEvents)))
 		}
 	}
 	if deps.CRM != nil && deps.Auth != nil {

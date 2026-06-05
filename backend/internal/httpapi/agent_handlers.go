@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/agent"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 )
 
@@ -45,7 +46,7 @@ func handleListAgentAudit(audit *guardian.AuditRepo) http.HandlerFunc {
 	}
 }
 
-func handleRunAgentTool(run *agent.Runner, audit *guardian.AuditRepo) http.HandlerFunc {
+func handleRunAgentTool(run *agent.Runner, audit *guardian.AuditRepo, bus *eventbus.Bus) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("name")
 		if name == "" {
@@ -72,6 +73,11 @@ func handleRunAgentTool(run *agent.Runner, audit *guardian.AuditRepo) http.Handl
 		if mapAgentError(w, err) {
 			return
 		}
+		_ = eventbus.PublishJSON(r.Context(), bus, eventbus.AgentToolExecuted, userID, "agent."+req.AgentID, map[string]any{
+			"tool":    name,
+			"agent_id": req.AgentID,
+			"success": true,
+		})
 		writeJSON(w, http.StatusOK, map[string]any{
 			"tool":   name,
 			"output": json.RawMessage(out),

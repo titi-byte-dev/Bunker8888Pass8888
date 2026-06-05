@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T14:14:44.136Z",
+  "generatedAt": "2026-06-05T14:22:40.566Z",
   "categories": [
     {
       "id": "concepts",
@@ -158,6 +158,27 @@
       "summary": "",
       "related": [],
       "actor": "Admin/RH",
+      "order": 99
+    },
+    {
+      "slug": "journey-agent-event-feed",
+      "title": "Journey: Feed de acções dos agentes (AGENT-004)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "agent_event_feed",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Utilizador / supervisor",
       "order": 99
     },
     {

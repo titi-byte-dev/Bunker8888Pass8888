@@ -21,6 +21,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -130,6 +131,8 @@ func main() {
 		agentReg.MustRegister(agent.NewListMailInboxTool(mailInbox))
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
+		agentEventStore := eventbus.NewPGStore(pool)
+		agentBus := eventbus.New(agentEventStore, logger, 256)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
 			InboundPerHour:  cfg.MailRateInboundPerHour,
@@ -182,6 +185,8 @@ func main() {
 			AgentRunner:  agentRun,
 			AgentAudit:   agentAudit,
 			Prospection:  prospectionSvc,
+			AgentBus:     agentBus,
+			AgentEvents:  agentEventStore,
 			CRM:          crmRepo,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
@@ -221,6 +226,10 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	if deps.AgentBus != nil {
+		deps.AgentBus.Run(ctx)
+	}
 
 	<-ctx.Done()
 	logger.Info("sinal de paragem recebido; a encerrar...")
