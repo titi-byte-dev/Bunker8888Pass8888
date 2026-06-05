@@ -32,8 +32,10 @@ openssl rand -base64 32
 ## 2. Subir stack
 
 ```bash
+cd /opt/aegispass
+./infra/scripts/05-deploy-stack.sh
+# ou manualmente:
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-docker compose ps
 curl -s http://127.0.0.1:8080/healthz
 ```
 

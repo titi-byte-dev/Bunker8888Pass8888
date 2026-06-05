@@ -25,11 +25,14 @@ sequenceDiagram
 
 ## 1. Instalar Postfix
 
+**Automático (recomendado):**
+
 ```bash
-sudo apt install postfix mailutils
-# Tipo: Internet Site
-# Nome do sistema: mail.seudominio.com
+cd /opt/aegispass
+sudo AEGIS_MAIL_DOMAIN=seudominio.com ./infra/scripts/04-postfix-install.sh
 ```
+
+**Manual:**
 
 ## 2. Transport pipe para o backend
 
