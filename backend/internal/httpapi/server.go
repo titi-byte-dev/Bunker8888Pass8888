@@ -23,6 +23,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/commissions"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/invoicing"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
@@ -71,6 +72,7 @@ type Deps struct {
 	Fin               *fin.Repo                  // nil desactiva endpoints /api/fin/*
 	OpenBanking       *openbanking.Service       // nil desactiva endpoints /api/fin/banking/*
 	Invoicing         *invoicing.Repo            // nil desactiva endpoints /api/fin/invoices/*
+	Commissions       *commissions.Repo          // nil desactiva endpoints /api/fin/commissions/*
 	Ops               *ops.Repo                  // nil desactiva endpoints /api/ops/*
 	Agent             *agent.Registry            // nil desactiva endpoints /api/agent/*
 	AgentRunner       *agent.Runner              // executor de tools (AGENT-001)
@@ -267,6 +269,12 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/fin/invoices", requireAuth(deps.Auth, handleListInvoices(deps.Invoicing)))
 		mux.Handle("POST /api/fin/invoices", requireAuth(deps.Auth, handleIssueInvoice(deps.Invoicing)))
 		mux.Handle("PUT /api/fin/invoices/{id}/status", requireAuth(deps.Auth, handleUpdateInvoiceStatus(deps.Invoicing)))
+	}
+	if deps.Commissions != nil && deps.Auth != nil {
+		// Comissoes sobre faturas pagas (FIN-007).
+		mux.Handle("GET /api/fin/commissions", requireAuth(deps.Auth, handleListCommissions(deps.Commissions)))
+		mux.Handle("POST /api/fin/commissions", requireAuth(deps.Auth, handleCreateCommission(deps.Commissions)))
+		mux.Handle("PUT /api/fin/commissions/{id}/status", requireAuth(deps.Auth, handleUpdateCommissionStatus(deps.Commissions)))
 	}
 	if deps.OpenBanking != nil && deps.Auth != nil {
 		// Open Banking scaffold (FIN-003) — mock provider em dev.
