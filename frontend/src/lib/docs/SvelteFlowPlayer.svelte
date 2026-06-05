@@ -1,7 +1,7 @@
 <script lang="ts">
   import { SvelteFlow, Background, Controls, type Node, type Edge } from "@xyflow/svelte";
   import "@xyflow/svelte/dist/style.css";
-  import type { DocFlow, DocFlowStep } from "./types";
+  import type { DocFlow, DocFlowNodeData, DocFlowStep } from "./types";
   import DocFlowNode from "./DocFlowNode.svelte";
   import FlowStepControls from "./FlowStepControls.svelte";
   import { prefersReducedMotion } from "$lib/motion/reduced";
@@ -25,7 +25,7 @@
   const nodes = $derived.by(() => {
     const step = messageSteps[stepIndex];
     return graph.nodes.map(
-      (n): Node => ({
+      (n): Node<DocFlowNodeData, "docFlow"> => ({
         id: n.id,
         type: "docFlow",
         position: { x: n.x, y: 24 },
@@ -105,7 +105,7 @@
       proOptions={{ hideAttribution: true }}
     >
       <Background gap={16} size={1} />
-      <Controls showInteractive={false} />
+      <Controls showLock={false} />
     </SvelteFlow>
   </div>
 

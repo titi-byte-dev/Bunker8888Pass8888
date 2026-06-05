@@ -26,6 +26,12 @@ export type DocFlowGraphNode = {
   x: number;
 };
 
+/** Payload de cada nó no Svelte Flow (DOC-011). */
+export type DocFlowNodeData = {
+  label: string;
+  active?: boolean;
+};
+
 export type DocFlowGraphEdge = {
   id: string;
   source: string;

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { NodeProps } from "@xyflow/svelte";
+  import type { Node, NodeProps } from "@xyflow/svelte";
+  import type { DocFlowNodeData } from "./types";
 
-  type DocFlowNodeData = {
-    label: string;
-    active?: boolean;
-  };
+  // NodeProps<T> espera o tipo Node completo (não só o payload em data).
+  type DocFlowNodeType = Node<DocFlowNodeData, "docFlow">;
 
-  let { data }: NodeProps<DocFlowNodeData> = $props();
+  let { data }: NodeProps<DocFlowNodeType> = $props();
 </script>
 
 <div class="doc-flow-node" class:active={data.active}>
