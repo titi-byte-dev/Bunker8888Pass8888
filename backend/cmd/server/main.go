@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/agent"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
@@ -120,6 +121,9 @@ func main() {
 			}
 		}
 
+		agentReg := agent.NewDefaultRegistry()
+		agentRun := agent.NewRunner(agentReg, agent.PermissivePolicy{})
+
 		deps = httpapi.Deps{
 			Auth:         auth.NewService(userRepo, sessionRepo, sessionTTL),
 			Vault:        vault.NewRepo(pool),
@@ -141,6 +145,8 @@ func main() {
 			HR:           hrRepo,
 			Mail:         mailRepo,
 			Fin:          finRepo,
+			Agent:        agentReg,
+			AgentRunner:  agentRun,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
 		}
