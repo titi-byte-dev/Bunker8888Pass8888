@@ -11,6 +11,7 @@
     groupLabel,
     type CommandEntry,
   } from "./commands";
+  import { buildDocSearchCommands } from "$lib/docs/search";
   import { goto } from "$app/navigation";
   import { loadDecodedLogins } from "$lib/vault/ui";
 
@@ -27,13 +28,28 @@
   let loadingVault = $state(false);
   let inputEl = $state<HTMLInputElement | undefined>(undefined);
 
+  const docCommands = $derived(
+    query.trim() ? buildDocSearchCommands(query) : [],
+  );
+
   const allCommands = $derived([
+    ...docCommands,
     ...buildNavigationCommands(),
     ...vaultCommands,
-    ...buildActionCommands(),
+    ...filterCommands(buildActionCommands(), query),
   ]);
 
-  const filtered = $derived(filterCommands(allCommands, query));
+  const filtered = $derived(
+    query.trim()
+      ? [
+          ...docCommands,
+          ...filterCommands(
+            [...buildNavigationCommands(), ...vaultCommands, ...buildActionCommands()],
+            query,
+          ),
+        ]
+      : allCommands,
+  );
   const grouped = $derived(groupCommands(filtered));
   const flatFiltered = $derived(filtered);
 
@@ -115,7 +131,7 @@
         <input
           bind:this={inputEl}
           type="search"
-          placeholder="Pesquisar páginas, logins, acções…"
+          placeholder="Pesquisar docs, páginas, logins, acções…"
           bind:value={query}
           onkeydown={onKeydown}
           autocomplete="off"

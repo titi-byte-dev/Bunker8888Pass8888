@@ -151,7 +151,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | DOC-007 | Journeys em falta (SHARE, DW, emergency…) | 2 | M | 🟢 | DOC-005 |
 | DOC-008 | Renderer Mermaid nos percursos | 2 | S | 🟢 | DOC-005 |
 | DOC-009 | FlowPlayer animado (passo-a-passo + reproduzir) | 2 | M | 🟢 | DOC-008 |
-| DOC-010 | Pesquisa full-text + glossário inline nas páginas | 2 | M | ⚪ | DOC-002 |
+| DOC-010 | Pesquisa full-text + glossário inline nas páginas | 2 | M | 🟢 | DOC-002 |
 | DOC-011 | POC Svelte Flow (`@xyflow/svelte`) com highlight por passo | 2 | M | 🟢 | DOC-009 |
 | DOC-012 | Converter sequenceDiagram → graph no build-docs | 2 | S | 🟢 | DOC-011 |
 

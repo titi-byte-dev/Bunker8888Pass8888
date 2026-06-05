@@ -1,5 +1,6 @@
 <script lang="ts">
   import { inAppDocs, docsByCategory } from "$lib/docs/loader";
+  import DocSearch from "$lib/docs/DocSearch.svelte";
   import { LEVEL_LABELS } from "$lib/docs/types";
 
   const groups = docsByCategory();
@@ -16,6 +17,10 @@
     Conhecimento agregado por níveis — começa pelo essencial e expande quando precisares.
     Projecto didático: conceitos embutidos, sem poluir o ecrã.
   </p>
+
+  <div class="search-wide">
+    <DocSearch placeholder="Pesquisar por título, conceito ou percurso…" limit={12} />
+  </div>
 
   <details class="how-it-works" open>
     <summary>Como usar esta documentação</summary>
@@ -66,8 +71,13 @@
     font-size: var(--text-2xl);
   }
 
+  .search-wide {
+    margin-bottom: var(--space-6);
+    max-width: 28rem;
+  }
+
   .lead {
-    margin: 0 0 var(--space-6);
+    margin: 0 0 var(--space-4);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     line-height: 1.6;

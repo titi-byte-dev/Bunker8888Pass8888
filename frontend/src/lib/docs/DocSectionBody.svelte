@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { DocFlow } from "./types";
+  import { annotateGlossaryHtml } from "./glossary";
   import { splitSectionHtml } from "./splitSection";
   import FlowPlayer from "./FlowPlayer.svelte";
 
@@ -10,7 +11,7 @@
 
   let { html, flows = [] }: Props = $props();
 
-  const parts = $derived(splitSectionHtml(html, flows));
+  const parts = $derived(splitSectionHtml(annotateGlossaryHtml(html), flows));
 </script>
 
 {#each parts as part, i (part.kind === "flow" ? part.flow.id : `html-${i}`)}

@@ -5,7 +5,7 @@
 import { visibleNavItems } from "./nav";
 import type { DecodedLogin } from "$lib/vault/ui";
 
-export type CommandGroup = "navigation" | "vault" | "action";
+export type CommandGroup = "navigation" | "vault" | "action" | "docs";
 
 export type CommandEntry = {
   id: string;
@@ -19,6 +19,7 @@ const GROUP_LABELS: Record<CommandGroup, string> = {
   navigation: "Navegação",
   vault: "Cofre",
   action: "Acções",
+  docs: "Documentação",
 };
 
 export function groupLabel(group: CommandGroup): string {
@@ -137,7 +138,7 @@ export function filterCommands(commands: CommandEntry[], query: string): Command
 }
 
 export function groupCommands(commands: CommandEntry[]): Map<CommandGroup, CommandEntry[]> {
-  const order: CommandGroup[] = ["navigation", "vault", "action"];
+  const order: CommandGroup[] = ["docs", "navigation", "vault", "action"];
   const map = new Map<CommandGroup, CommandEntry[]>();
   for (const g of order) map.set(g, []);
   for (const cmd of commands) {

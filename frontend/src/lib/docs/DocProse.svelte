@@ -99,4 +99,72 @@
     color: var(--color-text);
     font-weight: 600;
   }
+
+  /* Glossário inline (DOC-010) */
+  :global(.glossary-term) {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed color-mix(in srgb, var(--color-accent) 55%, transparent);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  :global(.glossary-term:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  :global(.glossary-tip) {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + var(--space-2));
+    transform: translateX(-50%);
+    z-index: 30;
+    display: none;
+    width: max-content;
+    max-width: min(18rem, 80vw);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    box-shadow: 0 6px 20px color-mix(in srgb, #000 18%, transparent);
+    font-size: var(--text-xs);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--color-text-muted);
+    pointer-events: none;
+  }
+
+  :global(.glossary-tip a) {
+    display: block;
+    margin-top: var(--space-1);
+    pointer-events: auto;
+    color: var(--color-link);
+    font-weight: 600;
+  }
+
+  :global(.glossary-term:hover .glossary-tip),
+  :global(.glossary-term:focus .glossary-tip),
+  :global(.glossary-term:focus-within .glossary-tip) {
+    display: block;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.glossary-tip) {
+      animation: glossary-in var(--duration-fast) var(--ease-out);
+    }
+  }
+
+  @keyframes glossary-in {
+    from {
+      opacity: 0;
+      translate: 0 4px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
 </style>
