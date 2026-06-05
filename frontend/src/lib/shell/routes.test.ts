@@ -10,14 +10,21 @@ import {
 } from "./routes";
 
 describe("ROUTE_TREE (UI-011)", () => {
-  it("navModules devolve os modulos de topo na ordem definida", () => {
-    expect(navModules()).toBe(ROUTE_TREE);
-    expect(navModules()[0].label).toBe("Cofre");
+  it("navModules devolve os modulos de topo (sem os hideFromNav) na ordem definida", () => {
+    const mods = navModules();
+    expect(mods[0].label).toBe("Cofre");
+    // Definicoes vive no menu de perfil (hideFromNav) -> fora da navegacao.
+    expect(mods.every((m) => !m.hideFromNav)).toBe(true);
+    expect(mods.some((m) => m.href === "/settings")).toBe(false);
+    // Ordem preservada face a ROUTE_TREE visivel.
+    expect(mods.map((m) => m.href)).toEqual(
+      ROUTE_TREE.filter((m) => !m.hideFromNav).map((m) => m.href),
+    );
   });
 
-  it("tabBarModules: cofre, seguranca, trabalho, definicoes (max 5)", () => {
+  it("tabBarModules: cofre, seguranca, trabalho (max 5, sem Definicoes)", () => {
     const tabs = tabBarModules().map((m) => m.href);
-    expect(tabs).toEqual(["/vault", "/security", "/work", "/settings"]);
+    expect(tabs).toEqual(["/vault", "/security", "/work"]);
     expect(tabs.length).toBeLessThanOrEqual(5);
   });
 
