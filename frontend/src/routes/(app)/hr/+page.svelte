@@ -21,7 +21,10 @@
     Button,
     confirmDialog,
     EmptyState,
+    Field,
     PageShell,
+    Panel,
+    Skeleton,
     StatusBanner,
     toast,
   } from "$lib/ui";
@@ -122,10 +125,18 @@
 
   async function onRemoveContract(id: string) {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Remover contrato?",
+      message: "Apaga o ficheiro cifrado desta ficha.",
+      confirmLabel: "Remover",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     try {
       await removeContract(open.id, id);
       await refreshContracts();
+      toast.success("Contrato removido.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao remover contrato";
     } finally {
@@ -213,10 +224,18 @@
 
   async function onRemoveField(name: string) {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Remover campo?",
+      message: `Apaga «${fieldLabel(name)}» da ficha (sem emitir certificado de crypto-shred).`,
+      confirmLabel: "Remover",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     try {
       await removeField(open.id, name);
       open = await openRecord(open.id);
+      toast.success("Campo removido.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao remover campo";
     } finally {
@@ -239,6 +258,7 @@
       await shredField(open.id, name);
       open = await openRecord(open.id);
       await refreshCerts();
+      toast.success("Campo eliminado — certificado emitido.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao eliminar campo";
     } finally {
@@ -261,6 +281,7 @@
       await shredRecord(open.id);
       open = await openRecord(open.id);
       await refreshCerts();
+      toast.success("Ficha eliminada — certificados emitidos.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao eliminar ficha";
     } finally {
@@ -314,7 +335,7 @@
   title="Fichas de Empregado"
   taskId="HR-001"
   description="Cada campo é cifrado de forma independente com a sua própria chave, embrulhada com a Master Key. Apagar a chave torna o valor irrecuperável (crypto-shredding RGPD, HR-003)."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />
@@ -336,18 +357,19 @@
     {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
     <div class="grid">
-      <!-- Coluna esquerda: lista de fichas -->
-      <section class="panel">
-        <div class="panel-head">
-          <p class="eyebrow">Fichas</p>
-          <button type="button" class="btn primary sm" onclick={onCreate} disabled={busy}>
-            + Nova
-          </button>
-        </div>
+      <Panel title="Fichas">
+        {#snippet actions()}
+          <Button size="sm" onclick={onCreate} disabled={busy} loading={busy}>+ Nova</Button>
+        {/snippet}
         {#if loading}
-          <p class="muted">A carregar…</p>
+          <Skeleton variant="row" />
+          <Skeleton variant="row" />
         {:else if records.length === 0}
-          <p class="muted">Sem fichas. Cria a primeira.</p>
+          <EmptyState title="Sem fichas" description="Cria a primeira ficha de empregado.">
+            {#snippet action()}
+              <Button size="sm" onclick={onCreate} disabled={busy}>+ Nova ficha</Button>
+            {/snippet}
+          </EmptyState>
         {:else}
           <ul class="list">
             {#each records as r (r.id)}
@@ -365,25 +387,26 @@
             {/each}
           </ul>
         {/if}
-      </section>
+      </Panel>
 
-      <!-- Coluna direita: detalhe da ficha -->
-      <section class="panel">
+      <Panel title={open ? `Ficha · ${shortId(open.id)}` : "Detalhe"}>
+        {#snippet actions()}
+          {#if open}
+            <Button variant="ghost" size="sm" onclick={onShredRecord} disabled={busy}>
+              🔥 Shred ficha
+            </Button>
+            <Button variant="danger" size="sm" onclick={onDeleteRecord} disabled={busy}>
+              Apagar ficha
+            </Button>
+          {/if}
+        {/snippet}
+
         {#if !open}
-          <p class="muted">Seleciona ou cria uma ficha para ver os campos.</p>
+          <EmptyState
+            title="Nenhuma ficha seleccionada"
+            description="Escolhe uma ficha na lista ou cria uma nova."
+          />
         {:else}
-          <div class="panel-head">
-            <p class="eyebrow">Ficha · <span class="mono">{shortId(open.id)}</span></p>
-            <span class="head-actions">
-              <button type="button" class="btn ghost sm" onclick={onShredRecord} disabled={busy}>
-                🔥 Shred ficha
-              </button>
-              <button type="button" class="btn danger-btn sm" onclick={onDeleteRecord} disabled={busy}>
-                Apagar ficha
-              </button>
-            </span>
-          </div>
-
           {#if open.fields.length === 0}
             <p class="muted">Ficha vazia. Adiciona o primeiro campo abaixo.</p>
           {:else}
@@ -399,24 +422,18 @@
                     {/if}
                     <span class="field-actions">
                       {#if !f.shredded}
-                        <button
-                          type="button"
-                          class="link-btn shred"
-                          onclick={() => onShredField(f.name)}
-                          disabled={busy}
-                          title="Crypto-shred (RGPD Art. 17)"
-                        >
+                        <Button variant="ghost" size="sm" onclick={() => onShredField(f.name)} disabled={busy}>
                           shred
-                        </button>
+                        </Button>
                       {/if}
-                      <button
-                        type="button"
-                        class="link-btn"
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onclick={() => onRemoveField(f.name)}
                         disabled={busy}
                       >
                         remover
-                      </button>
+                      </Button>
                     </span>
                   </dd>
                 </div>
@@ -425,50 +442,59 @@
           {/if}
 
           <div class="add-field">
-            <p class="eyebrow">Adicionar / actualizar campo</p>
+            <p class="section-label">Adicionar / actualizar campo</p>
             <div class="row-form">
-              <input
-                list="suggested-fields"
-                bind:value={newFieldName}
-                placeholder="Campo (ex.: salary)"
-                disabled={busy}
-              />
+              <Field label="Campo">
+                {#snippet control({ id, describedBy })}
+                  <input
+                    {id}
+                    aria-describedby={describedBy}
+                    list="suggested-fields"
+                    bind:value={newFieldName}
+                    placeholder="ex.: salary"
+                    disabled={busy}
+                  />
+                {/snippet}
+              </Field>
               <datalist id="suggested-fields">
                 {#each SUGGESTED_FIELDS as s (s)}
                   <option value={s}>{fieldLabel(s)}</option>
                 {/each}
               </datalist>
-              <input
-                bind:value={newFieldValue}
-                placeholder="Valor (cifrado no teu dispositivo)"
-                disabled={busy}
-              />
-              <button
-                type="button"
-                class="btn primary"
+              <Field label="Valor" hint="Cifrado no teu dispositivo antes de enviar.">
+                {#snippet control({ id, describedBy })}
+                  <input
+                    {id}
+                    aria-describedby={describedBy}
+                    bind:value={newFieldValue}
+                    placeholder="Valor em claro"
+                    disabled={busy}
+                  />
+                {/snippet}
+              </Field>
+              <Button
                 onclick={onSaveField}
                 disabled={busy || !newFieldName.trim() || !newFieldValue}
+                loading={busy}
               >
                 Gravar
-              </button>
+              </Button>
             </div>
           </div>
 
-          <!-- Contratos cifrados (HR-005) + assinatura digital (HR-006) -->
-          <div class="contracts">
-            <div class="contracts-head">
-              <p class="eyebrow">Contratos cifrados</p>
-              <label class="btn primary sm upload">
+          <Panel title="Contratos cifrados" variant="inset">
+            {#snippet actions()}
+              <input
+                type="file"
+                bind:this={contractInput}
+                onchange={onUploadContract}
+                disabled={busy}
+                hidden
+              />
+              <Button size="sm" onclick={() => contractInput?.click()} disabled={busy}>
                 + Carregar
-                <input
-                  type="file"
-                  bind:this={contractInput}
-                  onchange={onUploadContract}
-                  disabled={busy}
-                  hidden
-                />
-              </label>
-            </div>
+              </Button>
+            {/snippet}
             {#if contracts.length === 0}
               <p class="muted sm">Sem contratos. Carrega um ficheiro (máx. ~5 MiB).</p>
             {:else}
@@ -483,26 +509,21 @@
                       {/if}
                     </div>
                     <div class="c-actions">
-                      <button type="button" class="link-btn" onclick={() => onDownloadContract(c.id)}>
+                      <Button variant="ghost" size="sm" onclick={() => onDownloadContract(c.id)}>
                         descarregar
-                      </button>
+                      </Button>
                       {#if c.signed}
-                        <button type="button" class="link-btn" onclick={() => onVerifyContract(c.id)}>
+                        <Button variant="ghost" size="sm" onclick={() => onVerifyContract(c.id)}>
                           verificar
-                        </button>
+                        </Button>
                       {:else}
-                        <button
-                          type="button"
-                          class="link-btn sign"
-                          onclick={() => onSignContract(c.id)}
-                          disabled={busy}
-                        >
+                        <Button variant="ghost" size="sm" onclick={() => onSignContract(c.id)} disabled={busy}>
                           assinar
-                        </button>
+                        </Button>
                       {/if}
-                      <button type="button" class="link-btn" onclick={() => onRemoveContract(c.id)} disabled={busy}>
+                      <Button variant="ghost" size="sm" onclick={() => onRemoveContract(c.id)} disabled={busy}>
                         remover
-                      </button>
+                      </Button>
                     </div>
                     {#if verifyMsg[c.id]}
                       <p class="c-verify" role="status">{verifyMsg[c.id]}</p>
@@ -511,17 +532,15 @@
                 {/each}
               </ul>
             {/if}
-          </div>
+          </Panel>
         {/if}
-      </section>
+      </Panel>
     </div>
 
-    <!-- Certificados de eliminação (HR-004) -->
-    <section class="panel">
-      <div class="panel-head">
-        <p class="eyebrow">Certificados de eliminação · RGPD Art. 17</p>
+    <Panel title="Certificados de eliminação · RGPD Art. 17">
+      {#snippet actions()}
         <span class="muted sm">{certs.length} emitido(s)</span>
-      </div>
+      {/snippet}
       <p class="muted">
         Cada crypto-shred emite uma prova verificável: <span class="mono">sha256</span> sobre os
         factos da eliminação. O selo ✓ confirma que o <span class="mono">cert_hash</span> foi
@@ -537,31 +556,22 @@
               <span class="cert-field">{fieldLabel(c.fieldName)}</span>
               <span class="muted sm mono">{c.certHash.slice(0, 16)}…</span>
               <span class="muted sm">{new Date(c.shreddedAt).toLocaleString("pt-PT")}</span>
-              <button type="button" class="link-btn" onclick={() => downloadCert(c)}>
-                descarregar
-              </button>
+              <Button variant="ghost" size="sm" onclick={() => downloadCert(c)}>descarregar</Button>
             </li>
           {/each}
         </ul>
       {/if}
-    </section>
+    </Panel>
   {/if}
 </PageShell>
 
 <style>
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
   .grid {
     display: grid;
     grid-template-columns: 16rem 1fr;
     gap: var(--space-4);
     align-items: start;
+    margin-bottom: var(--space-4);
   }
   @media (max-width: 720px) {
     .grid {
@@ -569,23 +579,15 @@
     }
   }
 
-  .panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-4) var(--space-6);
-    margin-bottom: var(--space-4);
+  .section-label {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
   }
-  .panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-  .panel-head .eyebrow {
-    margin: 0;
-  }
+
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
@@ -666,15 +668,22 @@
   .add-field {
     border-top: 1px solid var(--color-border);
     padding-top: var(--space-4);
+    margin-bottom: var(--space-4);
   }
   .row-form {
     display: flex;
-    gap: var(--space-2);
-    margin-top: var(--space-2);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: flex-end;
+  }
+  .row-form :global(.field) {
+    flex: 1;
+    min-width: 10rem;
   }
   @media (max-width: 560px) {
     .row-form {
       flex-direction: column;
+      align-items: stretch;
     }
   }
   input {
@@ -694,74 +703,10 @@
     border-color: var(--color-accent);
   }
 
-  .btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .btn.sm {
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--text-xs);
-  }
-  .btn.primary {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
-  }
-  .btn.primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-  }
-  .btn.danger-btn {
-    color: var(--color-danger);
-    border-color: var(--color-danger);
-    background: none;
-  }
-  .btn.danger-btn:hover {
-    background: var(--color-danger);
-    color: var(--color-accent-fg);
-  }
-  .btn:disabled {
-    opacity: 0.55;
-    cursor: progress;
-  }
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-    cursor: pointer;
-    padding: 0;
-    flex-shrink: 0;
-  }
-  .link-btn:hover {
-    color: var(--color-danger);
-  }
-  .link-btn.shred:hover {
-    color: var(--color-danger);
-  }
   .field-actions {
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-1);
     flex-shrink: 0;
-  }
-  .head-actions {
-    display: inline-flex;
-    gap: var(--space-2);
-  }
-  .btn.ghost {
-    background: none;
-    color: var(--color-text-muted);
-  }
-  .btn.ghost:hover:not(:disabled) {
-    color: var(--color-danger);
-    border-color: var(--color-danger);
   }
 
   .cert-list {
@@ -800,26 +745,8 @@
     color: var(--color-danger);
     border: 1px solid var(--color-danger);
   }
-  .cert .link-btn {
+  .cert :global(.btn) {
     margin-left: auto;
-    color: var(--color-accent);
-  }
-  .contracts {
-    border-top: 1px solid var(--color-border);
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-  }
-  .contracts-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-2);
-  }
-  .contracts-head .eyebrow {
-    margin: 0;
-  }
-  .upload {
-    cursor: pointer;
   }
   .contract-list {
     margin: 0;
@@ -857,9 +784,6 @@
     display: flex;
     gap: var(--space-3);
     margin-top: var(--space-1);
-  }
-  .link-btn.sign:hover {
-    color: var(--color-accent);
   }
   .c-verify {
     margin: var(--space-2) 0 0;

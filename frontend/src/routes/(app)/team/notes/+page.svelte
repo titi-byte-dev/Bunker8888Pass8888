@@ -112,7 +112,7 @@
   title="Notas Auto-Destrutivas"
   taskId="SHARE-005"
   description="Uma nota cifrada que se lê uma única vez e arde a seguir. A chave vai no fragmento do link (nunca chega ao servidor). Passphrase opcional como 2.ª camada."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />

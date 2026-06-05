@@ -316,7 +316,7 @@
   title="Cofres Partilhados"
   taskId="SHARE-002"
   description="Coleções cifradas sob uma chave de cofre própria. Convidar um colega = re-cifrar essa chave para a chave pública dele. O servidor nunca vê o conteúdo."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />

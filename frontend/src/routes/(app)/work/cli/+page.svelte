@@ -53,10 +53,6 @@
 </section>
 
 <style>
-  .page {
-    max-width: 42rem;
-  }
-
   .back {
     display: inline-block;
     margin-bottom: var(--space-4);

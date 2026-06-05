@@ -100,7 +100,8 @@ function normalizeParticipantId(id) {
 
 /**
  * Converte sequenceDiagram em grafo para Svelte Flow (DOC-011/012).
- * Layout horizontal: actores em fila; arestas = mensagens.
+ * Posições x são indicativas; o layout final (colunas + filas verticais)
+ * é calculado no cliente em computeFlowLayout.ts.
  */
 function sequenceToGraph(source, steps) {
   const participants = parseParticipants(source);

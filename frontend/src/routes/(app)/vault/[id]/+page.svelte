@@ -66,7 +66,6 @@
   taskId="VAULT-001"
   leaf={item?.login.title}
   description={busy ? "A descifrar localmente…" : "Credenciais desbloqueadas com a Master Key — o servidor nunca vê estes valores."}
-  width="narrow"
   breadcrumb={false}
 >
   {#snippet actions()}

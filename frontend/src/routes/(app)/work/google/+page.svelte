@@ -28,7 +28,7 @@
   title="Google Workspace"
   taskId="GOOGLE-001"
   description="Estado do provider e scopes planeados para Drive ZK e masking de Sheets."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-google-dev-stub" label="Stub de desenvolvimento" />

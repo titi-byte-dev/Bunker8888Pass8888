@@ -249,7 +249,7 @@
   title="Faturação"
   taskId="FIN-006"
   description="Pro-forma, faturas e recibos com numeração legal — emitidos e cifrados no cliente."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <Button variant="ghost" size="sm" href="/fin/costs">← Custos</Button>

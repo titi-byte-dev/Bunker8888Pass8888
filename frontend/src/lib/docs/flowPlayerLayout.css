@@ -1,0 +1,44 @@
+/**
+ * Layout partilhado dos FlowPlayers (Svelte Flow + Mermaid).
+ * Mobile: diagrama em cima, passos em baixo.
+ * Desktop (≥900px): diagrama à esquerda, passos à direita.
+ */
+.flow-player-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  min-width: 0;
+}
+
+.flow-player-visual {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.flow-player-steps {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 900px) {
+  .flow-player-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .flow-player-visual {
+    flex: 1 1 58%;
+    min-width: 0;
+  }
+
+  .flow-player-steps {
+    flex: 0 0 min(22rem, 38%);
+    max-width: 26rem;
+    position: sticky;
+    top: var(--space-4);
+    max-height: calc(100dvh - var(--space-12));
+    overflow-y: auto;
+  }
+}

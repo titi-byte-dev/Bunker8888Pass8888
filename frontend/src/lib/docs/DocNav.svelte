@@ -12,6 +12,10 @@
   function isActive(slug: string): boolean {
     return pathname === `/settings/docs/${slug}`;
   }
+
+  function shortTitle(title: string): string {
+    return title.replace(/^Journey:\s*/i, "").replace(/^Jornada:\s*/i, "");
+  }
 </script>
 
 <nav class="doc-nav" aria-label="Índice da documentação">
@@ -27,11 +31,11 @@
             <a
               href="/settings/docs/{doc.slug}"
               class:active={isActive(doc.slug)}
-              title={doc.summary}
+              title={doc.title}
             >
-              <span class="doc-title">{doc.title}</span>
+              <span class="doc-title">{shortTitle(doc.title)}</span>
               {#if doc.level > 1}
-                <span class="doc-level">Nv.{doc.maxLevel}</span>
+                <span class="doc-level">L{doc.maxLevel}</span>
               {/if}
             </a>
           </li>
@@ -43,17 +47,18 @@
 
 <style>
   .doc-nav {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
   }
 
   .nav-home {
     display: block;
-    padding: var(--space-2) var(--space-3);
-    margin-bottom: var(--space-4);
+    padding: var(--space-1) var(--space-2);
+    margin-bottom: var(--space-3);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     text-decoration: none;
     font-weight: 600;
+    font-size: var(--text-sm);
   }
 
   .nav-home:hover,
@@ -63,16 +68,16 @@
   }
 
   .nav-group {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
   }
 
   .nav-group-title {
-    margin: 0 0 var(--space-2);
-    padding: 0 var(--space-3);
-    font-size: var(--text-xs);
+    margin: 0 0 var(--space-1);
+    padding: 0 var(--space-2);
+    font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     color: var(--color-text-muted);
   }
 
@@ -84,13 +89,14 @@
 
   .nav-list a {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    padding: 4px var(--space-2);
     border-radius: var(--radius-sm);
     color: var(--color-text-muted);
     text-decoration: none;
+    line-height: 1.35;
   }
 
   .nav-list a:hover {
@@ -100,21 +106,25 @@
 
   .nav-list a.active {
     background: var(--color-accent-muted);
-    color: var(--color-text);
-    font-weight: 500;
+    color: var(--color-accent);
+    font-weight: 600;
   }
 
   .doc-title {
     min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    word-break: break-word;
   }
 
   .doc-level {
     flex-shrink: 0;
-    font-size: var(--text-xs);
+    font-size: 0.6rem;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
+    margin-top: 2px;
   }
 </style>

@@ -14,14 +14,17 @@
 
   const visible = $derived(section.level <= maxVisibleLevel);
   const levelLabel = $derived(LEVEL_LABELS[section.level as DocComplexityLevel] ?? "");
+  const hasFlows = $derived((section.flows?.length ?? 0) > 0);
   const useDetails = $derived(
     !forceOpen && section.level > 1 && (section.collapsed || Boolean(section.title)),
   );
+  /** Secções com diagrama abrem por defeito — evita canvas XYFlow a medir 0px dentro de <details> fechado. */
+  const defaultOpen = $derived(section.level === 1 || hasFlows);
 </script>
 
 {#if visible}
   {#if useDetails}
-    <details class="doc-section" data-level={section.level} open={section.level === 1}>
+    <details class="doc-section" data-level={section.level} open={defaultOpen}>
       <summary class="section-summary">
         {#if section.title}
           <span class="section-title">{section.title}</span>
@@ -29,7 +32,10 @@
           <span class="section-title">{levelLabel}</span>
         {/if}
         <span class="level-badge">{levelLabel}</span>
-        <span class="hint">clica para expandir</span>
+        {#if hasFlows}
+          <span class="flow-badge">diagrama interactivo</span>
+        {/if}
+        <span class="hint">{hasFlows ? "fluxo interactivo abaixo" : "clica para expandir"}</span>
         <span class="chevron" aria-hidden="true">▾</span>
       </summary>
       <div class="section-body">
@@ -94,6 +100,14 @@
     font-size: var(--text-xs);
     color: var(--color-accent);
     background: var(--color-accent-muted);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+
+  .flow-badge {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    border: 1px dashed var(--color-border);
     padding: 2px var(--space-2);
     border-radius: var(--radius-sm);
   }

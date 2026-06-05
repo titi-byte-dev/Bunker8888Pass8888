@@ -1,5 +1,7 @@
 <script lang="ts">
   import { isRouteActive, type RouteNode } from "./routes";
+  import { iconForHref } from "./navIcons";
+  import NavIcon from "./NavIcon.svelte";
 
   interface Props {
     items: RouteNode[];
@@ -17,7 +19,9 @@
       class:active={isRouteActive(pathname, item.href)}
       aria-current={isRouteActive(pathname, item.href) ? "page" : undefined}
     >
-      <span class="tab-icon" aria-hidden="true">{item.label.charAt(0)}</span>
+      <span class="tab-icon" aria-hidden="true">
+        <NavIcon name={iconForHref(item.href)} size={18} />
+      </span>
       <span class="tab-label">{item.label}</span>
     </a>
   {/each}

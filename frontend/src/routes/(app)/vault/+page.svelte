@@ -57,7 +57,7 @@
   title="Cofre"
   taskId="VAULT-001"
   description={`${items.length} login${items.length === 1 ? "" : "s"} cifrados — desbloqueados localmente com a Master Key.`}
-  width="narrow"
+ 
   breadcrumb={false}
 >
   {#snippet actions()}

@@ -379,7 +379,8 @@
 
 <style>
   .playground {
-    max-width: var(--content-max);
+    max-width: none;
+    width: 100%;
   }
 
   header h1 {

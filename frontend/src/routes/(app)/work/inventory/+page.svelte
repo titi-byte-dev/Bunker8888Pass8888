@@ -153,7 +153,7 @@
   title="Inventário"
   taskId="AGENT-008"
   description="Gere stock operacional. Quando a quantidade desce ao nível de reordenação, o orquestrador sugere uma ordem de compra — aprova antes de gerar o rascunho."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-ops-agent-inventory" label="Como funciona o agente de operações?" />

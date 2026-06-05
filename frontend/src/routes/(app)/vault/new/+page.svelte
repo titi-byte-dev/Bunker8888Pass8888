@@ -32,7 +32,7 @@
   title="Novo login"
   taskId="VAULT-001"
   description="Cifragem AES-GCM no browser antes de enviar ao servidor — o plaintext nunca sai do dispositivo."
-  width="narrow"
+ 
   breadcrumb={false}
 >
   {#snippet actions()}

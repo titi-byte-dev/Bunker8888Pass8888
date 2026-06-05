@@ -3,6 +3,7 @@
   import MermaidBlock from "./MermaidBlock.svelte";
   import SvelteFlowPlayer from "./SvelteFlowPlayer.svelte";
   import FlowStepControls from "./FlowStepControls.svelte";
+  import FlowPlayerLayout from "./FlowPlayerLayout.svelte";
   import { prefersReducedMotion } from "$lib/motion/reduced";
 
   interface Props {
@@ -22,7 +23,6 @@
     flow.steps.filter((s): s is Extract<DocFlowStep, { kind: "message" }> => s.kind === "message"),
   );
   const hasSteps = $derived(messageSteps.length > 0);
-  const current = $derived(messageSteps[stepIndex]);
 
   function goTo(idx: number) {
     stepIndex = Math.max(0, Math.min(idx, messageSteps.length - 1));
@@ -35,46 +35,55 @@
 
   $effect(() => {
     if (!playing || messageSteps.length === 0 || useSvelteFlow) return;
-    const id = setInterval(() => {
-      if (stepIndex >= messageSteps.length - 1) {
-        playing = false;
-        return;
-      }
-      goTo(stepIndex + 1);
+    if (stepIndex >= messageSteps.length - 1) {
+      playing = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (playing) goTo(stepIndex + 1);
     }, 2800);
-    return () => clearInterval(id);
+    return () => clearTimeout(timer);
   });
 </script>
 
 {#if useSvelteFlow}
   <SvelteFlowPlayer {flow} />
+{:else if hasSteps || flow.type === "flowchart"}
+  <FlowPlayerLayout>
+    {#snippet visual()}
+      <MermaidBlock source={flow.source} id={flow.id} title={flow.title || undefined} />
+    {/snippet}
+    {#snippet steps()}
+      {#if hasSteps}
+        <FlowStepControls
+          {messageSteps}
+          {stepIndex}
+          {playing}
+          onStep={goTo}
+          onTogglePlay={togglePlay}
+        />
+      {:else}
+        <p class="flow-hint">
+          Diagrama estático — segue as setas do fluxograma na ordem lógica.
+        </p>
+      {/if}
+    {/snippet}
+  </FlowPlayerLayout>
 {:else}
-  <div class="flow-player">
-    <MermaidBlock source={flow.source} id={flow.id} title={flow.title || undefined} />
-
-    {#if hasSteps}
-      <FlowStepControls
-        {messageSteps}
-        {stepIndex}
-        {playing}
-        onStep={goTo}
-        onTogglePlay={togglePlay}
-      />
-    {:else if flow.type === "flowchart"}
-      <p class="flow-hint">
-        Diagrama estático — segue as setas do fluxograma na ordem lógica.
-      </p>
-    {/if}
-  </div>
+  <FlowPlayerLayout>
+    {#snippet visual()}
+      <MermaidBlock source={flow.source} id={flow.id} title={flow.title || undefined} />
+    {/snippet}
+  </FlowPlayerLayout>
 {/if}
 
 <style>
-  .flow-player {
-    margin: var(--space-4) 0;
-  }
-
   .flow-hint {
-    margin: var(--space-2) 0 0;
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
     font-size: var(--text-xs);
     color: var(--color-text-muted);
   }

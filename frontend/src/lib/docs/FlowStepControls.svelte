@@ -50,11 +50,18 @@
     {/if}
   </div>
 
+  <p class="flow-legend" aria-hidden="true">
+    <span class="leg current">Passo actual</span>
+    <span class="leg done">Concluído</span>
+    <span class="leg from">Origem</span>
+    <span class="leg to">Destino</span>
+  </p>
+
   {#if current}
     <p class="current-step" aria-live="polite">
-      <strong>{current.from}</strong>
+      <strong class="from-tag">{current.from}</strong>
       <span class="arrow">{current.arrow.includes("--") ? "⟹" : "→"}</span>
-      <strong>{current.to}</strong>
+      <strong class="to-tag">{current.to}</strong>
       <span class="msg">{current.label}</span>
     </p>
   {/if}
@@ -82,7 +89,7 @@
     border-radius: var(--radius-md);
     background: var(--color-bg-surface);
     padding: var(--space-4);
-    margin-top: var(--space-2);
+    margin-top: 0;
   }
 
   .control-row {
@@ -150,7 +157,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
-    max-height: 14rem;
+    max-height: min(22rem, 50vh);
     overflow-y: auto;
   }
 
@@ -170,10 +177,65 @@
     line-height: 1.4;
   }
 
+  .flow-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+  }
+
+  .leg {
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+  }
+
+  .leg.current {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+
+  .leg.done {
+    border-color: var(--color-success-fg);
+    color: var(--color-success-fg);
+  }
+
+  .leg.from {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+  }
+
+  .leg.to {
+    border-color: var(--color-success-fg);
+    background: var(--color-success-bg);
+    color: var(--color-success-fg);
+  }
+
+  .from-tag {
+    color: var(--color-warning);
+  }
+
+  .to-tag {
+    color: var(--color-success-fg);
+  }
+
+  .step-list li.done .step-btn {
+    color: var(--color-success-fg);
+    border-color: color-mix(in srgb, var(--color-success-fg) 35%, transparent);
+    background: color-mix(in srgb, var(--color-success-fg) 8%, transparent);
+  }
+
   .step-list li.active .step-btn {
     border-color: var(--color-accent);
     background: var(--color-accent-muted);
     color: var(--color-text);
+  }
+
+  .step-list li.done .step-num {
+    background: var(--color-success-bg);
+    color: var(--color-success-fg);
   }
 
   .step-num {

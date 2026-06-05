@@ -83,7 +83,7 @@
   title="Secret Links"
   taskId="SHARE-003"
   description="Partilha um segredo de uso único com quem não tem conta. O segredo é cifrado no teu dispositivo; o servidor guarda-o só em RAM. A chave vai no fragmento do link — nunca chega ao servidor."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />

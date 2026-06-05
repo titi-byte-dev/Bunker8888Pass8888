@@ -132,7 +132,7 @@
   title="Onboarding de Empregado"
   taskId="HR-007 · AGENT-007"
   description="Num clique: cria a ficha cifrada (HR-001), guarda campos iniciais e gera um alias de e-mail (MAIL-001). Cada passo fica no registo imutável (HR-002)."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-hr-agent-onboarding" label="Como funciona o agente RH?" />

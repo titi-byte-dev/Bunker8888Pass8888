@@ -28,7 +28,7 @@
 <PageShell
   title="Segurança"
   description="Higiene, dispositivos, sessões e confiança operacional."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />

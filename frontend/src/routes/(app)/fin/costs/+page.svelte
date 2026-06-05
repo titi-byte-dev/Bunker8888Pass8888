@@ -271,7 +271,7 @@
   title="Monitorização de Custos"
   taskId="FIN-001/002 · AGENT-006"
   description="As subscrições são cifradas com a tua Master Key — só tu vês os custos. O dashboard cruza cada subscrição com o login do cofre e assinala licenças esquecidas ou sem credencial associada."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />

@@ -1,10 +1,14 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import { SvelteFlow, Background, Controls, type Node, type Edge } from "@xyflow/svelte";
   import "@xyflow/svelte/dist/style.css";
   import type { DocFlow, DocFlowNodeData, DocFlowStep } from "./types";
   import DocFlowNode from "./DocFlowNode.svelte";
+  import DocSequenceEdge from "./DocSequenceEdge.svelte";
   import FlowStepControls from "./FlowStepControls.svelte";
+  import FlowPlayerLayout from "./FlowPlayerLayout.svelte";
   import { prefersReducedMotion } from "$lib/motion/reduced";
+  import { buildFlowEdges, buildFlowNodes, flowCanvasSize } from "./buildFlowGraph";
 
   interface Props {
     flow: DocFlow;
@@ -13,7 +17,9 @@
   let { flow }: Props = $props();
 
   const nodeTypes = { docFlow: DocFlowNode };
+  const edgeTypes = { docSequence: DocSequenceEdge };
   const graph = $derived(flow.graph!);
+  const canvas = $derived(flowCanvasSize(graph));
 
   let stepIndex = $state(0);
   let playing = $state(false);
@@ -22,47 +28,14 @@
     flow.steps.filter((s): s is Extract<DocFlowStep, { kind: "message" }> => s.kind === "message"),
   );
 
-  const nodes = $derived.by(() => {
-    const step = messageSteps[stepIndex];
-    return graph.nodes.map(
-      (n): Node<DocFlowNodeData, "docFlow"> => ({
-        id: n.id,
-        type: "docFlow",
-        position: { x: n.x, y: 24 },
-        data: {
-          label: n.label,
-          active: Boolean(step && (n.id === step.from || n.id === step.to)),
-        },
-        draggable: false,
-        selectable: false,
-        focusable: false,
-      }),
-    );
-  });
+  let nodes = $state.raw<Node<DocFlowNodeData, "docFlow">[]>([]);
+  let edges = $state.raw<Edge[]>([]);
 
-  const edges = $derived.by(() => {
-    return graph.edges.map(
-      (e, i): Edge => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        label: e.label,
-        type: "smoothstep",
-        animated: i === stepIndex && !prefersReducedMotion(),
-        style:
-          i === stepIndex
-            ? "stroke: var(--color-accent); stroke-width: 2.5"
-            : i < stepIndex
-              ? "stroke: var(--color-text-muted); stroke-width: 1.5; opacity: 0.55"
-              : "stroke: var(--color-border); stroke-width: 1.5; opacity: 0.35",
-        labelStyle:
-          i === stepIndex
-            ? "fill: var(--color-text); font-weight: 600; font-size: 11px"
-            : "fill: var(--color-text-muted); font-size: 10px",
-        selectable: false,
-        focusable: false,
-      }),
-    );
+  $effect(() => {
+    const idx = stepIndex;
+    const animate = !prefersReducedMotion();
+    nodes = buildFlowNodes(graph, messageSteps, idx);
+    edges = buildFlowEdges(graph, idx, animate);
   });
 
   function goTo(idx: number) {
@@ -76,62 +49,83 @@
 
   $effect(() => {
     if (!playing || messageSteps.length === 0) return;
-    const id = setInterval(() => {
-      if (stepIndex >= messageSteps.length - 1) {
-        playing = false;
-        return;
-      }
-      goTo(stepIndex + 1);
+    if (stepIndex >= messageSteps.length - 1) {
+      playing = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (playing) goTo(stepIndex + 1);
     }, 2800);
-    return () => clearInterval(id);
+    return () => clearTimeout(timer);
   });
 </script>
 
-<div class="sf-player">
-  <div class="sf-canvas" style:min-height={`${Math.max(200, graph.edges.length * 28 + 120)}px`}>
-    <SvelteFlow
-      {nodes}
-      {edges}
-      {nodeTypes}
-      fitView
-      fitViewOptions={{ padding: 0.2 }}
-      nodesDraggable={false}
-      nodesConnectable={false}
-      elementsSelectable={false}
-      panOnDrag
-      zoomOnScroll
-      minZoom={0.4}
-      maxZoom={1.4}
-      proOptions={{ hideAttribution: true }}
-    >
-      <Background gap={16} size={1} />
-      <Controls showLock={false} />
-    </SvelteFlow>
-  </div>
+<FlowPlayerLayout>
+  {#snippet visual()}
+    <div class="sf-scroll">
+      <div class="sf-canvas" style:width="{canvas.width}px" style:height="{canvas.height}px">
+        {#if browser}
+          <SvelteFlow
+            bind:nodes
+            bind:edges
+            {nodeTypes}
+            {edgeTypes}
+            width={canvas.width}
+            height={canvas.height}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            panOnDrag
+            zoomOnScroll
+            minZoom={0.65}
+            maxZoom={1.25}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background gap={20} size={1} />
+            <Controls showLock={false} />
+          </SvelteFlow>
+        {:else}
+          <p class="sf-loading" aria-hidden="true">A carregar diagrama…</p>
+        {/if}
+      </div>
+    </div>
+  {/snippet}
 
-  <FlowStepControls
-    {messageSteps}
-    {stepIndex}
-    {playing}
-    onStep={goTo}
-    onTogglePlay={togglePlay}
-  />
-</div>
+  {#snippet steps()}
+    <FlowStepControls
+      {messageSteps}
+      {stepIndex}
+      {playing}
+      onStep={goTo}
+      onTogglePlay={togglePlay}
+    />
+  {/snippet}
+</FlowPlayerLayout>
 
 <style>
-  .sf-player {
-    margin: var(--space-4) 0;
+  .sf-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-base);
+    -webkit-overflow-scrolling: touch;
   }
 
   .sf-canvas {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--color-bg-base);
+    min-width: 100%;
   }
 
-  /* Tokens AegisPass sobre o tema default do Svelte Flow */
-  .sf-canvas :global(.svelte-flow) {
+  .sf-loading {
+    margin: 0;
+    padding: var(--space-6);
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .sf-scroll :global(.svelte-flow) {
     --xy-edge-stroke-default: var(--color-border);
     --xy-node-background-color-default: var(--color-bg-surface);
     --xy-background-color-default: var(--color-bg-base);
@@ -142,20 +136,71 @@
     );
   }
 
-  .sf-canvas :global(.svelte-flow__controls) {
+  .sf-scroll :global(.svelte-flow__controls) {
     box-shadow: none;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     overflow: hidden;
   }
 
-  .sf-canvas :global(.svelte-flow__controls-button) {
+  .sf-scroll :global(.svelte-flow__controls-button) {
     background: var(--color-bg-surface);
     border-bottom: 1px solid var(--color-border);
     fill: var(--color-text-muted);
   }
 
-  .sf-canvas :global(.svelte-flow__controls-button:hover) {
+  .sf-scroll :global(.svelte-flow__controls-button:hover) {
     background: var(--color-accent-muted);
+  }
+
+  .sf-scroll :global(.svelte-flow__handle) {
+    width: 1px;
+    height: 1px;
+    min-width: 0;
+    min-height: 0;
+    opacity: 0;
+    border: none;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .sf-scroll :global(.flow-edge-current path) {
+    stroke: var(--color-accent);
+    stroke-width: 2.5;
+  }
+
+  .sf-scroll :global(.flow-edge-done path) {
+    stroke: var(--color-success-fg);
+    stroke-width: 2;
+    opacity: 0.85;
+  }
+
+  .sf-scroll :global(.flow-edge-pending path) {
+    stroke: var(--color-border);
+    stroke-width: 1.5;
+    opacity: 0.35;
+  }
+
+  .sf-scroll :global(.flow-edge-current .svelte-flow__edge-text) {
+    fill: var(--color-text);
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .sf-scroll :global(.flow-edge-done .svelte-flow__edge-text) {
+    fill: var(--color-success-fg);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .sf-scroll :global(.flow-edge-pending .svelte-flow__edge-text) {
+    fill: var(--color-text-muted);
+    font-size: 10px;
+    opacity: 0.65;
+  }
+
+  .sf-scroll :global(.svelte-flow__edge-textbg) {
+    fill: var(--color-bg-base);
+    fill-opacity: 0.92;
   }
 </style>

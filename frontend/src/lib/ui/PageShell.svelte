@@ -6,10 +6,7 @@
 
   /**
    * PageShell (UI-012) — cabecalho de pagina unico.
-   * Substitui ~32 copias locais de `.page` + `.page-head` + `h1` + `.lead`.
-   *
-   * Producao: mostra Breadcrumbs (nomes de produto).
-   * Dev: eyebrow opcional com taskId (import.meta.env.DEV).
+   * Layout fluido: ocupa toda a largura disponivel do shell (sem variantes narrow/wide).
    */
   interface Props {
     title: string;
@@ -20,8 +17,6 @@
     breadcrumb?: boolean;
     /** Segmento final dinamico para o trilho (ex.: nome do item). */
     leaf?: string;
-    /** Largura maxima do conteudo. */
-    width?: "narrow" | "wide";
     /** Accoes alinhadas a direita do titulo. */
     actions?: Snippet;
     children: Snippet;
@@ -33,7 +28,6 @@
     taskId,
     breadcrumb = true,
     leaf,
-    width = "wide",
     actions,
     children,
   }: Props = $props();
@@ -41,7 +35,7 @@
   const pathname = $derived($page.url.pathname);
 </script>
 
-<section class="page {width}">
+<section class="page">
   <header class="page-head">
     <div class="head-text">
       {#if breadcrumb}<Breadcrumbs {pathname} {leaf} />{/if}
@@ -60,13 +54,12 @@
 <style>
   .page {
     width: 100%;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
-  .narrow { max-width: var(--content-max); }
-  .wide { max-width: 64rem; }
 
   .page-head {
     display: flex;
@@ -75,7 +68,11 @@
     gap: var(--space-4);
     flex-wrap: wrap;
   }
-  .head-text { display: flex; flex-direction: column; gap: var(--space-1); }
+  .head-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
   h1 {
     margin: var(--space-1) 0 0;
     font-family: var(--font-display);
@@ -86,7 +83,7 @@
     margin: 0;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
-    max-width: 42rem;
+    max-width: var(--prose-max);
   }
   .head-actions {
     display: flex;

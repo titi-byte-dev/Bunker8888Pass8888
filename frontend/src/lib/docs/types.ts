@@ -27,9 +27,32 @@ export type DocFlowGraphNode = {
 };
 
 /** Payload de cada nó no Svelte Flow (DOC-011). */
+export type DocFlowNodeRole = "from" | "to" | "both" | null;
+
 export type DocFlowNodeData = {
   label: string;
   active?: boolean;
+  /** Origem / destino do passo actual — cores distintas. */
+  role?: DocFlowNodeRole;
+  /** Passo actual — força re-render quando o highlight muda. */
+  stepIndex?: number;
+  /** Linha vertical (lifeline) até ao fim da timeline. */
+  lifelineHeight?: number;
+};
+
+export type DocFlowEdgeState = "current" | "done" | "pending";
+
+/** Dados da aresta em fila (sequence diagram). */
+export type DocSequenceEdgeData = {
+  rowIndex: number;
+  rowY: number;
+  rowHeight: number;
+  sourceCenterX: number;
+  targetCenterX: number;
+  selfLoop: boolean;
+  selfLoopWidth?: number;
+  state: DocFlowEdgeState;
+  canvasWidth: number;
 };
 
 export type DocFlowGraphEdge = {

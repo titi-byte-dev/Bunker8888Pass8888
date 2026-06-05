@@ -40,7 +40,9 @@
   --duration-normal: 280ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --content-max: 42rem;
+  --content-max: 64rem;
+  /** Largura máxima de prosa (lead, parágrafos introdutórios) — não limita o layout da página. */
+  --prose-max: 48rem;
 }
 
 /* --- Tema escuro (omissão — Aegis Dark) ----------------------------------- */

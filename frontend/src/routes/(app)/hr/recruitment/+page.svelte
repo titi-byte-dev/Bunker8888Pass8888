@@ -113,7 +113,7 @@
   title="Recrutamento"
   taskId="AGENT-007"
   description="Candidaturas por e-mail com triagem às cegas — género, etnia e idade ficam ocultos antes do resumo (CT-RGPD-04)."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-hr-agent-recruitment" label="Como funciona a triagem às cegas?" />

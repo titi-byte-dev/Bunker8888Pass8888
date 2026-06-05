@@ -38,7 +38,7 @@
 <PageShell
   title="Trabalho"
   description="Turnos, sandbox browser, CLI e ferramentas operacionais BYOD."
-  width="narrow"
+ 
 >
   {#snippet actions()}
     <DocHelpLink />

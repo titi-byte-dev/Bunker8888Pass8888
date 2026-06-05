@@ -188,7 +188,7 @@
   title="Comissões"
   taskId="FIN-007"
   description="Comissões de vendas sobre faturas pagas — calculadas e cifradas no cliente."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <Button variant="ghost" size="sm" href="/fin/invoices">← Faturas</Button>

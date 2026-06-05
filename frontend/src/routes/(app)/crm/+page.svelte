@@ -243,7 +243,7 @@
   title="Leads"
   taskId="CRM-001/002 · AGENT-009"
   description="Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Move leads pelas colunas do funil (estágio decifrado no cliente)."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <DocHelpLink slug="journey-erp-flow-dev" label="Como funciona o fluxo ERP em dev?" />

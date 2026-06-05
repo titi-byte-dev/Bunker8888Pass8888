@@ -154,7 +154,7 @@
   title="Aliases de E-mail"
   taskId="MAIL-001/002"
   description="Endereços descartáveis que reencaminham para o teu e-mail real. Envio em dev via Mailpit (SMTP localhost:1025). Envia para o teu alias @aegis.email e corre a prospeção no CRM."
-  width="narrow"
+ 
 >
   {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 

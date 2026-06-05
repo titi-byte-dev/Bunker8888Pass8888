@@ -76,7 +76,7 @@
   title="Relatório de Conformidade"
   taskId="HR-008"
   description="Metadados RGPD e prova de integridade da cadeia de auditoria — conteúdos das fichas permanecem cifrados."
-  width="wide"
+ 
 >
   {#snippet actions()}
     <span class="no-print">
