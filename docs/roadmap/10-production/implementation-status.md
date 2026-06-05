@@ -56,7 +56,8 @@
 |---|---|
 | UI-001–008, UI-010 | 🟢 |
 | UI-009 Capacitor mobile | 🟡 scaffold + guia |
-| UI-011–017 design system aplicado | ⚪ ver [`09-design/design-system.md`](../09-design/design-system.md) |
+| UI-011–015, UI-017 design system | 🟢 |
+| UI-016 migração páginas | ⚪ ver [`09-design/design-system.md`](../09-design/design-system.md) |
 
 ## Próximos passos (prioridade)
 

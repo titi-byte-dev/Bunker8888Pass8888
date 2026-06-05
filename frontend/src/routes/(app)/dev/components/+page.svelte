@@ -3,6 +3,7 @@
   import {
     CATALOG_SECTIONS,
     MOCK_HEALTH_REPORT,
+    MOCK_TABLE_ROWS,
     SEMANTIC_COLORS,
     TYPE_SCALE,
   } from "$lib/design/catalog";
@@ -10,8 +11,39 @@
   import { loadThemePreference, setThemePreference } from "$lib/design";
   import SecurityHealthCard from "$lib/security/SecurityHealthCard.svelte";
   import CopyField from "$lib/vault/CopyField.svelte";
+  import {
+    Button,
+    confirmDialog,
+    DataTable,
+    ListRow,
+    MetricCard,
+    Skeleton,
+    toast,
+    type DataColumn,
+  } from "$lib/ui";
 
   let themeMode = $state<ThemeMode>(loadThemePreference());
+  let tableLoading = $state(false);
+
+  type DemoRow = (typeof MOCK_TABLE_ROWS)[number];
+
+  const tableColumns: DataColumn<DemoRow>[] = [
+    { id: "name", label: "Serviço" },
+    { id: "monthly", label: "Mensal", align: "right", mono: true },
+    { id: "fiscal", label: "Fiscal", muted: true },
+    { id: "status", label: "Estado" },
+  ];
+
+  async function demoConfirm() {
+    const ok = await confirmDialog({
+      title: "Apagar subscrição?",
+      message: "Esta acção remove o registo localmente. Não envia dados ao servidor.",
+      variant: "danger",
+      confirmLabel: "Apagar",
+    });
+    if (ok) toast.success("Confirmado — demo UI-017");
+    else toast.info("Cancelado");
+  }
 
   function setTheme(mode: ThemeMode) {
     themeMode = mode;
@@ -127,6 +159,61 @@
     <CopyField label="Nota pública" value="Sem segredo — clipboard 8s" />
   </section>
 
+  <section id="feedback" class="block">
+    <h2>Feedback (UI-017)</h2>
+    <p class="hint">Toast global no canto; ConfirmDialog no layout; Skeleton substitui «A carregar…».</p>
+    <div class="btn-row">
+      <Button variant="secondary" onclick={() => toast.info("Sincronização em curso…")}>Toast info</Button>
+      <Button variant="secondary" onclick={() => toast.success("Item guardado")}>Toast sucesso</Button>
+      <Button variant="secondary" onclick={() => toast.warning("Rever política de turno")}>Toast atenção</Button>
+      <Button variant="secondary" onclick={() => toast.error("Falha de rede")}>Toast erro</Button>
+      <Button variant="danger" onclick={demoConfirm}>ConfirmDialog</Button>
+    </div>
+    <h3>Skeleton</h3>
+    <div class="sk-demo">
+      <Skeleton variant="text" width="70%" />
+      <Skeleton variant="row" />
+      <Skeleton variant="row" />
+      <Skeleton variant="table" rows={3} cols={4} />
+    </div>
+  </section>
+
+  <section id="data" class="block">
+    <h2>Dados (UI-015)</h2>
+    <p class="hint">MetricCard, ListRow e DataTable — densidade tipo Stripe.</p>
+    <div class="metrics-demo">
+      <MetricCard label="por mês" value="€142" />
+      <MetricCard label="activas" value="12" trend={{ direction: "up", label: "+2 este mês" }} />
+      <MetricCard label="poupança potencial" value="€38" variant="warning" />
+    </div>
+    <h3>ListRow</h3>
+    <div class="list-demo">
+      <ListRow title="Netflix" meta="user@empresa.pt" href="/vault" />
+      <ListRow title="GitHub Enterprise" meta="org-aegis" href="/vault" />
+    </div>
+    <h3>DataTable</h3>
+    <div class="table-actions">
+      <Button
+        variant="ghost"
+        size="sm"
+        onclick={() => {
+          tableLoading = true;
+          setTimeout(() => (tableLoading = false), 1200);
+        }}
+      >
+        Simular loading
+      </Button>
+    </div>
+    <DataTable
+      columns={tableColumns}
+      rows={[...MOCK_TABLE_ROWS]}
+      keyFn={(r) => r.id}
+      loading={tableLoading}
+      rowClass={(r) => (r.status === "inactiva" ? "off" : undefined)}
+      emptyTitle="Sem subscrições"
+    />
+  </section>
+
   <section id="components" class="block">
     <h2>Componentes vivos</h2>
     <h3>SecurityHealthCard</h3>
@@ -208,6 +295,32 @@
   .block {
     margin-bottom: var(--space-10);
     padding-top: var(--space-2);
+  }
+
+  .sk-demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 28rem;
+  }
+
+  .metrics-demo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .list-demo {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-width: 28rem;
+    margin-bottom: var(--space-4);
+  }
+
+  .table-actions {
+    margin-bottom: var(--space-2);
   }
 
   h2 {

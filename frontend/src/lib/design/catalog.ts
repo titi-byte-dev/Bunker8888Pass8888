@@ -14,8 +14,17 @@ export const CATALOG_SECTIONS: CatalogSection[] = [
   { id: "spacing", title: "Spacing & radius" },
   { id: "buttons", title: "Botões" },
   { id: "forms", title: "Formulários" },
+  { id: "feedback", title: "Feedback (UI-017)" },
+  { id: "data", title: "Dados (UI-015)" },
   { id: "components", title: "Componentes vivos" },
 ];
+
+/** Linhas de exemplo para DataTable no catálogo. */
+export const MOCK_TABLE_ROWS = [
+  { id: "1", name: "Notion", monthly: "€12", fiscal: "Software", status: "activa" },
+  { id: "2", name: "Figma", monthly: "€15", fiscal: "Design", status: "activa" },
+  { id: "3", name: "Legacy CRM", monthly: "€49", fiscal: "Pendente", status: "inactiva" },
+] as const;
 
 export const SEMANTIC_COLORS = [
   { name: "accent", var: "--color-accent", bg: "--color-accent-muted" },

@@ -16,6 +16,7 @@
   import { clearSession, loadUserEmail } from "$lib/session";
   import { purgeMasterKey } from "$lib/vault/masterKeyStore";
   import ShellPageMotion from "$lib/motion/ShellPageMotion.svelte";
+  import { ToastHost, ConfirmDialog } from "$lib/ui";
 
   let { children } = $props();
 
@@ -83,6 +84,8 @@
 </div>
 
 <CommandPalette open={paletteOpen} onClose={() => (paletteOpen = false)} />
+<ToastHost />
+<ConfirmDialog />
 
 <style>
   .app-shell {

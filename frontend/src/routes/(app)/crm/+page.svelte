@@ -16,6 +16,7 @@
   import { reportDealClosed } from "$lib/crm/dealClosedService";
   import { isDealClosed, proformaFromLead } from "$lib/crm/dealClosed";
   import { issueInvoice } from "$lib/fin/invoicesService";
+  import { confirmDialog, toast } from "$lib/ui";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -201,10 +202,17 @@
   }
 
   async function remove(lead: Lead) {
-    if (!confirm(`Apagar lead «${lead.name}»?`)) return;
+    const ok = await confirmDialog({
+      title: "Apagar lead?",
+      message: `Remove «${lead.name}» do funil. Esta acção não pode ser desfeita.`,
+      variant: "danger",
+      confirmLabel: "Apagar",
+    });
+    if (!ok) return;
     busy = true;
     try {
       await deleteLead(lead.id);
+      toast.success(`Lead «${lead.name}» apagado.`);
       await refresh();
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao apagar";
