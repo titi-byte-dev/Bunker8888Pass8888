@@ -19,6 +19,8 @@ const (
 	HRRecruitmentRun = "hr.recruitment.run"
 	// FinSubscriptionStale — cliente reportou licenças SaaS sem uso (AGENT-006).
 	FinSubscriptionStale = "fin.subscription.stale"
+	// FinTransactionsSynced — cliente sincronizou movimentos e reportou reconciliação (FIN-003).
+	FinTransactionsSynced = "fin.transactions.synced"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).

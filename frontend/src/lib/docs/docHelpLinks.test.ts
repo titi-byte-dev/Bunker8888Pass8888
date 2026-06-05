@@ -30,6 +30,10 @@ describe("doc help links (DOC-013)", () => {
     expect(resolveDocHelp("/hr/recruitment")?.slug).toBe("journey-hr-agent-recruitment");
   });
 
+  it("resolve Open Banking com journey de reconciliação", () => {
+    expect(resolveDocHelp("/fin/banking")?.slug).toBe("journey-finance-agent-reconcile");
+  });
+
   it("devolve null para rotas sem doc", () => {
     expect(resolveDocHelp("/settings")).toBeNull();
   });

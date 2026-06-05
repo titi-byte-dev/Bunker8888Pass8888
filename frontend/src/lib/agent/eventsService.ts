@@ -40,10 +40,13 @@ function labelForType(type: string, payload?: Record<string, unknown>): string {
       if (action === "create_purchase_order") return "Sugestão: ordem de compra";
       if (action === "screen_candidate") return "Sugestão: triagem às cegas";
       if (action === "review_saas_licenses") return "Sugestão: rever licenças SaaS";
+      if (action === "reconcile_payments") return "Sugestão: reconciliar pagamentos";
       return "Sugestão do orquestrador";
     }
     case "fin.subscription.stale":
       return "Licenças SaaS sem uso reportadas";
+    case "fin.transactions.synced":
+      return "Movimentos bancários sincronizados";
     case "hr.recruitment.run":
       return "Triagem de candidatos executada";
     case "hr.employee.created":

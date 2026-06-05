@@ -117,7 +117,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 |---|---|---|---|---|---|
 | FIN-001 | Monitorização de custos SaaS (cruza com vault) | 2 | M | 🟢 | VAULT-005 |
 | FIN-002 | Alertas de licenças sem uso | 2 | S | 🟢 | FIN-001 |
-| FIN-003 | Integração Open Banking (mTLS) | 3 | XL | ⚪ | INFRA-002 |
+| FIN-003 | Integração Open Banking (mTLS) | 3 | XL | 🟡 | INFRA-002 |
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
 | FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
 

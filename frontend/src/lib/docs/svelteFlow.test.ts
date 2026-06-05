@@ -17,6 +17,7 @@ describe("Svelte Flow nos journeys (DOC-011/012)", () => {
       "journey-ops-agent-inventory",
       "journey-hr-agent-recruitment",
       "journey-finance-agent-saas",
+      "journey-finance-agent-reconcile",
     ]) {
       const flows = collectFlows(slug);
       const sequence = flows.find((f) => f.type === "sequence");

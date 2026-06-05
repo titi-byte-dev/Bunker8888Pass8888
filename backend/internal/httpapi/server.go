@@ -22,6 +22,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -66,7 +67,8 @@ type Deps struct {
 	MailRelay         *mail.RelayService  // nil desactiva compose/relay SMTP
 	MailRateLimiter   *mail.RateLimiter   // nil desactiva quotas MAIL-005
 	MailWebhookSecret string              // vazio desactiva webhook
-	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
+	Fin          *fin.Repo              // nil desactiva endpoints /api/fin/*
+	OpenBanking  *openbanking.Service   // nil desactiva endpoints /api/fin/banking/*
 	Ops          *ops.Repo          // nil desactiva endpoints /api/ops/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
@@ -258,6 +260,12 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("PUT /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleUpdateSubscription(deps.Fin)))
 		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
 	}
+	if deps.OpenBanking != nil && deps.Auth != nil {
+		// Open Banking scaffold (FIN-003) — mock provider em dev.
+		mux.Handle("GET /api/fin/banking/status", requireAuth(deps.Auth, handleBankingStatus(deps.OpenBanking)))
+		mux.Handle("POST /api/fin/banking/connect", requireAuth(deps.Auth, handleBankingConnect(deps.OpenBanking)))
+		mux.Handle("POST /api/fin/banking/sync", requireAuth(deps.Auth, handleBankingSync(deps.OpenBanking)))
+	}
 	if deps.Ops != nil && deps.Auth != nil {
 		// Inventário operacional (AGENT-008).
 		mux.Handle("GET /api/ops/inventory", requireAuth(deps.Auth, handleListInventory(deps.Ops)))
@@ -281,6 +289,7 @@ func NewRouter(deps Deps) http.Handler {
 		}
 		if deps.AgentBus != nil {
 			mux.Handle("POST /api/agent/finance/report-stale", requireAuth(deps.Auth, handleReportStaleSubscriptions(deps.AgentBus)))
+			mux.Handle("POST /api/agent/finance/report-sync", requireAuth(deps.Auth, handleReportTransactionsSynced(deps.AgentBus)))
 		}
 		if deps.AgentEvents != nil {
 			mux.Handle("GET /api/agent/events", requireAuth(deps.Auth, handleListAgentEvents(deps.AgentEvents)))

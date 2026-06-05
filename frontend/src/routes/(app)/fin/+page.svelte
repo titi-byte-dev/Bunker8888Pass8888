@@ -203,12 +203,13 @@
       <h1>Monitorização de Custos</h1>
       <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />
     </div>
-    <p class="lead">
-      As subscrições são cifradas com a tua Master Key — só tu vês os custos. O
-      dashboard cruza cada subscrição com o login do cofre e assinala licenças
-      esquecidas (sem uso) ou sem credencial associada.
-    </p>
+    <a class="back" href="/fin/banking">Open Banking →</a>
   </header>
+  <p class="lead">
+    As subscrições são cifradas com a tua Master Key — só tu vês os custos. O
+    dashboard cruza cada subscrição com o login do cofre e assinala licenças
+    esquecidas (sem uso) ou sem credencial associada.
+  </p>
 
   {#if locked}
     <section class="panel">
@@ -360,7 +361,17 @@
     max-width: 56rem;
   }
   .page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
     margin-bottom: var(--space-5);
+  }
+  .back {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    flex-shrink: 0;
   }
   .eyebrow {
     margin: 0 0 var(--space-1);
@@ -376,7 +387,7 @@
     font-size: var(--text-2xl);
   }
   .lead {
-    margin: var(--space-3) 0 0;
+    margin: 0 0 var(--space-5);
     max-width: 42rem;
     color: var(--color-text-muted);
     font-size: var(--text-sm);

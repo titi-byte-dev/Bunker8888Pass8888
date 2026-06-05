@@ -1,0 +1,235 @@
+{
+  "slug": "journey-finance-agent-reconcile",
+  "title": "Journey: Agente financeiro reconcilia pagamentos (FIN-003 / AGENT-006)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "finance_agent_reconcile",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Agente financeiro reconcilia pagamentos (FIN-003 / AGENT-006)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Responsável financeiro · <strong>Epics:</strong> <code>AGENT</code>, <code>FIN</code></p>\n</blockquote>\n<p>Liga uma conta bancária (mock em dev), sincroniza movimentos e cruza débitos com\nsubscrições SaaS. O orquestrador sugere reconciliação — sem alterar dados automaticamente.</p>\n<blockquote>\n<p>💡 <strong>Conceito:</strong> Open Banking — regulação PSD2 que permite acesso a movimentos\ncom consentimento do titular, via APIs mTLS entre TPP e banco.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador activo com worker <code>finance</code> (AGENT-005).</li>\n<li>Subscrições em <code>/fin</code> com custos mensais definidos.</li>\n<li>Master Key desbloqueada.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant OB as /fin/banking\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n\r\n    U->>OB: Simular consentimento PSD2\r\n    OB->>API: POST /api/fin/banking/connect\r\n    U->>OB: Sincronizar movimentos\r\n    OB->>API: POST /api/fin/banking/sync\r\n    OB->>OB: reconcileTransactions() no cliente\r\n    OB->>API: POST /api/agent/finance/report-sync\r\n    Note over API: só contagens (matched/unmatched)\r\n    API->>Orq: fin.transactions.synced\r\n    Orq->>API: orchestrator.action.suggested\r\n    Note over OB: «Sugestão: reconciliar pagamentos»\r\n    U->>OB: Aprovar (AGENT-009)\r\n    OB->>OB: revê movimentos sem correspondência",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "Simular consentimento PSD2"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/fin/banking/connect"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "Sincronizar movimentos"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/fin/banking/sync"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "reconcileTransactions() no cliente"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/agent/finance/report-sync"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "fin.transactions.synced"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "Aprovar (AGENT-009)"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "revê movimentos sem correspondência"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "OB",
+                "label": "/fin/banking",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 400
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "OB",
+                "label": "Simular consentimento PSD2",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "OB",
+                "target": "API",
+                "label": "POST /api/fin/banking/connect",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "U",
+                "target": "OB",
+                "label": "Sincronizar movimentos",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "OB",
+                "target": "API",
+                "label": "POST /api/fin/banking/sync",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "OB",
+                "target": "OB",
+                "label": "reconcileTransactions() no cliente",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "OB",
+                "target": "API",
+                "label": "POST /api/agent/finance/report-sync",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "API",
+                "target": "Orq",
+                "label": "fin.transactions.synced",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "U",
+                "target": "OB",
+                "label": "Aprovar (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-9",
+                "source": "OB",
+                "target": "OB",
+                "label": "revê movimentos sem correspondência",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Em <code>/fin</code>, abre <strong>Open Banking</strong>.</li>\n<li>Clica <strong>Simular consentimento PSD2</strong> — estado passa a <code>connected</code>.</li>\n<li><strong>Sincronizar movimentos</strong> — recebe transacções mock (Netflix, Spotify, AWS…).</li>\n<li>O cliente associa débitos a subscrições pelo valor mensal.</li>\n<li>No feed, aparece <strong>Sugestão: reconciliar pagamentos</strong>.</li>\n<li><strong>Aprova</strong> — revê os movimentos «sem correspondência» manualmente.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Metadados de ligação em <code>bank_connections</code> (sem tokens em claro).</li>\n<li>Evento <code>fin.transactions.synced</code> auditado; movimentos não persistidos no servidor.</li>\n</ul>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> provider real e certificados mTLS (<code>AEGIS_OB_*</code>) ficam para\nquando INFRA-002 (WireGuard) e credenciais de TPP estiverem disponíveis.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Responsável financeiro",
+  "order": 99
+}
