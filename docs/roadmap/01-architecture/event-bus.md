@@ -56,21 +56,25 @@ stateDiagram-v2
     Descartado --> [*]
 ```
 
-## Evolução (AGENT-005)
+## Orquestrador (AGENT-005)
+
+Ver [`orchestrator.md`](orchestrator.md) — workers subscrevem o bus e publicam sugestões.
+
+## Evolução (escala)
 
 ```mermaid
 flowchart TB
-    subgraph Hoje["AGENT-004"]
+    subgraph Hoje["AGENT-004/005"]
         CH[channels Go]
         PG[(PostgreSQL)]
+        ORQ[Orquestrador workers]
     end
     subgraph Futuro["Escala"]
         NATS[NATS JetStream]
-        ORQ[Orquestrador]
     end
     CH --> PG
+    ORQ --> CH
     CH -.-> NATS
-    NATS --> ORQ
 ```
 
 Ver também [`agents-architecture.md`](agents-architecture.md) e

@@ -20,7 +20,7 @@ interface AgentEventDTO {
   created_at: string;
 }
 
-function labelForType(type: string): string {
+function labelForType(type: string, payload?: Record<string, unknown>): string {
   switch (type) {
     case "mail.inbox.received":
       return "E-mail recebido no alias";
@@ -28,6 +28,11 @@ function labelForType(type: string): string {
       return "Prospeção executada";
     case "agent.tool.executed":
       return "Tool de agente executada";
+    case "orchestrator.action.suggested": {
+      const action = payload?.action;
+      if (action === "run_prospection") return "Sugestão: correr prospeção";
+      return "Sugestão do orquestrador";
+    }
     default:
       return type;
   }
@@ -40,7 +45,7 @@ function mapEvent(d: AgentEventDTO): AgentEvent {
     source: d.source,
     payload: d.payload ?? {},
     createdAt: d.created_at,
-    label: labelForType(d.type),
+    label: labelForType(d.type, d.payload),
   };
 }
 

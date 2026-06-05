@@ -1,0 +1,165 @@
+{
+  "slug": "journey-orchestrator",
+  "title": "Journey: Orquestrador sugere próximo passo (AGENT-005)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "orchestrator",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Orquestrador sugere próximo passo (AGENT-005)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Utilizador comercial · <strong>Epics:</strong> <code>AGENT</code>, <code>MAIL</code>, <code>CRM</code></p>\n</blockquote>\n<p>Quando chega e-mail ao alias, o orquestrador sugere «correr prospeção» no feed —\nsem executar acções que exijam Master Key automaticamente.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Event Bus activo (AGENT-004).</li>\n<li>Orquestrador arrancado com worker <code>prospection</code>.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant SMTP as E-mail\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n    participant CRM as /crm\r\n\r\n    SMTP->>API: ingest alias\r\n    API->>Orq: mail.inbox.received\r\n    Orq->>API: orchestrator.action.suggested\r\n    CRM->>API: GET /api/agent/events\r\n    Note over CRM: «Sugestão: correr prospeção»\r\n    CRM->>API: POST prospection/run (utilizador)",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "SMTP",
+              "to": "API",
+              "arrow": "->>",
+              "label": "ingest alias"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "mail.inbox.received"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST prospection/run (utilizador)"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "SMTP",
+                "label": "E-mail",
+                "x": 0
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 200
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 400
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "SMTP",
+                "target": "API",
+                "label": "ingest alias",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "API",
+                "target": "Orq",
+                "label": "mail.inbox.received",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "CRM",
+                "target": "API",
+                "label": "GET /api/agent/events",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST prospection/run (utilizador)",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Recebe e-mail no alias (SMTP ou simulação).</li>\n<li>Abre <code>/crm</code> — feed mostra <strong>Sugestão: correr prospeção</strong>.</li>\n<li>Clica <strong>Correr prospeção</strong> (acção humana).</li>\n<li>Importa rascunhos com cifragem local.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Sugestão auditada em <code>agent_events</code>.</li>\n<li>Utilizador mantém controlo (AGENT-009 preparado).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Utilizador comercial",
+  "order": 99
+}

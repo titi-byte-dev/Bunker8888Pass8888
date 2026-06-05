@@ -13,6 +13,8 @@ const (
 	CRMProspectionRun = "crm.prospection.run"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
+	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).
+	OrchestratorActionSuggested = "orchestrator.action.suggested"
 	// WildcardSubscribe recebe todos os tipos (só uso interno/debug).
 	WildcardSubscribe = "*"
 )
