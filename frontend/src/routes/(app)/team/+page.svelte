@@ -205,16 +205,18 @@
       </ol>
     </section>
 
-    <!-- Painel D — a seguir -->
-    <section class="panel next">
+    <!-- Painel D — cofres partilhados (SHARE-002) -->
+    <section class="panel">
       <div class="panel-head">
-        <p class="eyebrow">A seguir</p>
-        <span class="pill soon">SHARE-002</span>
+        <p class="eyebrow">Cofres partilhados</p>
+        <span class="pill on">Disponível</span>
       </div>
       <p class="panel-body">
-        Cofres partilhados por departamento, com permissões e revogação imediata —
-        construídos sobre estas chaves.
+        Cofres partilhados por equipa, com permissões e revogação imediata —
+        construídos sobre estas chaves. A chave de cada cofre é re-cifrada para a
+        chave pública de cada membro.
       </p>
+      <a class="btn primary" href="/team/vaults">Abrir cofres partilhados</a>
     </section>
   {/if}
 </section>
@@ -359,11 +361,6 @@
     color: var(--color-text-muted);
   }
 
-  .pill.soon {
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-  }
-
   /* Lookup form */
   .lookup {
     display: flex;
@@ -472,11 +469,6 @@
   .steps em {
     font-style: normal;
     color: var(--color-accent);
-  }
-
-  .next {
-    border-style: dashed;
-    background: transparent;
   }
 
   .danger .panel-title {

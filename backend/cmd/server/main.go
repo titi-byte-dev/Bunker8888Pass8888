@@ -11,24 +11,25 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharedvaults"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharekeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -72,6 +73,7 @@ func main() {
 		passkeyRepo := passkeys.NewRepo(pool)
 		sentinelRepo := sentinel.NewRepo(pool)
 		shareKeysRepo := sharekeys.NewRepo(pool)
+		sharedVaultsRepo := sharedvaults.NewRepo(pool)
 
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
@@ -103,22 +105,23 @@ func main() {
 		}
 
 		deps = httpapi.Deps{
-			Auth:     auth.NewService(userRepo, sessionRepo, sessionTTL),
-			Vault:    vault.NewRepo(pool),
-			Hub:      hub,
-			Wipe:     wipeSvc,
-			Users:    userRepo,
-			Shifts:   shiftRepo,
-			Geofence: geoRepo,
-			Recovery: recoveryRepo,
-			Emergency: emergency.NewService(emergencyRepo, userRepo),
-			Devices:  deviceRepo,
-			CLIca:    cliCA,
-			Passkeys:  passkeySvc,
-			Sentinel:  sentinel.NewService(sentinelRepo),
-			ShareKeys: shareKeysRepo,
-			AdminKey:  cfg.AdminKey,
-			Pool:     pool,
+			Auth:         auth.NewService(userRepo, sessionRepo, sessionTTL),
+			Vault:        vault.NewRepo(pool),
+			Hub:          hub,
+			Wipe:         wipeSvc,
+			Users:        userRepo,
+			Shifts:       shiftRepo,
+			Geofence:     geoRepo,
+			Recovery:     recoveryRepo,
+			Emergency:    emergency.NewService(emergencyRepo, userRepo),
+			Devices:      deviceRepo,
+			CLIca:        cliCA,
+			Passkeys:     passkeySvc,
+			Sentinel:     sentinel.NewService(sentinelRepo),
+			ShareKeys:    shareKeysRepo,
+			SharedVaults: sharedVaultsRepo,
+			AdminKey:     cfg.AdminKey,
+			Pool:         pool,
 		}
 		logger.Info("base de dados ligada e migrada")
 	} else {
