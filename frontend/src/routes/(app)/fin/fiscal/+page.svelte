@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import { PageShell, Panel, Button, StatusBanner, EmptyState } from "$lib/ui";
   import { listSubscriptions, updateSubscription } from "$lib/fin/subscriptionsService";
   import type { Subscription } from "$lib/fin/subscriptions";
   import {
@@ -80,25 +81,21 @@
 
 <svelte:head><title>Fiscal — AegisPass</title></svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">FIN-005</p>
-      <h1>Categorização fiscal</h1>
-      <DocHelpLink slug="journey-fiscal-categorization" label="Como funciona?" />
-    </div>
-    <a class="back" href="/fin">← Custos SaaS</a>
-  </header>
-
-  <p class="lead">
-    Classificação IRC calculada no cliente — o servidor só guarda blobs cifrados. Não
-    substitui aconselhamento de contabilista certificado.
-  </p>
+<PageShell
+  title="Categorização fiscal"
+  taskId="FIN-005"
+  description="Classificação IRC calculada no cliente — o servidor só guarda blobs cifrados. Não substitui aconselhamento de contabilista certificado."
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-fiscal-categorization" label="Como funciona?" />
+  {/snippet}
 
   {#if locked}
-    <p class="muted">🔒 Desbloqueia a Master Key em <a href="/vault">/vault</a>.</p>
+    <StatusBanner variant="warning">
+      Desbloqueia a Master Key em <a href="/vault">/vault</a>.
+    </StatusBanner>
   {:else}
-    {#if error}<p class="error" role="alert">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
     <section class="metrics">
       <div class="metric">
@@ -114,17 +111,27 @@
     </section>
 
     <div class="actions">
-      <button type="button" class="btn primary" disabled={busy || summary.pendingCount === 0} onclick={autoClassify}>
+      <Button
+        variant="primary"
+        loading={busy}
+        disabled={summary.pendingCount === 0}
+        onclick={autoClassify}
+      >
         Sugerir automaticamente
-      </button>
+      </Button>
     </div>
 
-    <section class="panel">
+    <Panel padding={summary.lines.length === 0 ? "md" : "none"}>
       {#if loading}
         <p class="muted">A carregar…</p>
       {:else if summary.lines.length === 0}
-        <p class="muted">Sem subscrições activas.</p>
+        <EmptyState
+          icon="🧾"
+          title="Sem subscrições activas"
+          description="Adiciona custos SaaS para os classificares fiscalmente."
+        />
       {:else}
+        <div class="table-scroll">
         <table>
           <thead>
             <tr><th>Serviço</th><th>Mensal</th><th>Classificação</th><th>Dedutível</th></tr>
@@ -150,66 +157,32 @@
             {/each}
           </tbody>
         </table>
+        </div>
       {/if}
-    </section>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 56rem; }
-  .page-head {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--space-4);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 { margin: 0; font-family: var(--font-display); }
-  .lead { color: var(--color-text-muted); font-size: var(--text-sm); max-width: 40rem; }
-  .back { font-size: var(--text-sm); color: var(--color-text-muted); }
+  /* Cabecalho, painel e estados vazios vivem agora em $lib/ui (UI-012). */
   .metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
     gap: var(--space-3);
-    margin: var(--space-4) 0;
   }
   .metric {
     padding: var(--space-3);
-    background: var(--color-surface);
+    background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
   }
   .metric .n { display: block; font-size: var(--text-lg); font-weight: 600; }
-  .metric.warn .n { color: var(--color-warning, #b45309); }
-  .actions { margin-bottom: var(--space-4); }
-  .btn.primary {
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-accent);
-    color: var(--color-on-accent);
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .panel {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-    overflow-x: auto;
-  }
+  .metric.warn .n { color: var(--color-warning); }
+  .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
-  th, td { text-align: left; padding: var(--space-2); border-bottom: 1px solid var(--color-border); }
+  th, td { text-align: left; padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--color-border); }
   .mono { font-family: var(--font-mono); }
   select { max-width: 16rem; }
-  .muted, .error { font-size: var(--text-sm); }
-  .error { color: var(--color-danger); }
+  .muted { font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>

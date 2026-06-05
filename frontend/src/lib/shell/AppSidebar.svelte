@@ -1,38 +1,66 @@
 <script lang="ts">
-  import type { NavItem } from "./nav";
-  import { isNavActive } from "./nav";
+  /**
+   * AppSidebar (UI-011) — navegacao em ARVORE.
+   * Antes: lista plana (~15 links irmaos). Agora: modulos de topo + filhos
+   * que se expandem quando o modulo (ou um filho) esta activo.
+   * Fonte unica: lib/shell/routes.ts (ROUTE_TREE).
+   */
+  import { isRouteActive, type RouteNode } from "./routes";
 
   interface Props {
-    items: NavItem[];
+    modules: RouteNode[];
     pathname: string;
   }
+  let { modules, pathname }: Props = $props();
 
-  let { items, pathname }: Props = $props();
+  const dev = import.meta.env.DEV;
+
+  /** Um modulo expande-se se ele ou algum filho corresponder ao pathname. */
+  function moduleOpen(node: RouteNode): boolean {
+    if (isRouteActive(pathname, node.href)) return true;
+    return (node.children ?? []).some((c) => isRouteActive(pathname, c.href));
+  }
 </script>
 
-<nav class="sidebar" aria-label="Navegação principal">
+<nav class="sidebar" aria-label="Navegacao principal">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">◆</span>
     <span class="brand-name">AegisPass</span>
   </div>
 
   <ul class="nav-list">
-    {#each items as item (item.id)}
+    {#each modules as mod (mod.href)}
+      {@const open = moduleOpen(mod)}
       <li>
-        {#if item.comingSoon}
+        {#if mod.comingSoon}
           <span class="nav-link disabled" aria-disabled="true">
-            {item.label}
-            <span class="badge">Em breve</span>
+            {mod.label}<span class="badge">Em breve</span>
           </span>
         {:else}
           <a
-            href={item.href}
-            class="nav-link"
-            class:active={isNavActive(pathname, item.href)}
-            aria-current={isNavActive(pathname, item.href) ? "page" : undefined}
+            href={mod.href}
+            class="nav-link module"
+            class:active={isRouteActive(pathname, mod.href)}
+            aria-current={pathname === mod.href ? "page" : undefined}
           >
-            {item.label}
+            {mod.label}
+            {#if dev && mod.taskId}<span class="task">{mod.taskId}</span>{/if}
           </a>
+        {/if}
+
+        {#if mod.children && open}
+          <ul class="children">
+            {#each mod.children as child (child.href)}
+              <a
+                href={child.href}
+                class="nav-link child"
+                class:active={pathname === child.href}
+                aria-current={pathname === child.href ? "page" : undefined}
+              >
+                {child.label}
+              </a>
+            {/each}
+          </ul>
         {/if}
       </li>
     {/each}
@@ -50,11 +78,8 @@
     background: var(--color-bg-elevated);
     box-sizing: border-box;
   }
-
   @media (min-width: 768px) {
-    .sidebar {
-      display: flex;
-    }
+    .sidebar { display: flex; }
   }
 
   .brand {
@@ -63,12 +88,7 @@
     gap: var(--space-2);
     padding: var(--space-2) var(--space-2) var(--space-6);
   }
-
-  .brand-mark {
-    color: var(--color-accent);
-    font-size: var(--text-lg);
-  }
-
+  .brand-mark { color: var(--color-accent); font-size: var(--text-lg); }
   .brand-name {
     font-family: var(--font-display);
     font-weight: 600;
@@ -100,23 +120,35 @@
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
   }
-
+  .nav-link.module { font-weight: 600; }
   .nav-link:hover:not(.disabled) {
     background: var(--color-bg-surface);
     color: var(--color-text);
   }
+  .nav-link.active { color: var(--color-accent); }
+  .nav-link.module.active { background: var(--color-accent-muted); }
+  .nav-link.disabled { opacity: 0.55; cursor: not-allowed; }
 
-  .nav-link.active {
+  .children {
+    list-style: none;
+    margin: var(--space-1) 0 var(--space-1) var(--space-3);
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-link.child {
+    font-weight: 500;
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+  .nav-link.child.active {
     background: var(--color-accent-muted);
     color: var(--color-accent);
   }
 
-  .nav-link.disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-
-  .badge {
+  .badge, .task {
     font-size: var(--text-xs);
     font-weight: 500;
     color: var(--color-text-muted);
@@ -124,10 +156,9 @@
     border-radius: var(--radius-sm);
     padding: 0 var(--space-1);
   }
+  .task { font-family: var(--font-mono); }
 
   @media (prefers-reduced-motion: reduce) {
-    .nav-link {
-      transition: none;
-    }
+    .nav-link { transition: none; }
   }
 </style>

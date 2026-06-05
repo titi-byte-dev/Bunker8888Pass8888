@@ -2,7 +2,7 @@
  * Registo de comandos da command palette (UI-006).
  * Sem side-effects — navegação via `href` tratada no componente.
  */
-import { visibleNavItems } from "./nav";
+import { ROUTE_TREE, type RouteNode } from "./routes";
 import type { DecodedLogin } from "$lib/vault/ui";
 
 export type CommandGroup = "navigation" | "vault" | "action" | "docs";
@@ -27,13 +27,27 @@ export function groupLabel(group: CommandGroup): string {
 }
 
 export function buildNavigationCommands(): CommandEntry[] {
-  return visibleNavItems().map((item) => ({
-    id: `nav-${item.id}`,
-    label: item.label,
-    group: "navigation" as const,
-    keywords: item.href,
-    href: item.href,
-  }));
+  // Achata o ROUTE_TREE em comandos hierarquicos: "Financas > Fiscal".
+  const out: CommandEntry[] = [];
+  const walk = (nodes: RouteNode[], prefix: string) => {
+    for (const node of nodes) {
+      const label = prefix ? `${prefix} › ${node.label}` : node.label;
+      // Evita duplicado quando o hub e um filho partilham href (ex.: /fin, /hr).
+      const childShadows = (node.children ?? []).some((c) => c.href === node.href);
+      if (!node.comingSoon && !childShadows) {
+        out.push({
+          id: `nav-${node.href}`,
+          label,
+          group: "navigation",
+          keywords: `${node.href} ${node.taskId ?? ""}`,
+          href: node.href,
+        });
+      }
+      if (node.children) walk(node.children, node.label);
+    }
+  };
+  walk(ROUTE_TREE, "");
+  return out;
 }
 
 export function buildVaultCommands(logins: DecodedLogin[]): CommandEntry[] {
