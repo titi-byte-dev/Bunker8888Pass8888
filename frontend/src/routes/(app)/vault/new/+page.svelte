@@ -4,6 +4,7 @@
   import { requireVaultAccess } from "$lib/vault/ui";
   import { blobToBase64, sealItem } from "$lib/vault/items";
   import type { LoginItem } from "$lib/vault/types";
+  import { Button, PageShell, StatusBanner } from "$lib/ui";
 
   let busy = $state(false);
   let error = $state("");
@@ -27,51 +28,20 @@
   <title>Novo login — AegisPass</title>
 </svelte:head>
 
-<section class="vault-page">
-  <header class="page-header">
-    <a href="/vault" class="back">← Cofre</a>
-    <h1>Novo login</h1>
-    <p class="subtitle">Cifragem AES-GCM no browser antes de enviar ao servidor.</p>
-  </header>
+<PageShell
+  title="Novo login"
+  taskId="VAULT-001"
+  description="Cifragem AES-GCM no browser antes de enviar ao servidor — o plaintext nunca sai do dispositivo."
+  width="narrow"
+  breadcrumb={false}
+>
+  {#snippet actions()}
+    <Button variant="ghost" size="sm" href="/vault">← Cofre</Button>
+  {/snippet}
 
   {#if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {/if}
 
   <LoginForm submitLabel="Guardar cifrado" busy={busy} onsubmit={handleCreate} />
-</section>
-
-<style>
-  .vault-page {
-    max-width: 28rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-2);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .subtitle {
-    margin: var(--space-2) 0 var(--space-6);
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-
-  .error {
-    margin-bottom: var(--space-4);
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-  }
-</style>
+</PageShell>

@@ -1,5 +1,15 @@
 <script lang="ts">
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import {
+    Button,
+    confirmDialog,
+    EmptyState,
+    PageShell,
+    Panel,
+    Skeleton,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
   import { onMount } from "svelte";
   import {
     addVaultItem,
@@ -145,9 +155,17 @@
 
   async function removeMember(userID: string) {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Remover membro?",
+      message: "Revoga o acesso ao cofre — a cópia da chave dele é apagada.",
+      confirmLabel: "Remover",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await revokeMember(open.vault.id, userID);
       open = await openSharedVault(open.vault.id);
+      toast.success("Membro removido.");
     } catch (e) {
       openError = e instanceof Error ? e.message : "Falha ao remover membro";
     }
@@ -175,9 +193,17 @@
 
   async function deleteItem(itemID: string) {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Apagar item?",
+      message: "Remove o segredo cifrado deste cofre partilhado.",
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await removeVaultItem(open.vault.id, itemID);
       open = await openSharedVault(open.vault.id);
+      toast.success("Item apagado.");
     } catch (e) {
       openError = e instanceof Error ? e.message : "Falha ao remover item";
     }
@@ -185,11 +211,19 @@
 
   async function destroyVault() {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Apagar cofre partilhado?",
+      message: `Remove «${open.vault.name}» para todos os membros. Irreversível.`,
+      confirmLabel: "Apagar cofre",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       const id = open.vault.id;
       await deleteSharedVault(id);
       vaults = vaults.filter((v) => v.id !== id);
       closeVault();
+      toast.success("Cofre apagado.");
     } catch (e) {
       openError = e instanceof Error ? e.message : "Falha ao apagar cofre";
     }
@@ -238,9 +272,17 @@
 
   async function deleteAttachment(attID: string) {
     if (!open) return;
+    const ok = await confirmDialog({
+      title: "Apagar anexo?",
+      message: "Remove o ficheiro cifrado deste cofre.",
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await removeAttachment(open.vault.id, attID);
       open = await openSharedVault(open.vault.id);
+      toast.success("Anexo apagado.");
     } catch (e) {
       openError = e instanceof Error ? e.message : "Falha ao remover anexo";
     }
@@ -270,38 +312,32 @@
   <title>Cofres Partilhados — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">SHARE-002 · Cofres partilhados</p>
-      <h1>Cofres Partilhados</h1>
-      <DocHelpLink />
-    </div>
-    <p class="lead">
-      Coleções cifradas sob uma chave de cofre própria. Convidar um colega =
-      re-cifrar essa chave para a chave pública dele. Revogar = apagar a cópia
-      dele. O servidor nunca vê o conteúdo.
-    </p>
-    <a class="back" href="/team">← Identidade de partilha</a>
-  </header>
+<PageShell
+  title="Cofres Partilhados"
+  taskId="SHARE-002"
+  description="Coleções cifradas sob uma chave de cofre própria. Convidar um colega = re-cifrar essa chave para a chave pública dele. O servidor nunca vê o conteúdo."
+  width="wide"
+>
+  {#snippet actions()}
+    <DocHelpLink />
+    <Button variant="ghost" size="sm" href="/team">← Identidade de partilha</Button>
+  {/snippet}
 
   {#if status === "loading"}
-    <div class="panel muted-panel">A carregar cofres…</div>
+    <Skeleton variant="row" />
+    <Skeleton variant="row" />
   {:else if status === "locked"}
-    <div class="panel locked">
-      <p class="panel-title">Cofre bloqueado</p>
-      <p class="panel-body">
-        Os cofres partilhados são protegidos pela tua Master Password. Desbloqueia
-        para os gerir.
-      </p>
-      <a class="btn primary" href="/auth/unlock">Desbloquear</a>
-    </div>
+    <EmptyState
+      title="Cofre bloqueado"
+      description="Os cofres partilhados são protegidos pela tua Master Password. Desbloqueia para os gerir."
+    >
+      {#snippet action()}
+        <Button href="/auth/unlock">Desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else if status === "error"}
-    <div class="panel danger">
-      <p class="panel-title">Erro</p>
-      <p class="panel-body">{loadError}</p>
-      <button type="button" class="btn secondary" onclick={load}>Tentar de novo</button>
-    </div>
+    <StatusBanner variant="error">{loadError}</StatusBanner>
+    <Button variant="secondary" onclick={load}>Tentar de novo</Button>
   {:else}
     <!-- Criar -->
     <section class="panel">
@@ -357,7 +393,7 @@
           <p class="eyebrow">Cofre · {open.vault.name}</p>
           <button type="button" class="link-btn" onclick={closeVault}>Fechar</button>
         </div>
-        {#if openError}<p class="inline-error" role="alert">{openError}</p>{/if}
+        {#if openError}<StatusBanner variant="error">{openError}</StatusBanner>{/if}
 
         <!-- Membros -->
         <div class="subhead">Membros · permissões</div>
@@ -498,15 +534,9 @@
       </section>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 48rem;
-  }
-  .page-head {
-    margin-bottom: var(--space-8);
-  }
   .eyebrow {
     margin: 0 0 var(--space-1);
     font-size: var(--text-xs);
@@ -515,29 +545,6 @@
     text-transform: uppercase;
     color: var(--color-text-muted);
   }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    line-height: var(--leading-tight);
-  }
-  .lead {
-    margin: var(--space-3) 0 0;
-    max-width: 40rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-  .back {
-    display: inline-block;
-    margin-top: var(--space-3);
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
-  .back:hover {
-    color: var(--color-text);
-  }
-
   .panel {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -804,8 +811,5 @@
   .danger-btn:hover {
     background: var(--color-danger);
     color: var(--color-accent-fg);
-  }
-  .danger .panel-title {
-    color: var(--color-danger);
   }
 </style>

@@ -7,6 +7,14 @@
   } from "$lib/share/secretLink";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { createSecretLink } from "$lib/share/secretLinkApi";
+  import {
+    Button,
+    Field,
+    PageShell,
+    Panel,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
 
   const TTL_OPTIONS = [
     { label: "10 minutos", seconds: 600 },
@@ -23,7 +31,6 @@
   let error = $state("");
   let link = $state("");
   let expiresAt = $state("");
-  let copied = $state(false);
 
   async function create(event: SubmitEvent) {
     event.preventDefault();
@@ -37,7 +44,6 @@
     creating = true;
     error = "";
     link = "";
-    copied = false;
     try {
       const key = generateLinkKey();
       const ciphertext = await encryptSecret(key, value);
@@ -45,6 +51,7 @@
       link = buildSecretLink(window.location.origin, created.id, key);
       expiresAt = new Date(created.expires_at).toLocaleString("pt-PT");
       secret = "";
+      toast.success("Link gerado.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao criar link";
     } finally {
@@ -55,10 +62,9 @@
   async function copy() {
     try {
       await navigator.clipboard.writeText(link);
-      copied = true;
-      setTimeout(() => (copied = false), 2000);
+      toast.success("Link copiado.");
     } catch {
-      copied = false;
+      toast.error("Não foi possível copiar.");
     }
   }
 
@@ -73,32 +79,25 @@
   <title>Secret Links — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">SHARE-003 · Links efémeros</p>
-      <h1>Secret Links</h1>
-      <DocHelpLink />
-    </div>
-    <p class="lead">
-      Partilha um segredo de uso único com quem não tem conta. O segredo é cifrado
-      no teu dispositivo; o servidor guarda-o só em RAM, com expiração. A chave vai
-      no fragmento do link — nunca chega ao servidor.
-    </p>
-    <a class="back" href="/team">← Identidade de partilha</a>
-  </header>
+<PageShell
+  title="Secret Links"
+  taskId="SHARE-003"
+  description="Partilha um segredo de uso único com quem não tem conta. O segredo é cifrado no teu dispositivo; o servidor guarda-o só em RAM. A chave vai no fragmento do link — nunca chega ao servidor."
+  width="narrow"
+>
+  {#snippet actions()}
+    <DocHelpLink />
+    <Button variant="ghost" size="sm" href="/team">← Identidade de partilha</Button>
+  {/snippet}
 
   {#if link}
-    <section class="panel">
-      <div class="panel-head">
-        <p class="eyebrow">Link gerado</p>
+    <Panel title="Link gerado">
+      {#snippet actions()}
         <span class="pill on">Pronto</span>
-      </div>
+      {/snippet}
       <div class="link-row">
         <input class="mono" type="text" readonly value={link} aria-label="Link secreto" />
-        <button type="button" class="btn primary" onclick={copy}>
-          {copied ? "Copiado!" : "Copiar"}
-        </button>
+        <Button onclick={copy}>Copiar</Button>
       </div>
       <dl class="props">
         <div class="prop">
@@ -115,134 +114,65 @@
         o servidor não a tem e não a consegue recuperar. Se perderes o link, o
         segredo é irrecuperável.
       </p>
-      <button type="button" class="btn secondary" onclick={reset}>Criar outro link</button>
-    </section>
+      <Button variant="secondary" onclick={reset}>Criar outro link</Button>
+    </Panel>
   {:else}
-    <section class="panel">
-      <div class="panel-head"><p class="eyebrow">Novo link</p></div>
-      <form onsubmit={create}>
-        <label class="field">
-          <span>Segredo</span>
-          <textarea
-            bind:value={secret}
-            rows="3"
-            placeholder="Password, token, nota…"
-            disabled={creating}
-          ></textarea>
-        </label>
+    <Panel title="Novo link">
+      <form class="form" onsubmit={create}>
+        <Field label="Segredo" required>
+          {#snippet control({ id, describedBy })}
+            <textarea
+              {id}
+              aria-describedby={describedBy}
+              bind:value={secret}
+              rows="3"
+              placeholder="Password, token, nota…"
+              disabled={creating}
+              required
+            ></textarea>
+          {/snippet}
+        </Field>
         <div class="row">
-          <label class="field">
-            <span>Expira após</span>
-            <select bind:value={ttlSeconds} disabled={creating}>
-              {#each TTL_OPTIONS as opt (opt.seconds)}
-                <option value={opt.seconds}>{opt.label}</option>
-              {/each}
-            </select>
-          </label>
-          <label class="field">
-            <span>Visualizações</span>
-            <select bind:value={maxViews} disabled={creating}>
-              {#each VIEW_OPTIONS as v (v)}
-                <option value={v}>{v}{v === 1 ? " (uso único)" : ""}</option>
-              {/each}
-            </select>
-          </label>
+          <Field label="Expira após">
+            {#snippet control({ id, describedBy })}
+              <select {id} aria-describedby={describedBy} bind:value={ttlSeconds} disabled={creating}>
+                {#each TTL_OPTIONS as opt (opt.seconds)}
+                  <option value={opt.seconds}>{opt.label}</option>
+                {/each}
+              </select>
+            {/snippet}
+          </Field>
+          <Field label="Visualizações">
+            {#snippet control({ id, describedBy })}
+              <select {id} aria-describedby={describedBy} bind:value={maxViews} disabled={creating}>
+                {#each VIEW_OPTIONS as v (v)}
+                  <option value={v}>{v}{v === 1 ? " (uso único)" : ""}</option>
+                {/each}
+              </select>
+            {/snippet}
+          </Field>
         </div>
-        {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
-        <button type="submit" class="btn primary" disabled={creating || !secret}>
-          {creating ? "A gerar…" : "Gerar link"}
-        </button>
+        {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
+        <Button type="submit" disabled={creating || !secret} loading={creating}>Gerar link</Button>
       </form>
-    </section>
+    </Panel>
 
-    <section class="panel">
-      <div class="panel-head"><p class="eyebrow">Como funciona</p></div>
+    <Panel title="Como funciona">
       <ol class="steps">
         <li><span>1</span> O segredo é cifrado no teu dispositivo com uma chave aleatória.</li>
         <li><span>2</span> O <em>ciphertext</em> vai para o servidor, que o guarda só em RAM com TTL.</li>
         <li><span>3</span> A chave vai no <em>fragmento</em> do link (#) — nunca chega ao servidor.</li>
         <li><span>4</span> Ao abrir, o segredo é revelado e apagado da RAM. Sem rasto em disco.</li>
       </ol>
-    </section>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 44rem;
-  }
-  .page-head {
-    margin-bottom: var(--space-8);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    line-height: var(--leading-tight);
-  }
-  .lead {
-    margin: var(--space-3) 0 0;
-    max-width: 38rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-  .back {
-    display: inline-block;
-    margin-top: var(--space-3);
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
-  .back:hover {
-    color: var(--color-text);
-  }
-
-  .panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-4) var(--space-6);
-    margin-bottom: var(--space-4);
-  }
-  .panel-head {
+  .form {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-  .panel-head .eyebrow {
-    margin: 0;
-  }
-  .panel-foot {
-    margin: var(--space-4) 0 var(--space-4);
-    font-size: var(--text-xs);
-    line-height: var(--leading-body);
-    color: var(--color-text-muted);
-  }
-  .panel-foot.warn {
-    color: var(--color-text);
-  }
-
-  .field {
-    display: block;
-    margin-bottom: var(--space-3);
-  }
-  .field > span {
-    display: block;
-    margin-bottom: var(--space-1);
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-label);
   }
   textarea,
   select,
@@ -270,10 +200,9 @@
     display: flex;
     gap: var(--space-3);
   }
-  .row .field {
+  .row :global(.field) {
     flex: 1;
   }
-
   .link-row {
     display: flex;
     gap: var(--space-2);
@@ -284,7 +213,6 @@
     min-width: 0;
     font-size: var(--text-xs);
   }
-
   .props {
     margin: 0;
     border-top: 1px solid var(--color-border);
@@ -309,7 +237,6 @@
   .mono {
     font-family: var(--font-mono);
   }
-
   .pill {
     flex-shrink: 0;
     font-size: var(--text-xs);
@@ -323,44 +250,12 @@
     color: var(--color-success-fg);
     background: var(--color-success-bg);
   }
-
-  .btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .btn.primary {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
-  }
-  .btn.primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-  }
-  .btn.secondary {
-    background: var(--color-bg-elevated);
+  .panel-foot {
+    margin: var(--space-4) 0;
+    font-size: var(--text-xs);
+    line-height: var(--leading-body);
     color: var(--color-text);
   }
-  .btn.secondary:hover:not(:disabled) {
-    background: var(--color-accent-muted);
-  }
-  .btn:disabled {
-    opacity: 0.55;
-    cursor: progress;
-  }
-
-  .inline-error {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--color-danger);
-  }
-
   .steps {
     margin: 0;
     padding: 0;
