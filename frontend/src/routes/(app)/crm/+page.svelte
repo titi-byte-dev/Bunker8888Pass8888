@@ -3,6 +3,12 @@
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import { createLead, deleteLead, listLeads, updateLead } from "$lib/crm/leadsService";
+  import {
+    importDraft,
+    runProspection,
+    seedInboxMessage,
+    type ProspectionDraft,
+  } from "$lib/crm/prospectionService";
   import { LEAD_STAGES, type Lead, type LeadStage } from "$lib/crm/leads";
 
   let locked = $state(false);
@@ -16,6 +22,12 @@
   let fCompany = $state("");
   let fStage = $state<LeadStage>("new");
   let fNotes = $state("");
+
+  let drafts = $state<ProspectionDraft[]>([]);
+  let prospectionBusy = $state(false);
+  let seedFrom = $state("lead@empresa.pt");
+  let seedSubject = $state("Pedido de demonstração");
+  let seedBody = $state("Olá, gostávamos de agendar uma demo do produto.");
 
   const byStage = $derived(
     LEAD_STAGES.map((s) => ({
@@ -82,6 +94,45 @@
     }
   }
 
+  async function handleProspection() {
+    prospectionBusy = true;
+    error = "";
+    try {
+      drafts = await runProspection();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha na prospeção";
+    } finally {
+      prospectionBusy = false;
+    }
+  }
+
+  async function handleImportDraft(draft: ProspectionDraft) {
+    busy = true;
+    error = "";
+    try {
+      await importDraft(draft);
+      drafts = drafts.filter((d) => d.message_id !== draft.message_id);
+      await refresh();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao importar";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handleSeedInbox(e: SubmitEvent) {
+    e.preventDefault();
+    prospectionBusy = true;
+    error = "";
+    try {
+      await seedInboxMessage(seedFrom.trim(), seedSubject.trim(), seedBody.trim());
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao simular e-mail";
+    } finally {
+      prospectionBusy = false;
+    }
+  }
+
   async function remove(lead: Lead) {
     if (!confirm(`Apagar lead «${lead.name}»?`)) return;
     busy = true;
@@ -103,7 +154,7 @@
 <section class="page">
   <header class="page-head">
     <div>
-      <p class="eyebrow">CRM-001/002 · Funil de vendas</p>
+      <p class="eyebrow">CRM-001/002 · AGENT-003 · Funil de vendas</p>
       <h1>Leads</h1>
       <DocHelpLink slug="journey-admin-onboarding" label="Como funciona o onboarding?" />
     </div>
@@ -120,6 +171,58 @@
     </section>
   {:else}
     {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+
+    <section class="panel prospection">
+      <h2>Prospeção automática</h2>
+      <p class="muted small">
+        O agente lê e-mails pendentes (stub até MAIL-002), gera rascunhos e tu
+        importas com cifragem local — Zero-Knowledge mantido.
+      </p>
+      <form class="seed" onsubmit={handleSeedInbox}>
+        <p class="seed-label">Simular e-mail recebido</p>
+        <div class="grid">
+          <label>
+            De
+            <input type="email" bind:value={seedFrom} disabled={prospectionBusy} />
+          </label>
+          <label>
+            Assunto
+            <input bind:value={seedSubject} disabled={prospectionBusy} />
+          </label>
+        </div>
+        <label>
+          Corpo
+          <textarea bind:value={seedBody} rows="2" disabled={prospectionBusy}></textarea>
+        </label>
+        <button type="submit" class="btn secondary" disabled={prospectionBusy}>Simular</button>
+      </form>
+      <button
+        type="button"
+        class="btn primary"
+        disabled={prospectionBusy || busy}
+        onclick={handleProspection}
+      >
+        {prospectionBusy ? "A processar…" : "Correr prospeção"}
+      </button>
+      {#if drafts.length > 0}
+        <ul class="draft-list">
+          {#each drafts as draft (draft.message_id)}
+            <li class="draft-card">
+              <strong>{draft.email}</strong>
+              <span class="email">{draft.subject}</span>
+              <button
+                type="button"
+                class="btn secondary"
+                disabled={busy}
+                onclick={() => handleImportDraft(draft)}
+              >
+                Importar para o funil
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
 
     <form class="panel form" onsubmit={handleCreate}>
       <h2>Novo lead</h2>
@@ -330,8 +433,54 @@
     cursor: pointer;
     font-size: var(--text-sm);
   }
-  .btn.primary:disabled {
+  .btn.primary:disabled,
+  .btn.secondary:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+  .btn.secondary {
+    display: inline-block;
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    cursor: pointer;
+    font-size: var(--text-sm);
+  }
+  .prospection h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+  }
+  .small {
+    margin: 0 0 var(--space-3);
+  }
+  .seed {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .seed-label {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .draft-list {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .draft-card {
+    padding: var(--space-2);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
   }
 </style>

@@ -61,8 +61,9 @@ type Deps struct {
 	MailInbox    *mail.InboxRepo    // nil desactiva endpoints /api/mail/inbox*
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
-	AgentRunner  *agent.Runner      // executor de tools (AGENT-001)
+	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
+	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
 	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
@@ -244,6 +245,9 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner, deps.AgentAudit)))
 		if deps.AgentAudit != nil {
 			mux.Handle("GET /api/agent/audit", requireAuth(deps.Auth, handleListAgentAudit(deps.AgentAudit)))
+		}
+		if deps.Prospection != nil {
+			mux.Handle("POST /api/agent/prospection/run", requireAuth(deps.Auth, handleRunProspection(deps.Prospection, deps.AgentAudit)))
 		}
 	}
 	if deps.CRM != nil && deps.Auth != nil {
