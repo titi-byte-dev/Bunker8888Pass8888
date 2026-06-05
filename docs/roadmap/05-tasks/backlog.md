@@ -27,6 +27,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | INFRA-004 | PostgreSQL em container + backups cifrados | 1 | M | 🟢 | INFRA-003 |
 | INFRA-005 | Pipeline CI (lint, test, build Go + Svelte) | 1 | M | 🟢 | — |
 | INFRA-006 | Scaffold monorepo (`/backend` Go, `/frontend` Svelte, `/cli`) | 1 | S | 🟢 | — |
+| CI-001 | Fix svelte-check (reconcile.test mocks) + actions @v5/Node 24 | 1 | S | 🟢 | INFRA-005 |
 
 ## VAULT — The Vault
 
