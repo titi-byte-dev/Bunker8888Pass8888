@@ -4,11 +4,15 @@
     addVaultItem,
     createSharedVault,
     deleteSharedVault,
+    downloadAttachment,
     inviteMember,
     listSharedVaults,
     openSharedVault,
+    removeAttachment,
     removeVaultItem,
     revokeMember,
+    uploadAttachment,
+    type DecryptedAttachment,
     type DecryptedVault,
     type InvitedMember,
     type OpenVault,
@@ -44,6 +48,12 @@
   let addingItem = $state(false);
   let itemError = $state("");
   let revealed = $state<Set<string>>(new Set());
+
+  // Anexos cifrados
+  let attachFile = $state<File | null>(null);
+  let uploading = $state(false);
+  let attachError = $state("");
+  let fileInput = $state<HTMLInputElement | null>(null);
 
   const canManage = $derived(open?.vault.role === "owner" || open?.vault.role === "admin");
   const canWrite = $derived(
@@ -182,6 +192,63 @@
     } catch (e) {
       openError = e instanceof Error ? e.message : "Falha ao apagar cofre";
     }
+  }
+
+  function onFilePick(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    attachFile = input.files && input.files.length > 0 ? input.files[0] : null;
+    attachError = "";
+  }
+
+  async function upload(event: SubmitEvent) {
+    event.preventDefault();
+    if (!open || !attachFile) return;
+    uploading = true;
+    attachError = "";
+    try {
+      await uploadAttachment(open.vault.id, open.vaultKey, attachFile);
+      attachFile = null;
+      if (fileInput) fileInput.value = "";
+      open = await openSharedVault(open.vault.id);
+    } catch (e) {
+      attachError = e instanceof Error ? e.message : "Falha ao carregar anexo";
+    } finally {
+      uploading = false;
+    }
+  }
+
+  async function download(att: DecryptedAttachment) {
+    if (!open) return;
+    try {
+      const file = await downloadAttachment(open.vault.id, open.vaultKey, att.id);
+      const blob = new Blob([file.bytes], { type: file.mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      openError = e instanceof Error ? e.message : "Falha ao descarregar anexo";
+    }
+  }
+
+  async function deleteAttachment(attID: string) {
+    if (!open) return;
+    try {
+      await removeAttachment(open.vault.id, attID);
+      open = await openSharedVault(open.vault.id);
+    } catch (e) {
+      openError = e instanceof Error ? e.message : "Falha ao remover anexo";
+    }
+  }
+
+  function formatBytes(n: number): string {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KiB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MiB`;
   }
 
   function toggleReveal(id: string) {
@@ -375,6 +442,50 @@
           {#if itemError}<p class="inline-error" role="alert">{itemError}</p>{/if}
         {:else}
           <p class="panel-foot">Tens acesso de leitor — podes ver, mas não escrever.</p>
+        {/if}
+
+        <!-- Anexos cifrados -->
+        <div class="subhead">Anexos cifrados</div>
+        {#if open.attachments.length === 0}
+          <p class="panel-body">Sem anexos neste cofre ainda.</p>
+        {:else}
+          <ul class="item-list">
+            {#each open.attachments as att (att.id)}
+              <li class="item">
+                <div class="item-main">
+                  <span class="item-title">{att.name}</span>
+                  <span class="item-secret">{att.mime} · {formatBytes(att.size)}</span>
+                </div>
+                <div class="item-actions">
+                  <button type="button" class="link-btn" onclick={() => download(att)}>Descarregar</button>
+                  {#if canWrite}
+                    <button type="button" class="link-btn danger-link" onclick={() => deleteAttachment(att.id)}>
+                      Apagar
+                    </button>
+                  {/if}
+                </div>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+
+        {#if canWrite}
+          <form class="add-item" onsubmit={upload}>
+            <input
+              type="file"
+              bind:this={fileInput}
+              onchange={onFilePick}
+              disabled={uploading}
+            />
+            <button type="submit" class="btn secondary" disabled={uploading || !attachFile}>
+              {uploading ? "A cifrar…" : "Carregar anexo"}
+            </button>
+          </form>
+          {#if attachError}<p class="inline-error" role="alert">{attachError}</p>{/if}
+          <p class="panel-foot">
+            Cada ficheiro é cifrado no teu dispositivo com a chave do cofre (máx. 5 MiB).
+            O servidor guarda só bytes opacos — nunca vê o nome nem o conteúdo.
+          </p>
         {/if}
 
         {#if isOwner}

@@ -35,6 +35,18 @@ export interface VaultItemDTO {
   updated_at: string;
 }
 
+export interface AttachmentMetaDTO {
+  id: string;
+  meta_blob: string;
+  byte_size: number;
+  created_by: string;
+  created_at: string;
+}
+
+export interface AttachmentFullDTO extends AttachmentMetaDTO {
+  data_blob: string;
+}
+
 export class SharedVaultsAPI {
   constructor(
     private baseURL: string,
@@ -112,6 +124,37 @@ export class SharedVaultsAPI {
   async removeItem(id: string, itemID: string): Promise<void> {
     await this.fetch(
       `/api/share/vaults/${encodeURIComponent(id)}/items/${encodeURIComponent(itemID)}`,
+      { method: "DELETE" },
+    );
+  }
+
+  /** Lista os anexos do cofre (só metadados cifrados, sem os bytes). */
+  async attachments(id: string): Promise<AttachmentMetaDTO[]> {
+    const res = await this.fetch(`/api/share/vaults/${encodeURIComponent(id)}/attachments`);
+    return ((await res.json()) as { attachments: AttachmentMetaDTO[] }).attachments;
+  }
+
+  /** Carrega um anexo cifrado (metadados + bytes do ficheiro). */
+  async addAttachment(id: string, metaBlob: string, dataBlob: string): Promise<AttachmentMetaDTO> {
+    const res = await this.fetch(`/api/share/vaults/${encodeURIComponent(id)}/attachments`, {
+      method: "POST",
+      body: JSON.stringify({ meta_blob: metaBlob, data_blob: dataBlob }),
+    });
+    return (await res.json()) as AttachmentMetaDTO;
+  }
+
+  /** Descarrega um anexo completo (inclui os bytes cifrados do ficheiro). */
+  async getAttachment(id: string, attID: string): Promise<AttachmentFullDTO> {
+    const res = await this.fetch(
+      `/api/share/vaults/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attID)}`,
+    );
+    return (await res.json()) as AttachmentFullDTO;
+  }
+
+  /** Remove um anexo do cofre. */
+  async removeAttachment(id: string, attID: string): Promise<void> {
+    await this.fetch(
+      `/api/share/vaults/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attID)}`,
       { method: "DELETE" },
     );
   }

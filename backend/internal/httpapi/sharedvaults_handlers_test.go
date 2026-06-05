@@ -23,6 +23,10 @@ func TestSharedVaultRoutesGuarded(t *testing.T) {
 		{http.MethodGet, "/api/share/vaults/abc/items"},
 		{http.MethodPost, "/api/share/vaults/abc/items"},
 		{http.MethodDelete, "/api/share/vaults/abc/items/i1"},
+		{http.MethodGet, "/api/share/vaults/abc/attachments"},
+		{http.MethodPost, "/api/share/vaults/abc/attachments"},
+		{http.MethodGet, "/api/share/vaults/abc/attachments/a1"},
+		{http.MethodDelete, "/api/share/vaults/abc/attachments/a1"},
 	}
 	for _, rt := range routes {
 		req := httptest.NewRequest(rt.method, rt.path, nil)

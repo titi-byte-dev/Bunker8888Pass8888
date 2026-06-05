@@ -11,8 +11,12 @@ import { importPublicKey } from "./keypair";
 import { ensureShareIdentity, loadOwnPrivateKey, lookupRecipient } from "./setup";
 import { SharedVaultsAPI, type VaultMemberDTO, type VaultRole } from "./vaultsApi";
 import {
+  decryptAttachmentMeta,
+  decryptFileBytes,
   decryptVaultItem,
   decryptVaultName,
+  encryptAttachmentMeta,
+  encryptFileBytes,
   encryptVaultItem,
   encryptVaultName,
   generateVaultKey,
@@ -21,6 +25,13 @@ import {
   type VaultItemPayload,
 } from "./vaults";
 import type { Bytes } from "../crypto";
+
+/**
+ * Teto do tamanho do ficheiro (5 MiB). O servidor limita o CIPHERTEXT a 5 MiB;
+ * o AES-GCM acrescenta 28 bytes (nonce + tag), por isso recusamos o ficheiro em
+ * claro um pouco antes, com uma mensagem amigável.
+ */
+export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024 - 28;
 
 export interface DecryptedVault {
   id: string;
@@ -38,11 +49,22 @@ export interface DecryptedItem {
   createdAt: string;
 }
 
+/** Anexo com os metadados já decifrados (o nome do ficheiro também é ZK). */
+export interface DecryptedAttachment {
+  id: string;
+  name: string;
+  mime: string;
+  size: number; // tamanho do ficheiro original
+  createdBy: string;
+  createdAt: string;
+}
+
 /** Cofre aberto: o conteúdo decifrado + a chave do cofre em memória para escrever. */
 export interface OpenVault {
   vault: DecryptedVault;
   members: VaultMemberDTO[];
   items: DecryptedItem[];
+  attachments: DecryptedAttachment[];
   /** Chave do cofre em claro — só vive nesta sessão, nunca vai para o servidor. */
   vaultKey: Bytes;
 }
@@ -103,7 +125,11 @@ export async function openSharedVault(id: string): Promise<OpenVault> {
   const dto = await api.get(id);
   const vaultKey = await unwrapVaultKey(myPriv, dto.wrapped_vault_key);
 
-  const [members, itemDtos] = await Promise.all([api.members(id), api.items(id)]);
+  const [members, itemDtos, attDtos] = await Promise.all([
+    api.members(id),
+    api.items(id),
+    api.attachments(id),
+  ]);
   const items: DecryptedItem[] = [];
   for (const it of itemDtos) {
     const payload = await decryptVaultItem(vaultKey, it.blob);
@@ -113,6 +139,18 @@ export async function openSharedVault(id: string): Promise<OpenVault> {
       secret: payload.secret,
       createdBy: it.created_by,
       createdAt: it.created_at,
+    });
+  }
+  const attachments: DecryptedAttachment[] = [];
+  for (const a of attDtos) {
+    const meta = await decryptAttachmentMeta(vaultKey, a.meta_blob);
+    attachments.push({
+      id: a.id,
+      name: meta.name,
+      mime: meta.mime,
+      size: meta.size,
+      createdBy: a.created_by,
+      createdAt: a.created_at,
     });
   }
 
@@ -126,6 +164,7 @@ export async function openSharedVault(id: string): Promise<OpenVault> {
     },
     members,
     items,
+    attachments,
     vaultKey,
   };
 }
@@ -163,6 +202,54 @@ export async function addVaultItem(
   const api = requireVaultAccess();
   const blob = await encryptVaultItem(vaultKey, payload);
   await api.addItem(vaultId, "note", blob);
+}
+
+/**
+ * Carrega um ficheiro como anexo cifrado: cifra metadados e bytes com a chave do
+ * cofre antes do upload. O servidor só recebe bytes opacos.
+ */
+export async function uploadAttachment(
+  vaultId: string,
+  vaultKey: Bytes,
+  file: File,
+): Promise<void> {
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    throw new Error("Ficheiro demasiado grande (limite 5 MiB).");
+  }
+  const api = requireVaultAccess();
+  const bytes = new Uint8Array(await file.arrayBuffer()) as Bytes;
+  const metaBlob = await encryptAttachmentMeta(vaultKey, {
+    name: file.name,
+    mime: file.type || "application/octet-stream",
+    size: file.size,
+  });
+  const dataBlob = await encryptFileBytes(vaultKey, bytes);
+  await api.addAttachment(vaultId, metaBlob, dataBlob);
+}
+
+/** Anexo descarregado e decifrado, pronto a guardar no dispositivo. */
+export interface DownloadedAttachment {
+  name: string;
+  mime: string;
+  bytes: Bytes;
+}
+
+/** Descarrega um anexo e decifra-o no dispositivo (nome + tipo + bytes). */
+export async function downloadAttachment(
+  vaultId: string,
+  vaultKey: Bytes,
+  attID: string,
+): Promise<DownloadedAttachment> {
+  const api = requireVaultAccess();
+  const dto = await api.getAttachment(vaultId, attID);
+  const meta = await decryptAttachmentMeta(vaultKey, dto.meta_blob);
+  const bytes = await decryptFileBytes(vaultKey, dto.data_blob);
+  return { name: meta.name, mime: meta.mime, bytes };
+}
+
+/** Remove um anexo do cofre. */
+export async function removeAttachment(vaultId: string, attID: string): Promise<void> {
+  await requireVaultAccess().removeAttachment(vaultId, attID);
 }
 
 /** Remove um membro (revogação imediata). */
