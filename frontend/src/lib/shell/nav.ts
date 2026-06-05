@@ -20,7 +20,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "vault", label: "Cofre", href: "/vault", tabBar: true },
   { id: "security", label: "Segurança", href: "/security", tabBar: true },
   { id: "work", label: "Trabalho", href: "/work", tabBar: true },
-  { id: "team", label: "Equipa", href: "/team", comingSoon: true },
+  { id: "team", label: "Equipa", href: "/team" },
   { id: "hr", label: "RH", href: "/hr", comingSoon: true },
   { id: "admin", label: "Admin", href: "/admin" },
   { id: "settings", label: "Definições", href: "/settings", tabBar: true },

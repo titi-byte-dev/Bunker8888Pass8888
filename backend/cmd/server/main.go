@@ -24,6 +24,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharekeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
@@ -70,6 +71,7 @@ func main() {
 		deviceRepo := clidevices.NewRepo(pool)
 		passkeyRepo := passkeys.NewRepo(pool)
 		sentinelRepo := sentinel.NewRepo(pool)
+		shareKeysRepo := sharekeys.NewRepo(pool)
 
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
@@ -112,9 +114,10 @@ func main() {
 			Emergency: emergency.NewService(emergencyRepo, userRepo),
 			Devices:  deviceRepo,
 			CLIca:    cliCA,
-			Passkeys: passkeySvc,
-			Sentinel: sentinel.NewService(sentinelRepo),
-			AdminKey: cfg.AdminKey,
+			Passkeys:  passkeySvc,
+			Sentinel:  sentinel.NewService(sentinelRepo),
+			ShareKeys: shareKeysRepo,
+			AdminKey:  cfg.AdminKey,
 			Pool:     pool,
 		}
 		logger.Info("base de dados ligada e migrada")
