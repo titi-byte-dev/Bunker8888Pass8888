@@ -17,6 +17,7 @@
     DataTable,
     ListRow,
     MetricCard,
+    PageShell,
     Skeleton,
     toast,
     type DataColumn,
@@ -55,30 +56,27 @@
   <title>Catálogo de componentes — AegisPass</title>
 </svelte:head>
 
-<section class="catalog">
-  <header class="hero">
-    <a href="/dev" class="back">← Playground</a>
-    <h1>Catálogo de componentes</h1>
-    <p class="lead">
-      Design tokens (UI-001) e peças reutilizáveis da app — só visível em desenvolvimento.
-    </p>
-    <nav class="toc" aria-label="Secções">
-      {#each CATALOG_SECTIONS as sec (sec.id)}
-        <a href="#{sec.id}">{sec.title}</a>
-      {/each}
-    </nav>
-    <div class="theme-row">
-      {#each (["light", "dark", "system"] as const) as mode (mode)}
-        <button
-          type="button"
-          class:active={themeMode === mode}
-          onclick={() => setTheme(mode)}
-        >
-          {themeModeLabel(mode)}
-        </button>
-      {/each}
-    </div>
-  </header>
+<PageShell
+  title="Catálogo de componentes"
+  taskId="UI-010"
+  description="Design tokens (UI-001) e peças reutilizáveis da app — só visível em desenvolvimento."
+>
+  <nav class="toc" aria-label="Secções">
+    {#each CATALOG_SECTIONS as sec (sec.id)}
+      <a href="#{sec.id}">{sec.title}</a>
+    {/each}
+  </nav>
+  <div class="theme-row">
+    {#each (["light", "dark", "system"] as const) as mode (mode)}
+      <button
+        type="button"
+        class:active={themeMode === mode}
+        onclick={() => setTheme(mode)}
+      >
+        {themeModeLabel(mode)}
+      </button>
+    {/each}
+  </div>
 
   <section id="typography" class="block">
     <h2>Tipografia</h2>
@@ -225,38 +223,9 @@
     <p class="status warn">Atenção — rever política</p>
     <p class="status err">Erro ou acção destrutiva</p>
   </section>
-</section>
+</PageShell>
 
 <style>
-  .catalog {
-    max-width: 48rem;
-    padding-bottom: var(--space-12);
-  }
-
-  .hero {
-    margin-bottom: var(--space-8);
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-sm);
-  }
-
   .toc {
     display: flex;
     flex-wrap: wrap;

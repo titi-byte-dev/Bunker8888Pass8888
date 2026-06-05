@@ -54,13 +54,18 @@
 
 | Task | Estado |
 |---|---|
-| UI-001–008, UI-010 | 🟢 |
+| UI-001–008, UI-010–018 | 🟢 |
 | UI-009 Capacitor mobile | 🟡 scaffold + guia |
-| UI-011–015, UI-017 design system | 🟢 |
-| UI-016 migração páginas | ⚪ ver [`09-design/design-system.md`](../09-design/design-system.md) |
+
+## Documentação in-app
+
+| Task | Estado |
+|---|---|
+| DOC-001–015 | 🟢 |
 
 ## Próximos passos (prioridade)
 
-1. Executar checklist [`journey-vps-deploy.md`](../04-user-journeys/journey-vps-deploy.md)
-2. GOOGLE-002 — upload Drive com blobs ZK via API
-3. UI-009 — shell Capacitor + biometria
+1. Executar [`demo-client-checklist.md`](demo-client-checklist.md) (INFRA-001 → MAIL-003)
+2. Checklist completo [`journey-vps-deploy.md`](../04-user-journeys/journey-vps-deploy.md)
+3. GOOGLE-002 — upload Drive com blobs ZK via API
+4. UI-009 — shell Capacitor + biometria

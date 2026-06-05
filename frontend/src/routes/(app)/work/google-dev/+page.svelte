@@ -14,6 +14,7 @@
     type DriveBackend,
     type DriveFileView,
   } from "$lib/google/driveService";
+  import { Button, PageShell, Panel, StatusBanner } from "$lib/ui";
 
   let locked = $state(false);
   let tab = $state<"drive" | "sheets">("drive");
@@ -71,20 +72,15 @@
 
 <svelte:head><title>Google proxy (dev) — AegisPass</title></svelte:head>
 
-<section class="page">
-  <header class="head">
-    <div>
-      <p class="eyebrow">GOOGLE-002/003 · Simulação dev · DoD Fase 2</p>
-      <h1>Google Workspace (stub)</h1>
-      <DocHelpLink slug="journey-google-dev-stub" label="Como funciona sem VPS?" />
-    </div>
-    <a class="back" href="/work/google">Estado OAuth →</a>
-  </header>
-
-  <p class="lead">
-    Drive com cifragem ZK: <strong>servidor</strong> guarda blobs opacos (GOOGLE-002);
-    <strong>local</strong> usa só localStorage. Sheets com mascaramento NIF/IBAN.
-  </p>
+<PageShell
+  title="Google Workspace (stub)"
+  taskId="GOOGLE-002"
+  description="Drive com cifragem ZK: servidor guarda blobs opacos (GOOGLE-002); local usa só localStorage. Sheets com mascaramento NIF/IBAN. Simulação dev — DoD Fase 2."
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-google-dev-stub" label="Como funciona sem VPS?" />
+    <Button variant="ghost" size="sm" href="/work/google">Estado OAuth →</Button>
+  {/snippet}
 
   <div class="tabs">
     <button type="button" class:active={tab === "drive"} onclick={() => (tab = "drive")}>Drive</button>
@@ -92,9 +88,11 @@
   </div>
 
   {#if locked}
-    <p class="muted">🔒 Desbloqueia a Master Key para usar o stub.</p>
+    <StatusBanner variant="warning">
+      Desbloqueia a Master Key em <a href="/vault">/vault</a> para usar o stub.
+    </StatusBanner>
   {:else if tab === "drive"}
-    <section class="panel">
+    <Panel>
       <div class="row">
         <label>Armazenamento
           <select bind:value={backend} onchange={() => refreshDrive()}>
@@ -107,8 +105,8 @@
       <label>Nome<input bind:value={fileName} /></label>
       <label>Conteúdo<textarea bind:value={fileContent} rows="3"></textarea></label>
       <button type="button" class="btn primary" onclick={handleUpload}>Enviar</button>
-    </section>
-    <section class="panel">
+    </Panel>
+    <Panel>
       <h2>Ficheiros (vista Google = opaco)</h2>
       {#if driveFiles.length === 0}<p class="muted">Vazio.</p>
       {:else}
@@ -128,29 +126,23 @@
         </ul>
       {/if}
       {#if opened}<pre class="opened">{opened}</pre>{/if}
-    </section>
+    </Panel>
   {:else}
-    <section class="panel">
+    <Panel>
       <h2>Mascaramento (o que a Google veria)</h2>
       <label>Dados sensíveis<textarea bind:value={sheetRaw} rows="5" oninput={applyMask}></textarea></label>
       <h3>Vista Sheet (tokens)</h3>
       <pre class="masked">{maskedView}</pre>
       <h3>Vista AegisPass (desmascarado)</h3>
       <pre class="opened">{unmaskText(maskedView, tokenMap)}</pre>
-    </section>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 48rem; margin: 0 auto; padding: var(--space-6); }
-  .head { display: flex; justify-content: space-between; margin-bottom: var(--space-4); }
-  .eyebrow { font-size: var(--text-xs); text-transform: uppercase; color: var(--color-text-label); margin: 0; }
-  .lead { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); }
-  .back { font-size: var(--text-sm); color: var(--color-text-muted); }
   .tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
   .tabs button { padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-inset); cursor: pointer; }
   .tabs button.active { border-color: var(--color-accent); color: var(--color-accent); }
-  .panel { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-4); }
   .row { margin-bottom: var(--space-3); }
   label { display: block; margin-bottom: var(--space-3); font-size: var(--text-sm); }
   input, textarea, select { width: 100%; margin-top: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); box-sizing: border-box; }
@@ -165,4 +157,6 @@
   .mono { font-family: var(--font-mono); }
   pre { background: var(--color-bg-inset); padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-xs); overflow-x: auto; }
   .muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+  h2 { margin: 0 0 var(--space-3); font-size: var(--text-lg); }
+  h3 { margin: var(--space-4) 0 var(--space-2); font-size: var(--text-base); }
 </style>

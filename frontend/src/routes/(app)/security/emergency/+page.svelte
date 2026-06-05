@@ -22,6 +22,7 @@
     type EmergencyRequest,
   } from "$lib/emergency/api";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let heirEmail = $state("");
   let waitDays = $state(7);
@@ -191,21 +192,19 @@
   <title>Acesso de emergência — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header>
-    <a href="/security" class="back">← Segurança</a>
-    <h1>Acesso de emergência</h1>
+<PageShell
+  title="Acesso de emergência"
+  taskId="VAULT-016"
+  description="Designa um herdeiro digital com período de espera. O servidor orquestra pedidos; a Master Key viaja só num blob cifrado (Zero-Knowledge)."
+>
+  {#snippet actions()}
     <DocHelpLink />
-    <p class="lead">
-      Designa um herdeiro digital com período de espera. O servidor orquestra pedidos;
-      a Master Key viaja só num blob cifrado (Zero-Knowledge).
-    </p>
-  </header>
+  {/snippet}
 
   <article class="card">
     <h2>Como titular</h2>
-    {#if ownerError}<p class="error" role="alert">{ownerError}</p>{/if}
-    {#if ownerStatus}<p class="ok" role="status">{ownerStatus}</p>{/if}
+    {#if ownerError}<StatusBanner variant="error">{ownerError}</StatusBanner>{/if}
+    {#if ownerStatus}<StatusBanner variant="success">{ownerStatus}</StatusBanner>{/if}
 
     <label>Email do herdeiro <input type="email" bind:value={heirEmail} disabled={ownerBusy} /></label>
     <label>
@@ -218,7 +217,7 @@
     </label>
 
     {#if newEmergencyCode}
-      <p class="warn">Código para o herdeiro (offline, uma vez):</p>
+      <StatusBanner variant="warning">Código para o herdeiro (offline, uma vez):</StatusBanner>
       <code class="code">{newEmergencyCode}</code>
     {/if}
 
@@ -261,8 +260,8 @@
   <article class="card">
     <h2>Como herdeiro</h2>
     <p class="muted">Conta autenticada: {myEmail || "—"}</p>
-    {#if heirError}<p class="error" role="alert">{heirError}</p>{/if}
-    {#if heirStatus}<p class="ok" role="status">{heirStatus}</p>{/if}
+    {#if heirError}<StatusBanner variant="error">{heirError}</StatusBanner>{/if}
+    {#if heirStatus}<StatusBanner variant="success">{heirStatus}</StatusBanner>{/if}
 
     <label>
       Email do titular
@@ -300,33 +299,11 @@
       </button>
     {/if}
   </article>
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 36rem;
-  }
-
-  .back {
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: var(--space-2) 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    line-height: var(--leading-body);
-  }
-
   .card {
-    margin-top: var(--space-6);
+    margin-bottom: var(--space-6);
     padding: var(--space-4);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -381,24 +358,6 @@
   button.secondary {
     background: var(--color-accent-muted);
     color: var(--color-text);
-  }
-
-  .error {
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-  }
-
-  .ok {
-    color: var(--color-success-fg);
-    background: var(--color-success-bg);
-    padding: var(--space-2);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-  }
-
-  .warn {
-    color: var(--color-warning);
-    font-size: var(--text-sm);
   }
 
   .code {

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { listSentinelEvents, reasonLabel, type LoginEvent } from "$lib/sentinel/api";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let events = $state<LoginEvent[]>([]);
   let alerts24h = $state(0);
@@ -29,23 +30,23 @@
   <title>Sentinel Mode — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/security" class="back">← Segurança</a>
-  <h1>Sentinel Mode</h1>
-  <DocHelpLink />
-  <p class="lead">
-    Deteção de logins geograficamente impossíveis (DW-004). Compara GPS entre sessões;
-    se a velocidade implícita exceder ~900 km/h, exige passkey antes de emitir token.
-  </p>
+<PageShell
+  title="Sentinel Mode"
+  taskId="VAULT-014"
+  description="Deteção de logins geograficamente impossíveis (DW-004). Compara GPS entre sessões; se a velocidade implícita exceder ~900 km/h, exige passkey antes de emitir token."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   {#if alerts24h > 0}
-    <p class="alert-banner" role="status">
+    <StatusBanner variant="warning">
       {alerts24h} alerta(s) suspeito(s) nas últimas 24 horas.
-    </p>
+    </StatusBanner>
   {/if}
 
   {#if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {/if}
 
   {#if busy}
@@ -102,43 +103,9 @@
   <p class="hint">
     GPS no browser pode ser falsificado; combina Sentinel com turnos, geofence e passkeys.
   </p>
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 52rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-    line-height: 1.5;
-  }
-
-  .alert-banner {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-  }
-
   .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--color-border);
@@ -192,13 +159,8 @@
     line-height: 1.5;
   }
 
-  .error,
   .muted {
     font-size: var(--text-sm);
-  }
-
-  .error {
-    color: var(--color-danger);
   }
 
   .muted {

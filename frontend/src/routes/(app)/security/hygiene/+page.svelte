@@ -12,6 +12,7 @@
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import SecurityHealthCard from "$lib/security/SecurityHealthCard.svelte";
   import { loadDecodedLogins } from "$lib/vault/ui";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let summary = $state<HygieneSummary | null>(null);
   let passwordsByItem = $state<Map<string, string>>(new Map());
@@ -99,18 +100,19 @@
   <title>Saúde de segurança — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/security" class="back">← Segurança</a>
-  <h1>Saúde de segurança</h1>
-  <DocHelpLink />
-  <p class="lead">
-    Higiene + fugas (DW-003). Análise no cliente; k-anonymity para breach check (DW-001).
-  </p>
+<PageShell
+  title="Saúde de segurança"
+  taskId="SEC-002"
+  description="Higiene + fugas (DW-003). Análise no cliente; k-anonymity para breach check (DW-001)."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   {#if busy}
     <p class="muted">A analisar cofre…</p>
   {:else if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {:else if summary && healthReport}
     <SecurityHealthCard report={healthReport} />
 
@@ -137,7 +139,7 @@
         {breachBusy ? "A verificar…" : "Verificar fugas"}
       </button>
       {#if breachError}
-        <p class="error" role="alert">{breachError}</p>
+        <StatusBanner variant="error">{breachError}</StatusBanner>
       {/if}
     </div>
 
@@ -170,34 +172,9 @@
       {/each}
     </ul>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 40rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-    line-height: var(--leading-body);
-  }
-
   .section-title {
     font-size: var(--text-lg);
     margin: 0 0 var(--space-3);
@@ -341,14 +318,6 @@
     font-weight: 600;
     color: var(--color-accent);
     text-decoration: none;
-  }
-
-  .error {
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

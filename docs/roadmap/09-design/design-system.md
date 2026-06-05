@@ -13,29 +13,18 @@
 
 | Área | Ficheiros / rotas | Estado | Gap |
 |---|---|---|---|
-| Tokens | `frontend/src/lib/design/tokens.css` (UI-001) | 🟢 | Só `light` / `dark` / `system` |
-| Tema | `frontend/src/lib/design/theme.ts` | 🟢 | Sem paletas múltiplas |
-| Shell | `lib/shell/AppSidebar`, `AppTabBar`, `(app)/+layout.svelte` | 🟢 | Navegação **plana** (~15 links) |
-| Motion | `lib/motion/*` (UI-005) | 🟢 | — |
-| Command palette | `lib/shell/CommandPalette.svelte` (UI-006) | 🟢 | Comandos flat, sem árvore |
-| Catálogo dev | `/dev/components` (UI-010) | 🟢 | Botões/forms **inline**, não importáveis |
-| Componentes UI | — | ❌ | **Não existe** `lib/ui/` |
-| Breadcrumbs | — | ❌ | Só `.eyebrow` com IDs de task |
-| Páginas | ~42 rotas em `(app)/` | 🟡 | 3 padrões visuais inconsistentes |
+| Tokens | `frontend/src/lib/design/tokens.css` (UI-001) | 🟢 | — |
+| Tema + paletas | `lib/design/theme.ts`, `/settings` (UI-013) | 🟢 | — |
+| Shell | `AppSidebar` (ícones + colapso), `(app)/+layout.svelte` | 🟢 | UI-009 mobile Capacitor 🟡 |
+| Navegação | `ROUTE_TREE`, breadcrumbs, ⌘K hierárquico (UI-011) | 🟢 | — |
+| Componentes | `lib/ui/` — PageShell, Panel, DataTable… (UI-012/015/017) | 🟢 | — |
+| Layout | Largura fluida 100% no shell; `--prose-max` só para `.lead` | 🟢 | — |
+| Docs in-app | Svelte Flow + FlowPlayer responsivo (DOC-011/015) | 🟢 | — |
+| Páginas `(app)/` | Todas em `PageShell` (UI-016 + UI-018) | 🟢 | — |
 
-> 💡 **Conceito — Design debt:** quando tokens existem mas cada página redefine
-> `.page-head`, `.panel` e `.eyebrow` localmente, o sistema **parece** maduro mas
-> **comporta-se** como protótipo. A dívida manifesta-se em inconsistência UX e
-> custo de manutenção.
-
-### 1.1 Padrões visuais hoje (inconsistentes)
-
-1. **Hub** — lista de links descritivos (`/work`, `/security`): `h1` + `.lead` + `.links`
-2. **Dados densos** — painéis e formulários (`/fin`, `/crm`, `/hr`): `.page-head` + `.eyebrow` + `.panel`
-3. **Cofre** — padrão próprio (`/vault`): `.page-header`, lista com motion, empty state
-
-Os IDs de task nos eyebrows (`FIN-001`, `GOOGLE-001`) são úteis para **dev**; em
-produção o utilizador deve ver **breadcrumbs** com nomes de produto.
+> 💡 **Conceito — Layout fluido:** o contentor principal (`shell-content`) já não
+> limita a `56rem`. Diagramas de documentação e tabelas densas (`/fin`, `/crm`)
+> partilham a mesma largura útil — sidebar colapsável liberta espaço em desktop.
 
 ---
 
@@ -132,11 +121,11 @@ Responsabilidades únicas:
 | `+page.ts` (override) | Títulos dinâmicos (`vault/[id]` → nome do item) |
 
 ```ts
-// Esboço — não implementado ainda (UI-011)
+// routeTree.ts — ROUTE_TREE (UI-011 🟢)
 type RouteNode = {
   label: string;
   href?: string;
-  taskId?: string;       // só eyebrow em DEV
+  taskId?: string;       // eyebrow em DEV
   children?: Record<string, RouteNode>;
 };
 ```
@@ -314,21 +303,36 @@ Ver também [`product-ui-vision.md` §6](product-ui-vision.md) (timing GSAP, sta
 | [UI-015](../05-tasks/backlog.md) | `DataTable`, `MetricCard`, `ListRow` | UI-012 | M |
 | [UI-016](../05-tasks/backlog.md) | Migração página-a-página (começar `/fin/*`) | UI-012, UI-011 | L |
 | [UI-017](../05-tasks/backlog.md) | `Toast`, `Skeleton`, `ConfirmDialog` | UI-012 | M |
+| [UI-018](../05-tasks/backlog.md) | Rotas secundárias admin/security/work/settings/dev | UI-016 | M |
+| [DOC-015](../05-tasks/backlog.md) | Docs flows: sidebar colapsável, Svelte Flow ladder, layout responsivo | DOC-011, UI-011 | M |
 
-**Ordem recomendada:** UI-012 → UI-011 → UI-013 → UI-014 → UI-015/UI-017 → UI-016.
+**Ordem recomendada:** UI-012 → UI-011 → UI-013 → UI-014 → UI-015/UI-017 → UI-016 → UI-018.
 
 Pode correr **em paralelo** com produção (VPS, Mail, Google) — não bloqueia infra.
+
+### 8.1 Layout de documentação (DOC-015)
+
+| Ficheiro | Função |
+|---|---|
+| `lib/docs/FlowPlayerLayout.svelte` | Diagrama + passos: vertical (mobile) / horizontal ≥900px |
+| `lib/docs/computeFlowLayout.ts` | Posições em escada (sequence diagram) |
+| `lib/docs/SvelteFlowPlayer.svelte` | Player animado com edges `DocSequenceEdge` |
+| `lib/shell/sidebarState.ts` | Persistência colapso sidebar (`localStorage`) |
+| `(app)/+layout.svelte` | Toggle `‹`/`›` entre sidebar e conteúdo |
+
+Rotas `/settings/docs/*` mantêm layout próprio (índice colapsável); resto da app usa `PageShell` fluido.
 
 ---
 
 ## 9. Critérios de aceitação (DoD design system)
 
-- [ ] `lib/ui/` com ≥8 componentes base importáveis
-- [ ] Sidebar em árvore; sub-páginas fin não aparecem ao nível de Cofre
-- [ ] Breadcrumbs em todas as rotas `(app)/` excepto hubs de primeiro nível
-- [ ] ≥4 paletas com contraste WCAG AA validado
-- [ ] Catálogo `/dev/components` mostra imports reais, não CSS inline
-- [ ] Módulo `/fin/*` 100% migrado para `PageShell`
+- [x] `lib/ui/` com ≥8 componentes base importáveis
+- [x] Sidebar em árvore; sub-páginas fin não aparecem ao nível de Cofre
+- [x] Breadcrumbs em todas as rotas `(app)/` excepto hubs de primeiro nível
+- [x] ≥4 paletas com contraste WCAG AA validado
+- [x] Catálogo `/dev/components` mostra imports reais, não CSS inline
+- [x] Módulo `/fin/*` 100% migrado para `PageShell`
+- [x] Rotas secundárias (UI-018) em `PageShell`
 - [ ] Eyebrows com task ID só visíveis em `import.meta.env.DEV`
 - [ ] `prefers-reduced-motion` testado nos componentes `lib/ui/`
 
@@ -337,7 +341,7 @@ Pode correr **em paralelo** com produção (VPS, Mail, Google) — não bloqueia
 ## 10. Ligações
 
 - North Star: [`product-ui-vision.md`](product-ui-vision.md)
-- Backlog: [`../05-tasks/backlog.md`](../05-tasks/backlog.md) (`UI-011`–`UI-017`)
+- Backlog: [`../05-tasks/backlog.md`](../05-tasks/backlog.md) (`UI-011`–`UI-018`, `DOC-015`)
 - Código tokens: `frontend/src/lib/design/tokens.css`
 - Shell actual: `frontend/src/lib/shell/`
 - Catálogo dev: `frontend/src/routes/(app)/dev/components/`

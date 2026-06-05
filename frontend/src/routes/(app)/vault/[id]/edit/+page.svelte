@@ -6,6 +6,7 @@
   import { loadDecodedLogin, requireVaultAccess, type DecodedLogin } from "$lib/vault/ui";
   import { blobToBase64, sealItem } from "$lib/vault/items";
   import type { LoginItem } from "$lib/vault/types";
+  import { Button, PageShell, Skeleton, StatusBanner } from "$lib/ui";
 
   let item = $state<DecodedLogin | null>(null);
   let busy = $state(true);
@@ -55,17 +56,26 @@
   <title>Editar — AegisPass</title>
 </svelte:head>
 
-<section class="vault-page">
-  <a href="/vault/{id}" class="back">← Voltar</a>
+<PageShell
+  title="Editar login"
+  taskId="VAULT-001"
+  leaf={item?.login.title}
+  breadcrumb={false}
+  description="Altera credenciais localmente — o servidor só recebe o blob cifrado."
+>
+  {#snippet actions()}
+    <Button variant="ghost" size="sm" href="/vault/{id}">← Voltar</Button>
+  {/snippet}
 
   {#if busy}
-    <p class="muted">A carregar…</p>
+    <Skeleton variant="block" height="2rem" />
+    <Skeleton variant="block" height="6rem" />
   {:else if error && !item}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
+    <Button variant="ghost" href="/vault">Voltar ao cofre</Button>
   {:else if item}
-    <h1>Editar login</h1>
     {#if error}
-      <p class="error" role="alert">{error}</p>
+      <StatusBanner variant="error">{error}</StatusBanner>
     {/if}
     <LoginForm
       initial={item.login}
@@ -76,37 +86,4 @@
       onsubmit={handleSave}
     />
   {/if}
-</section>
-
-<style>
-  .vault-page {
-    max-width: 28rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-6);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .error {
-    margin-bottom: var(--space-4);
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-  }
-
-  .muted {
-    color: var(--color-text-muted);
-  }
-</style>
+</PageShell>

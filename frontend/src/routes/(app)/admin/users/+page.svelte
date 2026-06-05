@@ -3,6 +3,7 @@
   import AdminGate from "$lib/admin/AdminGate.svelte";
   import { hasAdminKey } from "$lib/admin/adminKey";
   import { listAdminUsers, type AdminUser } from "$lib/admin/api";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let unlocked = $state(hasAdminKey());
   let users = $state<AdminUser[]>([]);
@@ -34,15 +35,16 @@
   <title>Utilizadores — Admin</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/admin" class="back">← Administração</a>
-  <h1>Utilizadores</h1>
-
+<PageShell
+  title="Utilizadores"
+  taskId="ADMIN-001"
+  description="Lista de colaboradores do tenant — políticas de turno, geofence e remote wipe por utilizador."
+>
   <AdminGate onUnlocked={onGateChange} />
 
   {#if unlocked}
     {#if error}
-      <p class="error" role="alert">{error}</p>
+      <StatusBanner variant="error">{error}</StatusBanner>
     {/if}
     {#if busy}
       <p class="muted">A carregar…</p>
@@ -61,23 +63,9 @@
       </ul>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-6);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
   .list {
     list-style: none;
     margin: 0;
@@ -109,15 +97,6 @@
     color: var(--color-text-muted);
     font-family: var(--font-mono);
     margin-top: var(--space-1);
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

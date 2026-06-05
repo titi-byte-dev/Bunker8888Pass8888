@@ -1,19 +1,20 @@
 <script lang="ts">
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import { PageShell } from "$lib/ui";
 </script>
 
 <svelte:head>
   <title>CLI mTLS — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/work" class="back">← Trabalho</a>
-  <h1>CLI mTLS</h1>
-  <DocHelpLink />
-  <p class="lead">
-    A CLI <code>aegis</code> injecta segredos em scripts via certificado mTLS — a Master Password
-    fica só em memória local (Zero-Knowledge).
-  </p>
+<PageShell
+  title="CLI mTLS"
+  taskId="CLI-001"
+  description="A CLI aegis injecta segredos em scripts via certificado mTLS — a Master Password fica só em memória local (Zero-Knowledge)."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   <section class="block">
     <h2>1. Registar dispositivo</h2>
@@ -50,30 +51,9 @@
     Revoga dispositivos comprometidos em
     <a href="/security/devices">Dispositivos e sessões</a>.
   </p>
-</section>
+</PageShell>
 
 <style>
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-    line-height: 1.5;
-  }
-
   .block {
     margin-bottom: var(--space-6);
   }

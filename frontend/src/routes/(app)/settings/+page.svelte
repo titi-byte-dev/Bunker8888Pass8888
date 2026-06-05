@@ -18,6 +18,7 @@
   } from "$lib/security/api";
   import { passkeysSupported, registerPasskey, type PasskeyMeta } from "$lib/passkey";
   import { loadSessionToken } from "$lib/session";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let themeMode = $state<ThemeMode>(loadThemePreference());
   let palette = $state<PaletteId>(loadPalettePreference());
@@ -90,15 +91,16 @@
   <title>Definições — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <h1>Definições</h1>
-  <p class="lead">Conta, aparência e autenticação sem password.</p>
-
+<PageShell
+  title="Definições"
+  taskId="UI-001"
+  description="Conta, aparência e autenticação sem password."
+>
   {#if status}
-    <p class="status">{status}</p>
+    <StatusBanner variant="success">{status}</StatusBanner>
   {/if}
   {#if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {/if}
 
   {#if busy}
@@ -207,25 +209,9 @@
       {/if}
     </section>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 40rem;
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-  }
-
   .block {
     margin-bottom: var(--space-8);
   }
@@ -408,24 +394,6 @@
   .passkey-form button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  .status {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: var(--color-success-bg);
-    color: var(--color-success-fg);
-    font-size: var(--text-sm);
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {
