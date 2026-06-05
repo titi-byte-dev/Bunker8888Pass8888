@@ -21,6 +21,18 @@
   import { reportStaleAlerts } from "$lib/fin/financeAgentService";
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
+  import {
+    Button,
+    confirmDialog,
+    DataTable,
+    EmptyState,
+    MetricCard,
+    PageShell,
+    Panel,
+    StatusBanner,
+    toast,
+    type DataColumn,
+  } from "$lib/ui";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -30,7 +42,6 @@
   let subs = $state<Subscription[]>([]);
   let logins = $state<VaultLoginRef[]>([]);
 
-  // Formulário (criar/editar).
   let editingId = $state<string | null>(null);
   let fName = $state("");
   let fCost = $state(0);
@@ -48,6 +59,43 @@
   let agentEvents = $state<AgentEvent[]>([]);
   let decidingId = $state<string | null>(null);
   let reviewApproved = $state(false);
+
+  const subColumns = $derived<DataColumn<Subscription>[]>([
+    {
+      id: "name",
+      label: "Serviço",
+      accessor: (s) => (alertsFor(s.id).length > 0 ? `${s.name} ⚠` : s.name),
+    },
+    {
+      id: "monthly",
+      label: "Mensal",
+      align: "right",
+      mono: true,
+      accessor: (s) => money(monthlyCost(s), s.currency),
+    },
+    {
+      id: "fiscal",
+      label: "Fiscal",
+      muted: true,
+      accessor: (s) => fiscalLabel(s.fiscalCode),
+    },
+    {
+      id: "cycle",
+      label: "Ciclo",
+      accessor: (s) => (s.cycle === "yearly" ? "Anual" : "Mensal"),
+    },
+    {
+      id: "vault",
+      label: "Cofre",
+      muted: true,
+      accessor: (s) => s.vaultItemTitle ?? "—",
+    },
+    {
+      id: "status",
+      label: "Estado",
+      accessor: (s) => (s.active ? "activa" : "inactiva"),
+    },
+  ]);
 
   async function refreshEvents() {
     try {
@@ -68,6 +116,7 @@
     try {
       await reportStaleAlerts(alerts, subs);
       await refreshEvents();
+      toast.success("Pedido de revisão enviado ao agente.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao reportar alertas";
     } finally {
@@ -83,6 +132,7 @@
       await refreshEvents();
       if (result.action === "review_saas_licenses") {
         reviewApproved = true;
+        toast.success("Revisão aprovada — revê os alertas abaixo.");
       }
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao aprovar";
@@ -96,6 +146,7 @@
     try {
       await rejectSuggestion(ev.id);
       await refreshEvents();
+      toast.info("Sugestão rejeitada.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao rejeitar";
     } finally {
@@ -168,11 +219,13 @@
       lastUsedAt: fLastUsedAt ? new Date(fLastUsedAt).toISOString() : undefined,
       active: fActive,
     };
+    const wasEdit = !!editingId;
     try {
       if (editingId) await updateSubscription(editingId, payload);
       else await createSubscription(payload);
       resetForm();
       await refresh();
+      toast.success(wasEdit ? "Subscrição actualizada." : "Subscrição adicionada.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao gravar";
     } finally {
@@ -180,12 +233,20 @@
     }
   }
 
-  async function remove(id: string) {
+  async function remove(s: Subscription) {
+    const ok = await confirmDialog({
+      title: "Apagar subscrição?",
+      message: `Remove «${s.name}» da lista de custos. Os dados cifrados são eliminados localmente.`,
+      variant: "danger",
+      confirmLabel: "Apagar",
+    });
+    if (!ok) return;
     busy = true;
     try {
-      await deleteSubscription(id);
-      if (editingId === id) resetForm();
+      await deleteSubscription(s.id);
+      if (editingId === s.id) resetForm();
       await refresh();
+      toast.success(`«${s.name}» removido.`);
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar";
     } finally {
@@ -206,43 +267,37 @@
   <title>Custos SaaS — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">FIN-001/002 · AGENT-006 · Custos SaaS</p>
-      <h1>Monitorização de Custos</h1>
-      <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />
-    </div>
-    <div class="head-links">
-      <a class="back" href="/fin/fiscal">Fiscal →</a>
-      <a class="back" href="/fin/banking">Open Banking →</a>
-    </div>
-  </header>
-  <p class="lead">
-    As subscrições são cifradas com a tua Master Key — só tu vês os custos. O
-    dashboard cruza cada subscrição com o login do cofre e assinala licenças
-    esquecidas (sem uso) ou sem credencial associada.
-  </p>
+<PageShell
+  title="Monitorização de Custos"
+  taskId="FIN-001/002 · AGENT-006"
+  description="As subscrições são cifradas com a tua Master Key — só tu vês os custos. O dashboard cruza cada subscrição com o login do cofre e assinala licenças esquecidas ou sem credencial associada."
+  width="wide"
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />
+  {/snippet}
 
   {#if locked}
-    <section class="panel">
-      <p class="muted">🔒 Desbloqueia a Master Key para ver os custos.</p>
-      <a class="btn primary" href="/vault">Ir desbloquear</a>
-    </section>
+    <EmptyState title="Cofre bloqueado" description="Desbloqueia a Master Key para ver e gerir custos SaaS.">
+      {#snippet action()}
+        <Button href="/vault">Ir desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else}
-    {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
     <section class="metrics">
-      <div class="metric"><span class="n">{money(summary.monthly)}</span> por mês</div>
-      <div class="metric"><span class="n">{money(summary.yearly)}</span> por ano</div>
-      <div class="metric"><span class="n">{summary.activeCount}</span> activas</div>
-      <div class="metric warn">
-        <span class="n">{money(summary.potentialMonthlySaving)}</span> poupança potencial/mês
-      </div>
+      <MetricCard label="por mês" value={money(summary.monthly)} />
+      <MetricCard label="por ano" value={money(summary.yearly)} />
+      <MetricCard label="activas" value={String(summary.activeCount)} />
+      <MetricCard
+        label="poupança potencial/mês"
+        value={money(summary.potentialMonthlySaving)}
+        variant="warning"
+      />
     </section>
 
-    <section class="panel events">
-      <h2>Actividade dos agentes</h2>
+    <Panel title="Actividade dos agentes">
       {#if agentEvents.length === 0}
         <p class="muted">Sem eventos recentes.</p>
       {:else}
@@ -253,12 +308,23 @@
                 <span class="ev-label">{ev.label}</span>
                 {#if isPendingSuggestion(ev) && ev.payload.action === "review_saas_licenses"}
                   <div class="ev-actions">
-                    <button type="button" class="btn approve" disabled={decidingId !== null || busy} onclick={() => handleApprove(ev)}>
-                      {decidingId === ev.id ? "…" : "Aprovar"}
-                    </button>
-                    <button type="button" class="btn reject" disabled={decidingId !== null} onclick={() => handleReject(ev)}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      loading={decidingId === ev.id}
+                      disabled={decidingId !== null || busy}
+                      onclick={() => handleApprove(ev)}
+                    >
+                      Aprovar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={decidingId !== null}
+                      onclick={() => handleReject(ev)}
+                    >
                       Rejeitar
-                    </button>
+                    </Button>
                   </div>
                 {/if}
               </div>
@@ -266,20 +332,19 @@
           {/each}
         </ul>
       {/if}
-    </section>
+    </Panel>
 
     {#if reviewApproved}
-      <p class="hint" role="status">Revisão aprovada — revê os alertas abaixo e cancela licenças inactivas.</p>
+      <StatusBanner variant="info">Revisão aprovada — revê os alertas abaixo e cancela licenças inactivas.</StatusBanner>
     {/if}
 
     {#if alerts.length > 0}
-      <section class="panel alerts">
-        <div class="panel-head">
-          <p class="eyebrow">⚠️ Alertas ({alerts.length})</p>
-          <button type="button" class="btn secondary sm" disabled={busy} onclick={handleReportToAgent}>
+      <Panel title="Alertas ({alerts.length})">
+        {#snippet actions()}
+          <Button variant="secondary" size="sm" disabled={busy} onclick={handleReportToAgent}>
             Pedir revisão ao agente
-          </button>
-        </div>
+          </Button>
+        {/snippet}
         <ul class="alert-list">
           {#each alerts as a (a.subscriptionId + a.kind)}
             <li class="alert" class:stale={a.kind === "stale"} class:orphan={a.kind === "orphan"}>
@@ -289,17 +354,16 @@
             </li>
           {/each}
         </ul>
-      </section>
+      </Panel>
     {/if}
 
-    <section class="panel">
-      <div class="panel-head">
-        <p class="eyebrow">{editingId ? "Editar subscrição" : "Nova subscrição"}</p>
+    <Panel title={editingId ? "Editar subscrição" : "Nova subscrição"}>
+      {#snippet actions()}
         {#if editingId}
-          <button type="button" class="link-btn" onclick={resetForm}>cancelar edição</button>
+          <Button variant="ghost" size="sm" onclick={resetForm}>Cancelar edição</Button>
         {/if}
-      </div>
-      <form onsubmit={save}>
+      {/snippet}
+      <form class="sub-form" onsubmit={save}>
         <div class="row">
           <label class="field grow"><span>Serviço</span>
             <input bind:value={fName} placeholder="Netflix" disabled={busy} /></label>
@@ -328,7 +392,7 @@
             disabled={busy || !fName.trim()}
             onclick={() => { fFiscalCode = suggestFiscalCode({ name: fName, category: fCategory }); }}
           >sugerir</button>
-          <label class="field grow"><span>Login no cofre (cruza com vault)</span>
+          <label class="field grow"><span>Login no cofre</span>
             <select bind:value={fVaultItemId} disabled={busy}>
               <option value="">— sem associação —</option>
               {#each logins as l (l.id)}
@@ -340,139 +404,45 @@
           <label class="field check"><span>Activa</span>
             <input type="checkbox" bind:checked={fActive} disabled={busy} /></label>
         </div>
-        <button type="submit" class="btn primary" disabled={busy || !fName.trim()}>
+        <Button type="submit" disabled={busy || !fName.trim()} loading={busy}>
           {editingId ? "Guardar alterações" : "Adicionar"}
-        </button>
+        </Button>
       </form>
-    </section>
+    </Panel>
 
-    <section class="panel">
-      <div class="panel-head"><p class="eyebrow">Subscrições</p></div>
-      {#if loading}
-        <p class="muted">A carregar…</p>
-      {:else if subs.length === 0}
-        <p class="muted">Sem subscrições. Adiciona a primeira acima.</p>
-      {:else}
-        <table>
-          <thead>
-            <tr><th>Serviço</th><th>Mensal</th><th>Fiscal</th><th>Ciclo</th><th>Cofre</th><th>Estado</th><th></th></tr>
-          </thead>
-          <tbody>
-            {#each subs as s (s.id)}
-              <tr class:off={!s.active}>
-                <td>
-                  {s.name}
-                  {#if alertsFor(s.id).length > 0}<span class="flag">⚠</span>{/if}
-                </td>
-                <td class="mono">{money(monthlyCost(s), s.currency)}</td>
-                <td class="muted sm">{fiscalLabel(s.fiscalCode)}</td>
-                <td>{s.cycle === "yearly" ? "Anual" : "Mensal"}</td>
-                <td class="muted sm">{s.vaultItemTitle ?? "—"}</td>
-                <td>{s.active ? "activa" : "inactiva"}</td>
-                <td class="actions">
-                  <button type="button" class="link-btn" onclick={() => edit(s)}>editar</button>
-                  <button type="button" class="link-btn" onclick={() => remove(s.id)} disabled={busy}>apagar</button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </section>
+    <Panel title="Subscrições" padding="none">
+      <DataTable
+        columns={subColumns}
+        rows={subs}
+        keyFn={(s) => s.id}
+        loading={loading}
+        dense
+        rowClass={(s) => (!s.active ? "off" : undefined)}
+        emptyTitle="Sem subscrições"
+        emptyDescription="Adiciona a primeira subscrição no formulário acima."
+      >
+        {#snippet actions(row)}
+          <Button variant="ghost" size="sm" onclick={() => edit(row)}>editar</Button>
+          <Button variant="ghost" size="sm" disabled={busy} onclick={() => remove(row)}>apagar</Button>
+        {/snippet}
+      </DataTable>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 56rem;
-  }
-  .page-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
-  }
-  .head-links {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    align-items: flex-end;
-    flex-shrink: 0;
-  }
-  .back {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-  .lead {
-    margin: 0 0 var(--space-5);
-    max-width: 42rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
   .metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     gap: var(--space-3);
-    margin-bottom: var(--space-4);
   }
-  .metric {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-3) var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-  }
-  .metric.warn .n {
-    color: var(--color-danger);
-  }
-  .metric .n {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    color: var(--color-text);
-  }
-  .panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-4) var(--space-6);
-    margin-bottom: var(--space-4);
-  }
-  .panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-3);
-  }
-  .panel-head .eyebrow {
-    margin: 0;
-  }
+
   .muted {
+    margin: 0;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
-  .sm {
-    font-size: var(--text-xs);
-  }
-  .mono {
-    font-family: var(--font-mono);
-  }
+
   .alert-list {
     margin: 0;
     padding: 0;
@@ -481,6 +451,7 @@
     flex-direction: column;
     gap: var(--space-1);
   }
+
   .alert {
     display: flex;
     align-items: baseline;
@@ -491,39 +462,28 @@
     border-left: 3px solid var(--color-border);
     font-size: var(--text-sm);
   }
-  .alert.stale {
-    border-left-color: var(--color-danger);
-  }
-  .alert.orphan {
-    border-left-color: var(--color-warning, #c79a2e);
-  }
-  .a-name {
-    font-weight: 500;
-  }
-  .a-reason {
-    color: var(--color-text-muted);
-    flex: 1;
-  }
-  .a-save {
-    color: var(--color-danger);
-    font-family: var(--font-mono);
-  }
-  .row {
+
+  .alert.stale { border-left-color: var(--color-danger); }
+  .alert.orphan { border-left-color: var(--color-warning); }
+  .a-name { font-weight: 500; }
+  .a-reason { color: var(--color-text-muted); flex: 1; }
+  .a-save { color: var(--color-danger); font-family: var(--font-mono); }
+
+  .sub-form .row {
     display: flex;
     gap: var(--space-2);
     flex-wrap: wrap;
+    margin-bottom: var(--space-2);
   }
+
   .field {
     display: block;
     margin-bottom: var(--space-3);
   }
-  .field.grow {
-    flex: 1;
-    min-width: 9rem;
-  }
-  .field.check {
-    align-self: center;
-  }
+
+  .field.grow { flex: 1; min-width: 9rem; }
+  .field.check { align-self: center; }
+
   .field > span {
     display: block;
     margin-bottom: var(--space-1);
@@ -532,6 +492,7 @@
     letter-spacing: 0.06em;
     color: var(--color-text-label);
   }
+
   input,
   select {
     padding: var(--space-2) var(--space-3);
@@ -544,67 +505,19 @@
     box-sizing: border-box;
     max-width: 9rem;
   }
+
   .field.grow input,
   .field.grow select {
     max-width: none;
     width: 100%;
   }
+
   input:focus-visible,
   select:focus-visible {
     outline: none;
     border-color: var(--color-accent);
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-  }
-  th,
-  td {
-    text-align: left;
-    padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--color-border);
-  }
-  th {
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-label);
-  }
-  tr.off {
-    opacity: 0.55;
-  }
-  .flag {
-    color: var(--color-danger);
-  }
-  td.actions {
-    display: flex;
-    gap: var(--space-3);
-  }
-  .btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--color-text);
-  }
-  .btn.primary {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
-  }
-  .btn.primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-  }
-  .btn:disabled {
-    opacity: 0.55;
-    cursor: progress;
-  }
+
   .link-btn {
     background: none;
     border: none;
@@ -612,19 +525,13 @@
     font-size: var(--text-xs);
     cursor: pointer;
     padding: 0;
+    align-self: flex-end;
+    margin-bottom: var(--space-3);
   }
-  .link-btn:hover {
-    color: var(--color-danger);
-  }
-  .inline-error {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-danger);
-  }
-  .events h2 {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-base);
-  }
+
+  .link-btn:hover:not(:disabled) { color: var(--color-accent); }
+  .link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
   .event-list {
     list-style: none;
     padding: 0;
@@ -633,15 +540,16 @@
     flex-direction: column;
     gap: var(--space-2);
   }
+
   .event-list li {
     padding: var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-bg-inset);
   }
-  .event-list li.suggested {
-    border-color: var(--color-accent);
-  }
+
+  .event-list li.suggested { border-color: var(--color-accent); }
+
   .ev-body {
     display: flex;
     align-items: center;
@@ -649,27 +557,7 @@
     gap: var(--space-3);
     flex-wrap: wrap;
   }
-  .ev-label {
-    font-size: var(--text-sm);
-  }
-  .ev-actions {
-    display: flex;
-    gap: var(--space-2);
-  }
-  .btn.secondary {
-    background: var(--color-bg-inset);
-  }
-  .btn.approve {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
-  }
-  .btn.reject {
-    color: var(--color-text-muted);
-  }
-  .hint {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-accent);
-  }
+
+  .ev-label { font-size: var(--text-sm); }
+  .ev-actions { display: flex; gap: var(--space-2); }
 </style>
