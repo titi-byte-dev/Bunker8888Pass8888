@@ -13,6 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
@@ -80,6 +81,10 @@ func main() {
 		secretLinksStore := secretlinks.NewStore()
 		go secretLinksStore.StartReaper(context.Background(), time.Minute)
 
+		// Notas auto-destrutivas: tambem só em RAM, com o seu proprio reaper.
+		burnNotesStore := burnnotes.NewStore()
+		go burnNotesStore.StartReaper(context.Background(), time.Minute)
+
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
 			var err error
@@ -126,6 +131,7 @@ func main() {
 			ShareKeys:    shareKeysRepo,
 			SharedVaults: sharedVaultsRepo,
 			SecretLinks:  secretLinksStore,
+			BurnNotes:    burnNotesStore,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
 		}

@@ -232,6 +232,20 @@
       </p>
       <a class="btn primary" href="/team/links">Criar secret link</a>
     </section>
+
+    <!-- Painel F — notas auto-destrutivas (SHARE-005) -->
+    <section class="panel">
+      <div class="panel-head">
+        <p class="eyebrow">Notas auto-destrutivas</p>
+        <span class="pill on">Disponível</span>
+      </div>
+      <p class="panel-body">
+        Notas que ardem após a primeira leitura. Cifradas no dispositivo, com
+        passphrase opcional (2.ª camada) e destruição manual a qualquer momento.
+        A chave viaja no fragmento do link e nunca chega ao servidor.
+      </p>
+      <a class="btn primary" href="/team/notes">Criar nota auto-destrutiva</a>
+    </section>
   {/if}
 </section>
 
