@@ -9,4 +9,17 @@ export {
   type ThemeMode,
   type ResolvedTheme,
 } from "./theme";
+export {
+  PALETTES,
+  PALETTE_STORAGE_KEY,
+  initPalette,
+  loadPalettePreference,
+  setPalettePreference,
+  applyPalette,
+  resolvePalette,
+  isPaletteId,
+  paletteLabel,
+  type PaletteId,
+  type PaletteMeta,
+} from "./palette";
 export { CATALOG_SECTIONS, type CatalogSection } from "./catalog";

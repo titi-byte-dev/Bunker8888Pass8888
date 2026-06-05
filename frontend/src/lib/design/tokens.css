@@ -104,6 +104,116 @@
   --shadow-inset: inset 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
+/* --- Paletas (UI-013) -----------------------------------------------------
+ * Identidade visual por empresa (white-label). data-palette combina-se com
+ * data-theme. So re-tintamos fundos + accent; texto e --color-danger herdam do
+ * modo -> contraste WCAG AA garantido (validado em palette.test.ts).
+ *
+ * "aegis" e a omissao: nao precisa de bloco (usa o tema base acima).
+ * -------------------------------------------------------------------------- */
+
+/* Aurora — teal/violeta desaturado, futurista suave. */
+[data-palette="aurora"]:root,
+[data-palette="aurora"][data-theme="dark"] {
+  --color-bg-base: #0a1316;
+  --color-bg-elevated: #10211f;
+  --color-bg-surface: #152a2b;
+  --color-bg-inset: #0c1a1b;
+
+  --color-border: #244241;
+  --color-border-strong: #356160;
+
+  --color-accent: #36c6d3;
+  --color-accent-fg: #04181b;
+  --color-accent-muted: #173536;
+
+  --color-link: #5fd6e0;
+}
+
+[data-palette="aurora"][data-theme="light"] {
+  --color-bg-base: #f0f6f6;
+  --color-bg-elevated: #ffffff;
+  --color-bg-surface: #ffffff;
+  --color-bg-inset: #e6f1f1;
+
+  --color-border: #cfe2e1;
+  --color-border-strong: #aacccb;
+
+  --color-accent: #0d7d8a;
+  --color-accent-fg: #ffffff;
+  --color-accent-muted: #dcefef;
+
+  --color-link: #0a6772;
+}
+
+/* Midnight — quase monocromatico, accent frio, sessoes longas. */
+[data-palette="midnight"]:root,
+[data-palette="midnight"][data-theme="dark"] {
+  --color-bg-base: #07090d;
+  --color-bg-elevated: #0d1017;
+  --color-bg-surface: #12161f;
+  --color-bg-inset: #090b10;
+
+  --color-border: #1f2530;
+  --color-border-strong: #313a48;
+
+  --color-accent: #7c8db0;
+  --color-accent-fg: #07090d;
+  --color-accent-muted: #1c2230;
+
+  --color-link: #9aa9c8;
+}
+
+[data-palette="midnight"][data-theme="light"] {
+  --color-bg-base: #eceef2;
+  --color-bg-elevated: #ffffff;
+  --color-bg-surface: #ffffff;
+  --color-bg-inset: #e3e6ec;
+
+  --color-border: #d2d6df;
+  --color-border-strong: #b0b6c2;
+
+  --color-accent: #475a7e;
+  --color-accent-fg: #ffffff;
+  --color-accent-muted: #e0e4ee;
+
+  --color-link: #3c4d6e;
+}
+
+/* Paper — claro quente, sombras minimas (RH/documentos). */
+[data-palette="paper"]:root,
+[data-palette="paper"][data-theme="dark"] {
+  --color-bg-base: #14110c;
+  --color-bg-elevated: #1d1810;
+  --color-bg-surface: #241e14;
+  --color-bg-inset: #110e09;
+
+  --color-border: #3a3122;
+  --color-border-strong: #54482f;
+
+  --color-accent: #d99a4e;
+  --color-accent-fg: #1a1205;
+  --color-accent-muted: #2f2616;
+
+  --color-link: #e6b06a;
+}
+
+[data-palette="paper"][data-theme="light"] {
+  --color-bg-base: #f7f4ee;
+  --color-bg-elevated: #fffdf9;
+  --color-bg-surface: #fffdf9;
+  --color-bg-inset: #efe9df;
+
+  --color-border: #e2d8c6;
+  --color-border-strong: #c8b99e;
+
+  --color-accent: #9a6212;
+  --color-accent-fg: #ffffff;
+  --color-accent-muted: #f3e6cf;
+
+  --color-link: #855410;
+}
+
 /* --- Base global ---------------------------------------------------------- */
 body {
   margin: 0;

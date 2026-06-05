@@ -82,7 +82,7 @@ export const ROUTE_TREE: RouteNode[] = [
     label: "Financas",
     href: "/fin",
     children: [
-      { label: "Custos SaaS", href: "/fin", taskId: "FIN-001" },
+      { label: "Custos SaaS", href: "/fin/costs", taskId: "FIN-001" },
       { label: "Fiscal", href: "/fin/fiscal", taskId: "FIN-005" },
       { label: "Faturas", href: "/fin/invoices", taskId: "FIN-006" },
       { label: "Comissoes", href: "/fin/commissions", taskId: "FIN-007" },
@@ -143,6 +143,17 @@ export function routeTrail(pathname: string): RouteNode[] {
   walk(ROUTE_TREE, []);
 
   return best ?? [];
+}
+
+/**
+ * Filhos de um modulo (para paginas-hub via HubLinks).
+ * Didatico: o hub NAO redeclara as suas sub-paginas — deriva-as da arvore,
+ * por isso adicionar uma rota a ROUTE_TREE chega para aparecer no hub.
+ * Exclui o filho-sombra que partilha href com o modulo (ex.: "Custos SaaS").
+ */
+export function routeChildren(href: string): RouteNode[] {
+  const node = flattenRoutes().find((n) => n.href === href);
+  return (node?.children ?? []).filter((c) => c.href !== href);
 }
 
 /** Lista plana de todos os nodes (para CommandPalette / pesquisa). */

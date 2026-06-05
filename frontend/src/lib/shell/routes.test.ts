@@ -6,6 +6,7 @@ import {
   isRouteActive,
   routeTrail,
   flattenRoutes,
+  routeChildren,
 } from "./routes";
 
 describe("ROUTE_TREE (UI-011)", () => {
@@ -45,5 +46,14 @@ describe("ROUTE_TREE (UI-011)", () => {
     const flat = flattenRoutes();
     expect(flat.some((n) => n.href === "/fin/commissions")).toBe(true);
     expect(flat.length).toBeGreaterThan(ROUTE_TREE.length);
+  });
+
+  it("routeChildren deriva os cartoes do hub (UI-014)", () => {
+    const fin = routeChildren("/fin").map((c) => c.href);
+    expect(fin).toContain("/fin/costs");
+    expect(fin).toContain("/fin/fiscal");
+    // exclui o filho-sombra que partilharia href com o modulo
+    expect(fin).not.toContain("/fin");
+    expect(routeChildren("/vault")).toEqual([]); // modulo-folha sem filhos
   });
 });
