@@ -115,8 +115,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| FIN-001 | Monitorização de custos SaaS (cruza com vault) | 2 | M | ⚪ | VAULT-005 |
-| FIN-002 | Alertas de licenças sem uso | 2 | S | ⚪ | FIN-001 |
+| FIN-001 | Monitorização de custos SaaS (cruza com vault) | 2 | M | 🟢 | VAULT-005 |
+| FIN-002 | Alertas de licenças sem uso | 2 | S | 🟢 | FIN-001 |
 | FIN-003 | Integração Open Banking (mTLS) | 3 | XL | ⚪ | INFRA-002 |
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
 | FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
@@ -135,6 +135,21 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | AGENT-008 | Agente Operações (compras/inventário) | 3 | L | ⚪ | AGENT-005 |
 | AGENT-009 | Human-in-the-loop p/ ações sensíveis | 3 | M | ⚪ | AGENT-005 |
 | AGENT-010 | Mitigação de prompt injection (dados ≠ instruções) | 2 | M | ⚪ | AGENT-001 |
+
+## DOC — Documentação in-app
+
+> SSOT em `docs/`; a app lê JSON gerado por `scripts/build-docs.mjs`.
+
+| ID | Descrição | Fase | Tamanho | Estado | Depende de |
+|---|---|---|---|---|---|
+| DOC-001 | Convenção Markdown + script `build-docs.mjs` + manifest | 1 | M | 🟢 | — |
+| DOC-002 | UI `/settings/docs` com níveis e dropdowns didáticos | 1 | L | 🟢 | DOC-001, UI-002 |
+| DOC-003 | Conteúdo product + concepts (glossary, vault, security…) | 1 | M | 🟢 | DOC-001 |
+| DOC-004 | Conteúdo developer (crypto, API) + competitive landscape | 1 | M | 🟢 | DOC-001 |
+| DOC-005 | Journeys do roadmap expostos na app (04-user-journeys) | 1 | S | 🟢 | DOC-002 |
+| DOC-006 | Command palette + link em Definições | 1 | S | 🟢 | DOC-002 |
+| DOC-007 | Journeys em falta (SHARE, DW, emergency…) | 2 | M | ⚪ | DOC-005 |
+| DOC-008 | Renderer Mermaid nos percursos | 2 | S | ⚪ | DOC-005 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 

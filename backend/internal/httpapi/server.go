@@ -16,6 +16,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
@@ -54,6 +55,7 @@ type Deps struct {
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
 	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/*
+	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -214,6 +216,13 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/mail/aliases", requireAuth(deps.Auth, handleCreateAlias(deps.Mail)))
 		mux.Handle("PATCH /api/mail/aliases/{id}", requireAuth(deps.Auth, handleSetAliasActive(deps.Mail)))
 		mux.Handle("DELETE /api/mail/aliases/{id}", requireAuth(deps.Auth, handleDeleteAlias(deps.Mail)))
+	}
+	if deps.Fin != nil && deps.Auth != nil {
+		// Monitorizacao de custos SaaS (FIN-001).
+		mux.Handle("GET /api/fin/subscriptions", requireAuth(deps.Auth, handleListSubscriptions(deps.Fin)))
+		mux.Handle("POST /api/fin/subscriptions", requireAuth(deps.Auth, handleCreateSubscription(deps.Fin)))
+		mux.Handle("PUT /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleUpdateSubscription(deps.Fin)))
+		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
 	}
 
 	return mux
