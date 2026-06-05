@@ -48,6 +48,22 @@
   ],
   "sections": [
     {
+      "level": 1,
+      "title": "",
+      "html": "<!--DOC_FLOW:flow-1-->\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart TB\r\n  subgraph Cliente[\"Browser (cliente)\"]\r\n    MP[Master Password]\r\n    MK[Master Key]\r\n    MP --> MK\r\n    MK --> Cifra[Cifrar / decifrar]\r\n  end\r\n  subgraph Servidor[\"Backend + PostgreSQL\"]\r\n    AH[Auth Hash]\r\n    Blob[Blobs cifrados]\r\n  end\r\n  Cifra --> Blob\r\n  MP -.->|nunca enviada| Servidor\r\n  MK -.->|nunca enviada| Servidor\r\n  MP --> AH",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": false
+    },
+    {
       "level": 2,
       "title": "Aprofundar: pilares Zero-Trust",
       "html": "<table>\n<thead>\n<tr>\n<th>Pilar</th>\n<th>O que significa na prática</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Rede</td>\n<td>Túnel WireGuard antes de falar com a API</td>\n</tr>\n<tr>\n<td>Identidade</td>\n<td>Auth Hash + sessão + passkeys</td>\n</tr>\n<tr>\n<td>Contexto</td>\n<td>Turno (NTP), geofencing, dispositivo registado</td>\n</tr>\n<tr>\n<td>Dados</td>\n<td>Blobs cifrados; score de higiene calculado no cliente</td>\n</tr>\n</tbody></table>\n",

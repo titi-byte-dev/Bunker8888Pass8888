@@ -1,11 +1,23 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { page } from "$app/state";
   import DocNav from "$lib/docs/DocNav.svelte";
   import DocSearch from "$lib/docs/DocSearch.svelte";
   import { DOC_MANIFEST } from "$lib/docs/loader";
+  import {
+    clampDocNavWidth,
+    loadDocNavCollapsed,
+    loadDocNavWidth,
+    saveDocNavCollapsed,
+    saveDocNavWidth,
+  } from "$lib/docs/docNavState";
+
   let { children } = $props();
 
-  let navCollapsed = $state(false);
+  let navCollapsed = $state(loadDocNavCollapsed());
+  let navWidth = $state(loadDocNavWidth());
+  let resizing = $state(false);
+  let layoutEl: HTMLDivElement | undefined = $state();
 
   const docTitle = $derived(
     page.params.slug
@@ -15,11 +27,45 @@
 
   function toggleDocNav() {
     navCollapsed = !navCollapsed;
+    saveDocNavCollapsed(navCollapsed);
   }
+
+  function startResize(e: MouseEvent) {
+    if (navCollapsed) return;
+    resizing = true;
+    e.preventDefault();
+  }
+
+  onMount(() => {
+    function onMove(e: MouseEvent) {
+      if (!resizing || !layoutEl) return;
+      const left = layoutEl.getBoundingClientRect().left;
+      navWidth = clampDocNavWidth(e.clientX - left);
+    }
+
+    function onUp() {
+      if (!resizing) return;
+      resizing = false;
+      saveDocNavWidth(navWidth);
+    }
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  });
 </script>
 
-<div class="docs-layout" class:nav-collapsed={navCollapsed}>
-  <aside class="docs-sidebar">
+<div
+  class="docs-layout"
+  class:nav-collapsed={navCollapsed}
+  class:resizing
+  bind:this={layoutEl}
+  style:--doc-nav-width="{navCollapsed ? '2.75rem' : `${navWidth}px`}"
+>
+  <aside class="docs-sidebar" aria-label="Índice da documentação">
     <div class="docs-sidebar-head">
       <nav class="breadcrumbs" aria-label="Navegação">
         {#if !navCollapsed}
@@ -45,54 +91,122 @@
         {navCollapsed ? "»" : "«"}
       </button>
     </div>
+
     {#if !navCollapsed}
-      <DocSearch />
-      <DocNav pathname={page.url.pathname} />
+      <div class="docs-sidebar-scroll">
+        <DocSearch />
+        <DocNav pathname={page.url.pathname} />
+      </div>
     {/if}
   </aside>
+
+  <!-- Separador arrastável — ajusta largura do índice (desktop). -->
+  <button
+    type="button"
+    class="docs-resizer"
+    class:hidden={navCollapsed}
+    onmousedown={startResize}
+    aria-label="Redimensionar índice"
+    title="Arrastar para ajustar largura do índice"
+  ></button>
+
   <div class="docs-main">
-    {@render children()}
+    <div class="docs-main-scroll">
+      {@render children()}
+    </div>
   </div>
 </div>
 
 <style>
   .docs-layout {
-    display: grid;
-    gap: var(--space-4);
-    max-width: none;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
     width: 100%;
-  }
-
-  @media (min-width: 768px) {
-    .docs-layout {
-      grid-template-columns: 9.5rem 1fr;
-      align-items: start;
-      gap: var(--space-3);
-    }
-
-    .docs-layout.nav-collapsed {
-      grid-template-columns: 2.5rem 1fr;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .docs-layout {
-      grid-template-columns: 10.5rem 1fr;
-    }
+    overflow: hidden;
   }
 
   .docs-sidebar {
-    position: sticky;
-    top: var(--space-4);
+    flex: 0 0 var(--doc-nav-width);
+    width: var(--doc-nav-width);
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    box-sizing: border-box;
   }
 
   .docs-sidebar-head {
+    flex-shrink: 0;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-1);
-    margin-bottom: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .docs-sidebar-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: var(--space-2) var(--space-2) var(--space-3);
+    scrollbar-gutter: stable;
+  }
+
+  .docs-resizer {
+    flex: 0 0 6px;
+    width: 6px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    cursor: col-resize;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+  }
+
+  .docs-resizer.hidden {
+    display: none;
+  }
+
+  .docs-resizer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 2px;
+    margin: 0 auto;
+    border-radius: 1px;
+    background: var(--color-border);
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .docs-resizer:hover::after,
+  .docs-layout.resizing .docs-resizer::after {
+    background: var(--color-accent);
+  }
+
+  .docs-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .docs-main-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: var(--space-3) 10px var(--space-6);
+    scrollbar-gutter: stable;
   }
 
   .nav-toggle {
@@ -141,7 +255,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 12rem;
+    max-width: 10rem;
   }
 
   .nav-icon-link {
@@ -158,9 +272,33 @@
     background: var(--color-accent-muted);
   }
 
-  .docs-main {
-    min-width: 0;
-    max-width: none;
-    width: 100%;
+  @media (max-width: 767px) {
+    .docs-layout {
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    .docs-sidebar {
+      flex: none;
+      width: 100%;
+      max-height: 42vh;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .docs-resizer {
+      display: none;
+    }
+
+    .docs-main-scroll {
+      overflow: visible;
+      padding-inline: 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .docs-resizer::after {
+      transition: none;
+    }
   }
 </style>

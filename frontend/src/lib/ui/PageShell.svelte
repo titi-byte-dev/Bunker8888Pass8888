@@ -58,23 +58,23 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--page-gap);
   }
 
   .page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: var(--space-4);
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
   .head-text {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 0.125rem;
   }
   h1 {
-    margin: var(--space-1) 0 0;
+    margin: 0;
     font-family: var(--font-display);
     font-size: var(--text-2xl);
     line-height: var(--leading-tight);
@@ -83,6 +83,7 @@
     margin: 0;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    line-height: var(--leading-snug);
     max-width: var(--prose-max);
   }
   .head-actions {

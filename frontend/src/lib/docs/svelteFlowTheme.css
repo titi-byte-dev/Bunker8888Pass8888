@@ -1,0 +1,131 @@
+/**
+ * Tema Svelte Flow alinhado a tokens AegisPass (light/dark/paletas).
+ * Importar junto de @xyflow/svelte/dist/style.css no player de documentação.
+ */
+.sf-theme :global(.svelte-flow) {
+  --xy-edge-stroke-default: color-mix(in srgb, var(--color-text-muted) 55%, var(--color-border));
+  --xy-edge-stroke-width-default: 1.5;
+  --xy-edge-stroke-selected-default: var(--color-accent);
+  --xy-edge-label-background-color: var(--color-bg-elevated);
+  --xy-edge-label-color: var(--color-text);
+  --xy-connectionline-stroke-default: var(--color-border);
+  --xy-background-color-default: var(--color-bg-inset);
+  --xy-background-pattern-color-default: color-mix(
+    in srgb,
+    var(--color-text-muted) 28%,
+    transparent
+  );
+  --xy-node-color-default: var(--color-text);
+  --xy-node-border-default: 1px solid var(--color-border-strong);
+  --xy-node-background-color-default: var(--color-bg-surface);
+  --xy-node-boxshadow-hover-default: 0 2px 8px color-mix(in srgb, var(--color-bg-base) 45%, transparent);
+  --xy-handle-background-color-default: var(--color-accent);
+  --xy-handle-border-color-default: var(--color-bg-elevated);
+  --xy-controls-button-background-color-default: var(--color-bg-surface);
+  --xy-controls-button-background-color-hover-default: var(--color-accent-muted);
+  --xy-controls-button-color-default: var(--color-text);
+  --xy-controls-button-color-hover-default: var(--color-text);
+  --xy-controls-button-border-color-default: var(--color-border);
+  --xy-controls-box-shadow-default: 0 2px 10px color-mix(in srgb, var(--color-bg-base) 50%, transparent);
+  --xy-minimap-background-color-default: var(--color-bg-elevated);
+  --xy-minimap-node-background-color-default: var(--color-bg-surface);
+}
+
+.sf-theme :global(.svelte-flow__background) {
+  background: var(--color-bg-inset);
+}
+
+.sf-theme :global(.svelte-flow__pane) {
+  cursor: grab;
+}
+
+.sf-theme :global(.svelte-flow__pane:active) {
+  cursor: grabbing;
+}
+
+.sf-theme :global(.svelte-flow__edges marker path),
+.sf-theme :global(.svelte-flow__connectionline path) {
+  fill: color-mix(in srgb, var(--color-text-muted) 70%, var(--color-text));
+  stroke: color-mix(in srgb, var(--color-text-muted) 70%, var(--color-text));
+}
+
+.sf-theme :global(.flow-edge-current marker path) {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+
+.sf-theme :global(.flow-edge-done marker path) {
+  fill: var(--color-success-fg);
+  stroke: var(--color-success-fg);
+}
+
+.sf-theme :global(.flow-edge-pending marker path) {
+  fill: color-mix(in srgb, var(--color-text-muted) 50%, var(--color-border));
+  stroke: color-mix(in srgb, var(--color-text-muted) 50%, var(--color-border));
+}
+
+.sf-theme :global(.svelte-flow__edge-text) {
+  fill: var(--color-text);
+}
+
+.sf-theme :global(.svelte-flow__edge-textbg) {
+  fill: var(--color-bg-elevated);
+  fill-opacity: 0.97;
+  stroke: var(--color-border);
+  stroke-width: 0.75;
+}
+
+.sf-theme :global(.svelte-flow__controls) {
+  box-shadow: var(--xy-controls-box-shadow-default);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.sf-theme :global(.svelte-flow__controls-button) {
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  fill: var(--color-text-muted);
+}
+
+.sf-theme :global(.svelte-flow__controls-button:hover) {
+  background: var(--color-accent-muted);
+  fill: var(--color-text);
+}
+
+.sf-theme :global(.svelte-flow__controls-button:last-child) {
+  border-bottom: none;
+}
+
+.sf-theme :global(.flow-edge-current path:not(.svelte-flow__edge-textbg)) {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+
+.sf-theme :global(.flow-edge-done path:not(.svelte-flow__edge-textbg)) {
+  stroke: var(--color-success-fg);
+  stroke-width: 2;
+  opacity: 0.92;
+}
+
+.sf-theme :global(.flow-edge-pending path:not(.svelte-flow__edge-textbg)) {
+  stroke: color-mix(in srgb, var(--color-text-muted) 40%, var(--color-border));
+  stroke-width: 1.5;
+  opacity: 0.55;
+}
+
+.sf-theme :global(.flow-edge-current .svelte-flow__edge-text) {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.sf-theme :global(.flow-edge-done .svelte-flow__edge-text) {
+  fill: var(--color-success-fg);
+  font-size: 10px;
+}
+
+.sf-theme :global(.flow-edge-pending .svelte-flow__edge-text) {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+  opacity: 0.8;
+}

@@ -152,16 +152,17 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--nav-item-py) var(--nav-item-px);
     border-radius: var(--radius-sm);
     color: var(--color-text-muted);
     text-decoration: none;
     font-size: var(--text-sm);
     font-weight: 500;
+    line-height: var(--nav-item-leading);
+    min-height: var(--nav-item-min-height);
     transition:
       background-color var(--duration-fast) var(--ease-out),
       color var(--duration-fast) var(--ease-out);
-    min-height: 2.25rem;
   }
 
   .sidebar.collapsed .nav-link {
@@ -212,7 +213,8 @@
   .nav-link.child {
     font-weight: 500;
     font-size: var(--text-xs);
-    padding: var(--space-1) var(--space-2);
+    padding: 2px var(--space-2);
+    line-height: var(--nav-item-leading);
   }
 
   .nav-link.child.active {

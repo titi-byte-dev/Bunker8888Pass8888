@@ -29,6 +29,15 @@ exigir *step-up* (passkey ou confirmação) antes de permitir acesso sensível.
 :::
 
 :::level{level=1 title="Páginas principais"}
+
+```mermaid
+flowchart LR
+  Hyg[/security/hygiene] --> Vault[Cofre]
+  Dev[/security/devices] --> Vault
+  Sen[/security/sentinel] --> Step[Step-up auth]
+  Emg[/security/emergency] --> Vault
+```
+
 | Rota | Função |
 |---|---|
 | `/security/hygiene` | Score, passwords fracas, acções |

@@ -32,8 +32,17 @@
     {
       "level": 1,
       "title": "Páginas principais",
-      "html": "<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/security/hygiene</code></td>\n<td>Score, passwords fracas, acções</td>\n</tr>\n<tr>\n<td><code>/security/devices</code></td>\n<td>Sessões, passkeys, revogação</td>\n</tr>\n<tr>\n<td><code>/security/sentinel</code></td>\n<td>Alertas de viagem impossível</td>\n</tr>\n<tr>\n<td><code>/security/emergency</code></td>\n<td>Acesso de emergência (herdeiro digital)</td>\n</tr>\n<tr>\n<td><code>/work/shifts</code></td>\n<td>Turnos e geofence</td>\n</tr>\n</tbody></table>\n",
-      "flows": [],
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/security/hygiene</code></td>\n<td>Score, passwords fracas, acções</td>\n</tr>\n<tr>\n<td><code>/security/devices</code></td>\n<td>Sessões, passkeys, revogação</td>\n</tr>\n<tr>\n<td><code>/security/sentinel</code></td>\n<td>Alertas de viagem impossível</td>\n</tr>\n<tr>\n<td><code>/security/emergency</code></td>\n<td>Acesso de emergência (herdeiro digital)</td>\n</tr>\n<tr>\n<td><code>/work/shifts</code></td>\n<td>Turnos e geofence</td>\n</tr>\n</tbody></table>\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart LR\r\n  Hyg[/security/hygiene] --> Vault[Cofre]\r\n  Dev[/security/devices] --> Vault\r\n  Sen[/security/sentinel] --> Step[Step-up auth]\r\n  Emg[/security/emergency] --> Vault",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
       "collapsed": false
     },
     {

@@ -30,6 +30,15 @@ describe("computeFlowLayout (DOC-011)", () => {
     expect(long).toBeGreaterThan(short);
   });
 
+  it("distribui actores pela largura alvo do canvas", () => {
+    const layout = computeFlowLayout(graph, 800);
+    expect(layout.canvasWidth).toBe(800);
+    const xs = layout.nodes.map((n) => n.columnCenterX);
+    expect(xs[0]).toBeLessThan(xs[xs.length - 1]);
+    expect(xs[0]).toBeGreaterThanOrEqual(32);
+    expect(xs[xs.length - 1]).toBeLessThanOrEqual(768);
+  });
+
   it("assigna lifeline a cada actor", () => {
     const layout = computeFlowLayout(graph);
     for (const node of layout.nodes) {

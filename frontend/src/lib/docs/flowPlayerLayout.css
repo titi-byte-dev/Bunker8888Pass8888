@@ -7,13 +7,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin: var(--space-4) 0;
+  margin: var(--space-3) 0;
   min-width: 0;
 }
 
 .flow-player-visual {
   min-width: 0;
   flex: 1 1 auto;
+  min-height: 300px;
 }
 
 .flow-player-steps {
@@ -24,21 +25,31 @@
 @media (min-width: 900px) {
   .flow-player-layout {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     gap: var(--space-4);
+    min-height: 320px;
   }
 
   .flow-player-visual {
-    flex: 1 1 58%;
+    flex: 1 1 62%;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flow-player-visual :global(.sf-scroll) {
+    flex: 1;
+    max-height: none;
+    min-height: 320px;
   }
 
   .flow-player-steps {
-    flex: 0 0 min(22rem, 38%);
-    max-width: 26rem;
+    flex: 0 0 min(20rem, 36%);
+    max-width: 24rem;
     position: sticky;
-    top: var(--space-4);
-    max-height: calc(100dvh - var(--space-12));
+    top: var(--space-2);
+    max-height: calc(100dvh - 8rem);
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }

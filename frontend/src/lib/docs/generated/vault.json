@@ -27,7 +27,7 @@
       "id": "vault-sync",
       "title": "Sincronização em tempo real",
       "level": 2,
-      "html": "<p>Alterações propagam-se via <strong>WebSockets</strong> entre dispositivos do mesmo utilizador.\nO servidor reencaminha eventos; não decifra payloads.</p>\n"
+      "html": "<p>Alterações propagam-se via <strong>WebSockets</strong> entre dispositivos do mesmo utilizador.\nO servidor reencaminha eventos; não decifra payloads.</p>\n<pre><code class=\"language-mermaid\">sequenceDiagram\nparticipant A as Dispositivo A\nparticipant WS as WebSocket\nparticipant B as Dispositivo B\nA-&gt;&gt;WS: item.updated (blob cifrado)\nWS-&gt;&gt;B: evento reencaminhado\nNote over A,B: Servidor nunca vê conteúdo em claro\n</code></pre>\n"
     }
   ],
   "sections": [

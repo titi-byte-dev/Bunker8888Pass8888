@@ -131,7 +131,7 @@
   .section-body {
     padding: 0 var(--space-4) var(--space-4);
     font-size: var(--text-sm);
-    line-height: 1.65;
+    line-height: var(--leading-snug);
   }
 
   .doc-section:not(.flat) .section-body {

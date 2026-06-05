@@ -20,7 +20,8 @@
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
 
-  --leading-body: 1.6;
+  --leading-body: 1.5;
+  --leading-snug: 1.4;
   --leading-tight: 1.2;
 
   --space-1: 0.25rem;
@@ -43,6 +44,16 @@
   --content-max: 64rem;
   /** Largura máxima de prosa (lead, parágrafos introdutórios) — não limita o layout da página. */
   --prose-max: 48rem;
+
+  /** Espaço vertical entre cabeçalho e corpo das páginas (PageShell). */
+  --page-gap: var(--space-1);
+  --shell-content-pad-y: 0;
+
+  /** Itens de navegação / listas — altura mínima compacta mas legível. */
+  --nav-item-py: var(--space-1);
+  --nav-item-px: var(--space-3);
+  --nav-item-leading: 1.35;
+  --nav-item-min-height: 1.6rem;
 }
 
 /* --- Tema escuro (omissão — Aegis Dark) ----------------------------------- */
@@ -223,7 +234,6 @@ body {
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: var(--text-base);
-  line-height: var(--leading-body);
   transition:
     background-color var(--duration-normal) var(--ease-out),
     color var(--duration-normal) var(--ease-out);

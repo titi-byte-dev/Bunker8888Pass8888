@@ -28,6 +28,17 @@ cifrado** da subscrição. Totais dedutíveis calculam-se só no browser.
 :::
 
 :::level{level=1 title="Rotas na app"}
+
+```mermaid
+sequenceDiagram
+participant User as Utilizador
+participant Fin as /fin
+participant Vault as Cofre ZK
+User->>Fin: abre hub Finanças
+Fin->>Vault: desbloqueia Master Key
+Vault-->>Fin: blobs cifrados
+```
+
 | Rota | Função |
 |---|---|
 | `/fin` | Subscrições, alertas licenças sem uso, feed agente |
@@ -38,11 +49,33 @@ cifrado** da subscrição. Totais dedutíveis calculam-se só no browser.
 :::
 
 :::level{level=2 title="Alertas de licença sem uso"}
+
+```mermaid
+flowchart LR
+  Sub[Subscrição activa] --> Check{last_used antigo?}
+  Check -->|sim| Alert[Alerta FIN-001]
+  Check -->|não| OK[Sem alerta]
+  Alert --> Vault[Liga login cofre]
+```
+
 Regra no cliente: subscrição activa com `last_used_at` antigo ou em falta.
 Cruza com logins do cofre para sugerir corte de custos.
 :::
 
 :::level{level=2 title="Agente financeiro"}
+
+```mermaid
+sequenceDiagram
+participant Fin as Agente FIN
+participant Bus as Event bus
+participant Orq as Orquestrador
+participant User as Aprovador
+Fin->>Bus: fin.subscription.stale
+Bus->>Orq: worker finance
+Orq->>User: human-in-the-loop
+User-->>Orq: aprova / rejeita
+```
+
 Reporta licenças stale e movimentos bancários ao orquestrador. Acções sensíveis
 passam por **Human-in-the-loop** no feed de eventos.
 :::

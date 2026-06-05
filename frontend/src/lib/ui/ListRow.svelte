@@ -42,7 +42,8 @@
     align-items: center;
     gap: var(--space-3);
     width: 100%;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--nav-item-py) var(--space-4);
+    min-height: var(--nav-item-min-height);
     border: none;
     border-bottom: 1px solid var(--color-border);
     background: transparent;
@@ -79,6 +80,7 @@
   .title {
     font-weight: 600;
     font-size: var(--text-sm);
+    line-height: var(--nav-item-leading);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -34,22 +34,196 @@
     {
       "level": 1,
       "title": "Rotas na app",
-      "html": "<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/fin</code></td>\n<td>Subscrições, alertas licenças sem uso, feed agente</td>\n</tr>\n<tr>\n<td><code>/fin/fiscal</code></td>\n<td>Resumo dedutível mensal + classificação</td>\n</tr>\n<tr>\n<td><code>/fin/banking</code></td>\n<td>Open Banking (mock em dev) + reconciliação</td>\n</tr>\n<tr>\n<td><code>/fin/invoices</code></td>\n<td>Pro-forma, faturas, recibos (FIN-006)</td>\n</tr>\n<tr>\n<td><code>/fin/commissions</code></td>\n<td>Comissões sobre faturas pagas (FIN-007)</td>\n</tr>\n</tbody></table>\n",
-      "flows": [],
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/fin</code></td>\n<td>Subscrições, alertas licenças sem uso, feed agente</td>\n</tr>\n<tr>\n<td><code>/fin/fiscal</code></td>\n<td>Resumo dedutível mensal + classificação</td>\n</tr>\n<tr>\n<td><code>/fin/banking</code></td>\n<td>Open Banking (mock em dev) + reconciliação</td>\n</tr>\n<tr>\n<td><code>/fin/invoices</code></td>\n<td>Pro-forma, faturas, recibos (FIN-006)</td>\n</tr>\n<tr>\n<td><code>/fin/commissions</code></td>\n<td>Comissões sobre faturas pagas (FIN-007)</td>\n</tr>\n</tbody></table>\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\nparticipant User as Utilizador\r\nparticipant Fin as /fin\r\nparticipant Vault as Cofre ZK\r\nUser->>Fin: abre hub Finanças\r\nFin->>Vault: desbloqueia Master Key\r\nVault-->>Fin: blobs cifrados",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "User",
+              "to": "Fin",
+              "arrow": "->>",
+              "label": "abre hub Finanças"
+            },
+            {
+              "kind": "message",
+              "from": "Fin",
+              "to": "Vault",
+              "arrow": "->>",
+              "label": "desbloqueia Master Key"
+            },
+            {
+              "kind": "message",
+              "from": "Vault",
+              "to": "Fin",
+              "arrow": "-->>",
+              "label": "blobs cifrados"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "User",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "Fin",
+                "label": "/fin",
+                "x": 200
+              },
+              {
+                "id": "Vault",
+                "label": "Cofre ZK",
+                "x": 400
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "User",
+                "target": "Fin",
+                "label": "abre hub Finanças",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "Fin",
+                "target": "Vault",
+                "label": "desbloqueia Master Key",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "Vault",
+                "target": "Fin",
+                "label": "blobs cifrados",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Alertas de licença sem uso",
-      "html": "<p>Regra no cliente: subscrição activa com <code>last_used_at</code> antigo ou em falta.\nCruza com logins do cofre para sugerir corte de custos.</p>\n",
-      "flows": [],
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n<p>Regra no cliente: subscrição activa com <code>last_used_at</code> antigo ou em falta.\nCruza com logins do cofre para sugerir corte de custos.</p>\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart LR\r\n  Sub[Subscrição activa] --> Check{last_used antigo?}\r\n  Check -->|sim| Alert[Alerta FIN-001]\r\n  Check -->|não| OK[Sem alerta]\r\n  Alert --> Vault[Liga login cofre]",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Agente financeiro",
-      "html": "<p>Reporta licenças stale e movimentos bancários ao orquestrador. Acções sensíveis\npassam por <strong>Human-in-the-loop</strong> no feed de eventos.</p>\n",
-      "flows": [],
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n<p>Reporta licenças stale e movimentos bancários ao orquestrador. Acções sensíveis\npassam por <strong>Human-in-the-loop</strong> no feed de eventos.</p>\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\nparticipant Fin as Agente FIN\r\nparticipant Bus as Event bus\r\nparticipant Orq as Orquestrador\r\nparticipant User as Aprovador\r\nFin->>Bus: fin.subscription.stale\r\nBus->>Orq: worker finance\r\nOrq->>User: human-in-the-loop\r\nUser-->>Orq: aprova / rejeita",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "Fin",
+              "to": "Bus",
+              "arrow": "->>",
+              "label": "fin.subscription.stale"
+            },
+            {
+              "kind": "message",
+              "from": "Bus",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "worker finance"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "User",
+              "arrow": "->>",
+              "label": "human-in-the-loop"
+            },
+            {
+              "kind": "message",
+              "from": "User",
+              "to": "Orq",
+              "arrow": "-->>",
+              "label": "aprova / rejeita"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "Fin",
+                "label": "Agente FIN",
+                "x": 0
+              },
+              {
+                "id": "Bus",
+                "label": "Event bus",
+                "x": 200
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 400
+              },
+              {
+                "id": "User",
+                "label": "Aprovador",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "Fin",
+                "target": "Bus",
+                "label": "fin.subscription.stale",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "Bus",
+                "target": "Orq",
+                "label": "worker finance",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "Orq",
+                "target": "User",
+                "label": "human-in-the-loop",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "User",
+                "target": "Orq",
+                "label": "aprova / rejeita",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
       "collapsed": true
     },
     {

@@ -268,12 +268,14 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-4);
+    padding: var(--nav-item-py) var(--space-4);
     border: none;
     background: transparent;
     color: inherit;
     font-family: var(--font-ui);
     font-size: var(--text-sm);
+    line-height: var(--nav-item-leading);
+    min-height: var(--nav-item-min-height);
     text-align: left;
     cursor: pointer;
   }

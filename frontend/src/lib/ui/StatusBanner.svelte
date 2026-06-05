@@ -48,7 +48,7 @@
     font-size: var(--text-xs);
     font-weight: 700;
   }
-  .msg { line-height: var(--leading-body); }
+  .msg { line-height: var(--leading-snug); }
 
   .info { background: var(--color-accent-muted); color: var(--color-text); }
   .info .dot { background: var(--color-accent); color: var(--color-accent-fg); }

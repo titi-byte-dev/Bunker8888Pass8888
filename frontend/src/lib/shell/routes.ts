@@ -24,6 +24,8 @@ export type RouteNode = {
   tabBar?: boolean;
   /** Modulo futuro — link desactivado com badge "Em breve". */
   comingSoon?: boolean;
+  /** Ocultar da sidebar e tab bar (ex.: Definições no menu de perfil). */
+  hideFromNav?: boolean;
   /** Sub-rotas do modulo. */
   children?: RouteNode[];
 };
@@ -98,7 +100,7 @@ export const ROUTE_TREE: RouteNode[] = [
       { label: "Audit log", href: "/admin/audit", taskId: "HR-002" },
     ],
   },
-  { label: "Definicoes", href: "/settings", tabBar: true, taskId: "UI-001" },
+  { label: "Definicoes", href: "/settings", taskId: "UI-001", hideFromNav: true },
 ];
 
 /** Item da sidebar/tab bar derivado da arvore (so node de topo). */
@@ -106,12 +108,12 @@ export type NavModule = RouteNode;
 
 /** Modulos de topo (sidebar desktop). */
 export function navModules(): NavModule[] {
-  return ROUTE_TREE;
+  return ROUTE_TREE.filter((n) => !n.hideFromNav);
 }
 
 /** Subconjunto para tab bar mobile (max. 5). */
 export function tabBarModules(): NavModule[] {
-  return ROUTE_TREE.filter((n) => n.tabBar);
+  return ROUTE_TREE.filter((n) => n.tabBar && !n.hideFromNav);
 }
 
 /** true se o pathname pertence a este node (exacto ou sub-rota). */

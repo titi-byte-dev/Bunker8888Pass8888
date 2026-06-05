@@ -25,6 +25,16 @@ cliente. A lista no ecrã mostra títulos; o conteúdo só aparece após desbloq
 :::concept{id="vault-sync" title="Sincronização em tempo real" level=2}
 Alterações propagam-se via **WebSockets** entre dispositivos do mesmo utilizador.
 O servidor reencaminha eventos; não decifra payloads.
+
+```mermaid
+sequenceDiagram
+participant A as Dispositivo A
+participant WS as WebSocket
+participant B as Dispositivo B
+A->>WS: item.updated (blob cifrado)
+WS->>B: evento reencaminhado
+Note over A,B: Servidor nunca vê conteúdo em claro
+```
 :::
 
 :::level{level=1 title="O que podes fazer"}

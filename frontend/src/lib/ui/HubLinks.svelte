@@ -47,14 +47,14 @@
     padding: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
   .card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-4);
-    height: 100%;
+    gap: 0.125rem;
+    padding: var(--space-3);
+    height: auto;
     box-sizing: border-box;
     background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
@@ -71,8 +71,8 @@
   }
   .card.disabled { opacity: 0.55; cursor: not-allowed; }
   .row { display: flex; align-items: center; gap: var(--space-2); }
-  .title { font-weight: 600; font-size: var(--text-sm); }
-  .desc { color: var(--color-text-muted); font-size: var(--text-xs); line-height: var(--leading-body); }
+  .title { font-weight: 600; font-size: var(--text-sm); line-height: var(--nav-item-leading); }
+  .desc { color: var(--color-text-muted); font-size: var(--text-xs); line-height: var(--leading-snug); }
   .badge, .task {
     font-size: var(--text-xs);
     border: 1px solid var(--color-border);

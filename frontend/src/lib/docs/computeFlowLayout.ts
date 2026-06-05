@@ -2,18 +2,19 @@ import type { DocFlowGraph } from "./types";
 
 /** Constantes do layout — estilo sequence diagram (actores no topo, mensagens em filas). */
 export const FLOW_LAYOUT = {
-  padX: 28,
-  padBottom: 36,
-  headerY: 16,
+  padX: 32,
+  padBottom: 40,
+  headerY: 20,
   nodeHeight: 48,
-  lifelineGap: 8,
-  rowGapMin: 56,
-  rowGapPerChar: 0.45,
-  rowGapLong: 76,
-  columnMin: 100,
-  columnCharPx: 7.2,
-  columnPad: 36,
-  selfLoopWidth: 52,
+  lifelineGap: 10,
+  rowGapMin: 52,
+  rowGapPerChar: 0.42,
+  rowGapLong: 72,
+  columnMin: 96,
+  columnCharPx: 7,
+  columnPad: 32,
+  selfLoopWidth: 56,
+  minCanvasWidth: 360,
 } as const;
 
 export type FlowLayoutNode = {
@@ -55,41 +56,67 @@ export function rowHeightForLabel(label: string): number {
   );
 }
 
-/**
- * Distribui actores em colunas e mensagens em filas verticais.
- * Evita sobrepor todas as arestas na mesma linha (problema do layout horizontal antigo).
- */
-export function computeFlowLayout(graph: DocFlowGraph): FlowLayout {
-  const lifelineTop = FLOW_LAYOUT.headerY + FLOW_LAYOUT.nodeHeight + FLOW_LAYOUT.lifelineGap;
-
+/** Largura mínima quando o contentor ainda não foi medido. */
+function minContentWidth(graph: DocFlowGraph): number {
   const columnWidths = graph.nodes.map((n) =>
     Math.min(
       220,
-      Math.max(FLOW_LAYOUT.columnMin, Math.ceil(n.label.length * FLOW_LAYOUT.columnCharPx) + FLOW_LAYOUT.columnPad),
+      Math.max(
+        FLOW_LAYOUT.columnMin,
+        Math.ceil(n.label.length * FLOW_LAYOUT.columnCharPx) + FLOW_LAYOUT.columnPad,
+      ),
     ),
   );
-
-  const columnStarts: number[] = [];
   let x = FLOW_LAYOUT.padX;
   for (const w of columnWidths) {
-    columnStarts.push(x);
     x += w;
   }
-  const canvasWidth = Math.max(320, x + FLOW_LAYOUT.padX);
+  return Math.max(FLOW_LAYOUT.minCanvasWidth, x + FLOW_LAYOUT.padX);
+}
+
+/**
+ * Distribui actores uniformemente pela largura do canvas (targetWidth).
+ * Didático: o contentor do player mede-se com ResizeObserver; o grafo
+ * estica-se para usar toda a área interactiva, não só o canto superior-esquerdo.
+ */
+export function computeFlowLayout(graph: DocFlowGraph, targetWidth?: number): FlowLayout {
+  const lifelineTop = FLOW_LAYOUT.headerY + FLOW_LAYOUT.nodeHeight + FLOW_LAYOUT.lifelineGap;
+  const canvasWidth = Math.max(minContentWidth(graph), targetWidth ?? minContentWidth(graph));
+
+  const innerLeft = FLOW_LAYOUT.padX;
+  const innerRight = canvasWidth - FLOW_LAYOUT.padX;
+  const span = Math.max(0, innerRight - innerLeft);
+  const nodeCount = graph.nodes.length;
+
+  const columnCenters: number[] = [];
+  if (nodeCount === 1) {
+    columnCenters.push(canvasWidth / 2);
+  } else {
+    for (let i = 0; i < nodeCount; i++) {
+      columnCenters.push(innerLeft + (span * i) / (nodeCount - 1));
+    }
+  }
+
+  const maxNodeWidth =
+    nodeCount > 1
+      ? Math.min(220, Math.max(FLOW_LAYOUT.columnMin, span / nodeCount - 20))
+      : Math.min(280, span * 0.55);
 
   const centerById = new Map<string, number>();
   const layoutNodes: FlowLayoutNode[] = graph.nodes.map((n, i) => {
-    const columnWidth = columnWidths[i];
-    const columnCenterX = columnStarts[i] + columnWidth / 2;
+    const columnCenterX = columnCenters[i];
     centerById.set(n.id, columnCenterX);
-    const nodeWidth = Math.min(columnWidth - 12, Math.max(88, n.label.length * 6.5 + 28));
+    const nodeWidth = Math.min(
+      maxNodeWidth,
+      Math.max(88, Math.min(maxNodeWidth, n.label.length * 6.5 + 28)),
+    );
     return {
       id: n.id,
       label: n.label,
       x: columnCenterX - nodeWidth / 2,
       y: FLOW_LAYOUT.headerY,
       columnCenterX,
-      columnWidth,
+      columnWidth: maxNodeWidth,
       lifelineHeight: 0,
     };
   });

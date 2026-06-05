@@ -56,11 +56,12 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-height: 44px;
     border-radius: var(--radius-sm);
     color: var(--color-text-muted);
     text-decoration: none;
     font-size: var(--text-xs);
+    line-height: var(--nav-item-leading);
+    min-height: var(--nav-item-min-height);
     transition: color var(--duration-fast) var(--ease-out);
   }
 

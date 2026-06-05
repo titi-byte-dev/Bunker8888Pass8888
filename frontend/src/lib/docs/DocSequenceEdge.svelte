@@ -85,12 +85,14 @@
   }
 
   .row-band-current {
-    fill: color-mix(in srgb, var(--color-accent) 14%, transparent);
-    stroke: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    fill: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    stroke: color-mix(in srgb, var(--color-accent) 40%, transparent);
     stroke-width: 1;
   }
 
   .row-band-done {
-    fill: color-mix(in srgb, var(--color-success-fg) 8%, transparent);
+    fill: color-mix(in srgb, var(--color-success-fg) 10%, transparent);
+    stroke: color-mix(in srgb, var(--color-success-fg) 25%, transparent);
+    stroke-width: 0.75;
   }
 </style>

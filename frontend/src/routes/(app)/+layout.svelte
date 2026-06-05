@@ -18,6 +18,7 @@
   import ShellPageMotion from "$lib/motion/ShellPageMotion.svelte";
   import { ToastHost, ConfirmDialog } from "$lib/ui";
   import { loadSidebarCollapsed, saveSidebarCollapsed } from "$lib/shell/sidebarState";
+  import ProfileMenu from "$lib/shell/ProfileMenu.svelte";
 
   let { children } = $props();
 
@@ -51,13 +52,16 @@
   const tabs = tabBarModules();
   const userEmail = $derived(loadUserEmail());
 
+  /** Rotas de documentação — scroll independente sidebar/conteúdo. */
+  const isDocsRoute = $derived(page.url.pathname.startsWith("/settings/docs"));
+
   function toggleSidebar() {
     sidebarCollapsed = !sidebarCollapsed;
     saveSidebarCollapsed(sidebarCollapsed);
   }
 </script>
 
-<div class="app-shell" class:sidebar-collapsed={sidebarCollapsed}>
+<div class="app-shell" class:sidebar-collapsed={sidebarCollapsed} class:docs-mode={isDocsRoute}>
   <AppSidebar modules={navItems} pathname={page.url.pathname} collapsed={sidebarCollapsed} />
 
   <!-- Separador com botão no topo — entre sidebar e conteúdo (só desktop). -->
@@ -76,11 +80,7 @@
 
   <div class="shell-main">
     <header class="topbar">
-      {#if userEmail}
-        <span class="user-email" title="Sessão activa">{userEmail}</span>
-      {:else}
-        <div class="topbar-spacer" aria-hidden="true"></div>
-      {/if}
+      <div class="topbar-spacer" aria-hidden="true"></div>
       <div class="topbar-actions">
         <button type="button" class="palette-btn" onclick={() => (paletteOpen = true)} title="Command palette (Ctrl+K)">
           ⌘K
@@ -88,13 +88,11 @@
         <button type="button" class="theme-btn" onclick={toggleTheme} title="Alternar tema">
           {themeModeLabel(themeMode)}
         </button>
-        <button type="button" class="logout-btn" onclick={handleLogout} title="Terminar sessão">
-          Sair
-        </button>
+        <ProfileMenu email={userEmail} onLogout={handleLogout} />
       </div>
     </header>
 
-    <main class="shell-content">
+    <main class="shell-content" class:docs-route={isDocsRoute}>
       <ShellPageMotion>
         {@render children()}
       </ShellPageMotion>
@@ -112,11 +110,17 @@
   .app-shell {
     --shell-sidebar-width: 15rem;
     --shell-sidebar-collapsed-width: 3.75rem;
-    --shell-tab-height: 3.5rem;
+    --shell-tab-height: 3rem;
     --shell-toggle-top: 3.25rem;
     display: flex;
     min-height: 100dvh;
     position: relative;
+  }
+
+  .app-shell.docs-mode {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
 
   /* Linha zero entre sidebar e main — o botão centra-se na fronteira. */
@@ -175,24 +179,21 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
   }
 
   .topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-1) var(--space-4);
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg-base);
   }
 
-  .user-email {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .topbar-spacer {
+    flex: 1;
     min-width: 0;
   }
 
@@ -201,22 +202,6 @@
     align-items: center;
     gap: var(--space-2);
     flex-shrink: 0;
-  }
-
-  .logout-btn {
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--color-text-muted);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    cursor: pointer;
-  }
-
-  .logout-btn:hover {
-    color: var(--color-text);
-    background: var(--color-bg-surface);
   }
 
   .palette-btn {
@@ -253,18 +238,44 @@
 
   .shell-content {
     flex: 1;
-    padding: var(--space-6) var(--space-4);
-    padding-bottom: calc(var(--shell-tab-height) + var(--space-8));
+    padding-block: var(--shell-content-pad-y);
+    padding-inline: var(--space-4);
+    /* Só margem inferior: tab bar mobile + respiro mínimo */
+    padding-bottom: calc(var(--shell-tab-height) + var(--space-2));
     width: 100%;
     max-width: none;
     margin: 0;
     box-sizing: border-box;
+    min-height: 0;
+  }
+
+  /* Documentação: painéis com scroll próprio (índice + artigo). */
+  .shell-content.docs-route {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-block: 0;
+    padding-inline: calc(var(--space-4) + 10px);
+    padding-bottom: calc(var(--shell-tab-height) + var(--space-1));
+  }
+
+  .shell-content.docs-route :global(.shell-page-motion) {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   @media (min-width: 768px) {
     .shell-content {
-      padding-bottom: var(--space-12);
-      padding-inline: var(--space-6);
+      padding-bottom: var(--space-2);
+    }
+
+    .shell-content.docs-route {
+      padding-bottom: 0;
+      height: calc(100dvh - 2.75rem);
+      max-height: calc(100dvh - 2.75rem);
     }
   }
 

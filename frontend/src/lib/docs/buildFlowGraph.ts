@@ -25,9 +25,10 @@ export function buildFlowNodes(
   graph: DocFlowGraph,
   messageSteps: MessageStep[],
   stepIndex: number,
+  viewportWidth?: number,
 ): Node<DocFlowNodeData, "docFlow">[] {
   const step = messageSteps[stepIndex];
-  const layout = computeFlowLayout(graph);
+  const layout = computeFlowLayout(graph, viewportWidth);
 
   return layout.nodes.map((n) => {
     const role = nodeRole(step, n.id);
@@ -54,8 +55,9 @@ export function buildFlowEdges(
   graph: DocFlowGraph,
   stepIndex: number,
   animate: boolean,
+  viewportWidth?: number,
 ): Edge<DocSequenceEdgeData>[] {
-  const layout = computeFlowLayout(graph);
+  const layout = computeFlowLayout(graph, viewportWidth);
 
   return graph.edges.map((e, i) => {
     const meta = layout.edges[i];
@@ -77,7 +79,7 @@ export function buildFlowEdges(
         sourceCenterX: meta.sourceCenterX,
         targetCenterX: meta.targetCenterX,
         selfLoop: meta.selfLoop,
-        selfLoopWidth: 52,
+        selfLoopWidth: 56,
         state,
         canvasWidth: layout.canvasWidth,
       } satisfies DocSequenceEdgeData,
@@ -92,7 +94,11 @@ export function buildFlowEdges(
 }
 
 /** Dimensões do canvas para o grafo (partilhado pelo player). */
-export function flowCanvasSize(graph: DocFlowGraph): { width: number; height: number } {
-  const layout = computeFlowLayout(graph);
+export function flowCanvasSize(
+  graph: DocFlowGraph,
+  viewportWidth?: number,
+): { width: number; height: number } {
+  const layout = computeFlowLayout(graph, viewportWidth);
   return { width: layout.canvasWidth, height: layout.canvasHeight };
 }
+

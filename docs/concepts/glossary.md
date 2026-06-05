@@ -16,6 +16,24 @@ O AegisPass assenta em poucos conceitos de segurança e privacidade. Começa por
 cinco; os restantes expandem o vocabulário à medida que exploras funcionalidades.
 :::
 
+```mermaid
+flowchart TB
+  subgraph Cliente["Browser (cliente)"]
+    MP[Master Password]
+    MK[Master Key]
+    MP --> MK
+    MK --> Cifra[Cifrar / decifrar]
+  end
+  subgraph Servidor["Backend + PostgreSQL"]
+    AH[Auth Hash]
+    Blob[Blobs cifrados]
+  end
+  Cifra --> Blob
+  MP -.->|nunca enviada| Servidor
+  MK -.->|nunca enviada| Servidor
+  MP --> AH
+```
+
 :::concept{id="zero-knowledge" title="Zero-Knowledge" level=1}
 O servidor **nunca** vê dados sensíveis em claro nem a **Master Key**. Cifragem e
 decifragem acontecem no teu dispositivo (*client-side*). Mesmo com acesso à base de

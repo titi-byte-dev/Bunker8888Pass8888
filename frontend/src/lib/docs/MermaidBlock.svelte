@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { renderMermaid } from "./mermaid";
+  import { renderMermaid, resetMermaidTheme } from "./mermaid";
 
   interface Props {
     source: string;
@@ -14,26 +14,41 @@
   let error = $state("");
   let busy = $state(true);
 
+  async function draw() {
+    if (!container) return;
+    busy = true;
+    error = "";
+    try {
+      await renderMermaid(container, source, id);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao renderizar diagrama";
+    } finally {
+      busy = false;
+    }
+  }
+
   onMount(() => {
     let cancelled = false;
 
-    (async () => {
-      if (!container) return;
-      busy = true;
-      error = "";
-      try {
-        await renderMermaid(container, source, id);
-      } catch (e) {
-        if (!cancelled) {
-          error = e instanceof Error ? e.message : "Falha ao renderizar diagrama";
-        }
-      } finally {
-        if (!cancelled) busy = false;
-      }
-    })();
+    const run = async () => {
+      if (cancelled) return;
+      await draw();
+    };
+
+    void run();
+
+    const observer = new MutationObserver(() => {
+      resetMermaidTheme();
+      void draw();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-palette"],
+    });
 
     return () => {
       cancelled = true;
+      observer.disconnect();
     };
   });
 </script>
@@ -58,10 +73,10 @@
 
 <style>
   .mermaid-block {
-    margin: var(--space-4) 0;
+    margin: var(--space-3) 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    background: var(--color-bg-base);
+    background: var(--color-bg-inset);
     overflow: hidden;
   }
 

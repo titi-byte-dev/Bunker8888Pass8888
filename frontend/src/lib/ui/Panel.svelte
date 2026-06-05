@@ -55,5 +55,5 @@
     color: var(--color-text);
   }
   .panel-actions { display: flex; gap: var(--space-2); }
-  .panel-body.pad { padding: var(--space-4); }
+  .panel-body.pad { padding: var(--space-3); }
 </style>
