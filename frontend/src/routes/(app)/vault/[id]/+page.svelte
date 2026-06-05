@@ -4,6 +4,14 @@
   import { page } from "$app/state";
   import CopyField from "$lib/vault/CopyField.svelte";
   import { loadDecodedLogin, requireVaultAccess, type DecodedLogin } from "$lib/vault/ui";
+  import {
+    Button,
+    confirmDialog,
+    PageShell,
+    Skeleton,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
 
   let item = $state<DecodedLogin | null>(null);
   let busy = $state(true);
@@ -26,11 +34,19 @@
   }
 
   async function handleDelete() {
-    if (!item || !confirm(`Apagar «${item.login.title}»? Esta acção é irreversível.`)) return;
+    if (!item) return;
+    const ok = await confirmDialog({
+      title: "Apagar login?",
+      message: `Remove «${item.login.title}». Esta acção é irreversível.`,
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     deleting = true;
     try {
       const { api } = requireVaultAccess();
       await api.delete(item.meta.id);
+      toast.success("Login apagado.");
       await goto("/vault");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar";
@@ -45,19 +61,29 @@
   <title>{item?.login.title ?? "Login"} — AegisPass</title>
 </svelte:head>
 
-<section class="vault-page">
-  <a href="/vault" class="back">← Cofre</a>
+<PageShell
+  title={item?.login.title ?? "Login"}
+  taskId="VAULT-001"
+  leaf={item?.login.title}
+  description={busy ? "A descifrar localmente…" : "Credenciais desbloqueadas com a Master Key — o servidor nunca vê estes valores."}
+  width="narrow"
+  breadcrumb={false}
+>
+  {#snippet actions()}
+    <Button variant="ghost" size="sm" href="/vault">← Cofre</Button>
+    {#if item}
+      <Button variant="secondary" size="sm" href="/vault/{item.meta.id}/edit">Editar</Button>
+    {/if}
+  {/snippet}
 
   {#if busy}
-    <p class="muted">A descifrar…</p>
+    <Skeleton variant="block" height="2rem" />
+    <Skeleton variant="block" height="4rem" />
+    <Skeleton variant="block" height="4rem" />
   {:else if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
+    <Button variant="ghost" href="/vault">Voltar ao cofre</Button>
   {:else if item}
-    <header class="page-header">
-      <h1>{item.login.title}</h1>
-      <a class="edit" href="/vault/{item.meta.id}/edit">Editar</a>
-    </header>
-
     <CopyField label="Utilizador" value={item.login.username} />
     <CopyField label="Password" value={item.login.password} secret />
 
@@ -77,82 +103,25 @@
       Actualizado {new Date(item.meta.updated_at).toLocaleString("pt-PT")}
     </p>
 
-    <button type="button" class="danger" onclick={handleDelete} disabled={deleting}>
-      {deleting ? "A apagar…" : "Apagar login"}
-    </button>
+    <Button variant="ghost" onclick={handleDelete} disabled={deleting} loading={deleting}>
+      Apagar login
+    </Button>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .vault-page {
-    max-width: 32rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-6);
-  }
-
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .edit {
-    font-size: var(--text-sm);
-    color: var(--color-link);
-    text-decoration: none;
-  }
-
   .sandbox-link {
     margin: var(--space-4) 0 0;
     font-size: var(--text-sm);
   }
-
   .sandbox-link a {
     color: var(--color-link);
+    text-decoration: none;
   }
-
   .meta {
-    margin: var(--space-6) 0;
+    margin: var(--space-6) 0 var(--space-4);
     font-size: var(--text-xs);
   }
-
-  .danger {
-    width: 100%;
-    padding: var(--space-3);
-    border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--color-danger);
-    cursor: pointer;
-    font-size: var(--text-sm);
-  }
-
-  .danger:disabled {
-    opacity: 0.5;
-  }
-
-  .error {
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
-  }
-
   .muted {
     color: var(--color-text-muted);
   }

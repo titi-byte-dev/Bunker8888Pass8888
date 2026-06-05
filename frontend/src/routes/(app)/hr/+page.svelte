@@ -17,6 +17,14 @@
     type VerifiedCertificate,
   } from "$lib/hr/employeesService";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import {
+    Button,
+    confirmDialog,
+    EmptyState,
+    PageShell,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
   import { certificateToJSON } from "$lib/hr/erasure";
   import {
     downloadContract,
@@ -218,12 +226,13 @@
 
   async function onShredField(name: string) {
     if (!open) return;
-    if (
-      !confirm(
-        `Crypto-shred do campo "${fieldLabel(name)}"? A chave é destruída e o valor fica irrecuperável (RGPD Art. 17). É emitido um certificado.`,
-      )
-    )
-      return;
+    const ok = await confirmDialog({
+      title: "Crypto-shred do campo?",
+      message: `Destrói a chave de «${fieldLabel(name)}» — o valor fica irrecuperável (RGPD Art. 17). É emitido um certificado.`,
+      confirmLabel: "Eliminar campo",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     error = "";
     try {
@@ -239,7 +248,13 @@
 
   async function onShredRecord() {
     if (!open) return;
-    if (!confirm("Crypto-shred de TODA a ficha? Cada campo emite um certificado.")) return;
+    const ok = await confirmDialog({
+      title: "Crypto-shred da ficha inteira?",
+      message: "Cada campo emite um certificado de eliminação. Os valores ficam irrecuperáveis.",
+      confirmLabel: "Eliminar tudo",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     error = "";
     try {
@@ -265,13 +280,20 @@
 
   async function onDeleteRecord() {
     if (!open) return;
-    if (!confirm("Apagar a ficha inteira? Os campos cifrados vão com ela.")) return;
+    const ok = await confirmDialog({
+      title: "Apagar ficha?",
+      message: "Remove a ficha e todos os campos cifrados associados.",
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     try {
       await deleteRecord(open.id);
       open = null;
       await refresh();
       await refreshCerts();
+      toast.success("Ficha apagada.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar ficha";
     } finally {
@@ -288,36 +310,30 @@
   <title>Fichas de Empregado — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">HR-001 · Cifragem campo-a-campo</p>
-      <h1>Fichas de Empregado</h1>
-      <DocHelpLink />
-    </div>
-    <span class="report-link">
-      <a class="btn ghost" href="/hr/onboarding">Onboarding →</a>
-      <a class="btn ghost" href="/hr/recruitment">Recrutamento →</a>
-      <a class="btn ghost" href="/hr/compliance">Relatório RGPD →</a>
-    </span>
-    <p class="lead">
-      Cada campo da ficha é cifrado <strong>de forma independente</strong>, com a
-      sua própria chave. Essa chave é embrulhada com a tua Master Key — o servidor
-      só vê blobs opacos. Apagar a chave de um campo torna-o irrecuperável
-      (fundação do crypto-shredding RGPD, HR-003).
-    </p>
-  </header>
+<PageShell
+  title="Fichas de Empregado"
+  taskId="HR-001"
+  description="Cada campo é cifrado de forma independente com a sua própria chave, embrulhada com a Master Key. Apagar a chave torna o valor irrecuperável (crypto-shredding RGPD, HR-003)."
+  width="wide"
+>
+  {#snippet actions()}
+    <DocHelpLink />
+    <Button variant="ghost" size="sm" href="/hr/onboarding">Onboarding →</Button>
+    <Button variant="ghost" size="sm" href="/hr/recruitment">Recrutamento →</Button>
+    <Button variant="ghost" size="sm" href="/hr/compliance">Relatório RGPD →</Button>
+  {/snippet}
 
   {#if locked}
-    <section class="panel">
-      <p class="panel-body">
-        🔒 Cofre bloqueado. Desbloqueia a tua Master Key para gerir fichas — é ela
-        que embrulha as chaves de cada campo.
-      </p>
-      <a class="btn primary" href="/vault">Ir desbloquear</a>
-    </section>
+    <EmptyState
+      title="Cofre bloqueado"
+      description="Desbloqueia a Master Key para gerir fichas — é ela que embrulha as chaves de cada campo."
+    >
+      {#snippet action()}
+        <Button href="/vault">Ir desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else}
-    {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
     <div class="grid">
       <!-- Coluna esquerda: lista de fichas -->
@@ -530,15 +546,9 @@
       {/if}
     </section>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 56rem;
-  }
-  .page-head {
-    margin-bottom: var(--space-6);
-  }
   .eyebrow {
     margin: 0 0 var(--space-1);
     font-size: var(--text-xs);
@@ -547,19 +557,6 @@
     text-transform: uppercase;
     color: var(--color-text-muted);
   }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    line-height: var(--leading-tight);
-  }
-  .lead {
-    margin: var(--space-3) 0 0;
-    max-width: 42rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-
   .grid {
     display: grid;
     grid-template-columns: 16rem 1fr;
@@ -588,11 +585,6 @@
   }
   .panel-head .eyebrow {
     margin: 0;
-  }
-  .panel-body {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-sm);
-    color: var(--color-text);
   }
   .muted {
     color: var(--color-text-muted);
@@ -763,14 +755,6 @@
     display: inline-flex;
     gap: var(--space-2);
   }
-  .report-link {
-    display: inline-flex;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-  }
-  .report-link a {
-    text-decoration: none;
-  }
   .btn.ghost {
     background: none;
     color: var(--color-text-muted);
@@ -820,12 +804,6 @@
     margin-left: auto;
     color: var(--color-accent);
   }
-  .inline-error {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-danger);
-  }
-
   .contracts {
     border-top: 1px solid var(--color-border);
     margin-top: var(--space-4);

@@ -2,6 +2,16 @@
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
+  import {
+    Button,
+    DataTable,
+    EmptyState,
+    MetricCard,
+    PageShell,
+    Skeleton,
+    StatusBanner,
+    type DataColumn,
+  } from "$lib/ui";
   import { actionLabel, type AuditEntry } from "$lib/hr/audit";
   import {
     fetchAuditLog,
@@ -47,36 +57,46 @@
   function fmt(d: string): string {
     return new Date(d).toLocaleString("pt-PT");
   }
+
+  const auditColumns: DataColumn<AuditEntry>[] = [
+    { id: "seq", label: "#", mono: true, accessor: (e) => String(e.seq) },
+    { id: "action", label: "Acção", accessor: (e) => actionLabel(e.action) },
+    { id: "detail", label: "Detalhe", mono: true, accessor: (e) => e.detail },
+    { id: "when", label: "Quando", accessor: (e) => fmt(e.occurredAt) },
+    { id: "hash", label: "entry_hash", mono: true, muted: true, accessor: (e) => `${e.entryHash.slice(0, 12)}…` },
+  ];
 </script>
 
 <svelte:head>
   <title>Relatório de Conformidade RGPD — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head no-print">
-    <div>
-      <p class="eyebrow">HR-008 · Conformidade RGPD</p>
-      <h1>Relatório de Conformidade</h1>
+<div class="compliance-page">
+<PageShell
+  title="Relatório de Conformidade"
+  taskId="HR-008"
+  description="Metadados RGPD e prova de integridade da cadeia de auditoria — conteúdos das fichas permanecem cifrados."
+  width="wide"
+>
+  {#snippet actions()}
+    <span class="no-print">
       <DocHelpLink />
-    </div>
-    <div class="head-actions">
-      <a class="btn ghost" href="/hr">← Fichas</a>
-      <button type="button" class="btn primary" onclick={printReport} disabled={!report}>
-        Descarregar PDF
-      </button>
-    </div>
-  </header>
+      <Button variant="ghost" size="sm" href="/hr">← Fichas</Button>
+      <Button onclick={printReport} disabled={!report}>Descarregar PDF</Button>
+    </span>
+  {/snippet}
 
   {#if locked}
-    <section class="panel">
-      <p>🔒 Cofre bloqueado. Desbloqueia a Master Key para gerar o relatório.</p>
-      <a class="btn primary" href="/vault">Ir desbloquear</a>
-    </section>
+    <EmptyState title="Cofre bloqueado" description="Desbloqueia a Master Key para gerar o relatório.">
+      {#snippet action()}
+        <Button href="/vault">Ir desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else if loading}
-    <p class="muted">A gerar relatório…</p>
+    <Skeleton variant="block" height="8rem" />
+    <Skeleton variant="table" rows={5} cols={5} />
   {:else if error}
-    <p class="inline-error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {:else if report}
     <article class="report">
       <header class="report-head">
@@ -85,15 +105,11 @@
       </header>
 
       <section class="metrics">
-        <div class="metric"><span class="n">{report.recordCount}</span> Fichas de empregado</div>
-        <div class="metric"><span class="n">{report.activeFieldCount}</span> Campos cifrados activos</div>
-        <div class="metric">
-          <span class="n">{report.shreddedFieldCount}</span> Campos eliminados (crypto-shred)
-        </div>
-        <div class="metric">
-          <span class="n">{report.certificateCount}</span> Certificados de eliminação
-        </div>
-        <div class="metric"><span class="n">{report.auditEntryCount}</span> Entradas de auditoria</div>
+        <MetricCard label="fichas de empregado" value={String(report.recordCount)} />
+        <MetricCard label="campos cifrados activos" value={String(report.activeFieldCount)} />
+        <MetricCard label="campos eliminados" value={String(report.shreddedFieldCount)} variant="warning" />
+        <MetricCard label="certificados de eliminação" value={String(report.certificateCount)} />
+        <MetricCard label="entradas de auditoria" value={String(report.auditEntryCount)} />
       </section>
 
       <section class="integrity">
@@ -117,22 +133,12 @@
       {#if entries.length > 0}
         <section class="log">
           <h3>Registo de auditoria (append-only)</h3>
-          <table>
-            <thead>
-              <tr><th>#</th><th>Acção</th><th>Detalhe</th><th>Quando</th><th>entry_hash</th></tr>
-            </thead>
-            <tbody>
-              {#each entries as e (e.seq)}
-                <tr>
-                  <td>{e.seq}</td>
-                  <td>{actionLabel(e.action)}</td>
-                  <td class="mono">{e.detail}</td>
-                  <td>{fmt(e.occurredAt)}</td>
-                  <td class="mono hash">{e.entryHash.slice(0, 12)}…</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
+          <DataTable
+            columns={auditColumns}
+            rows={entries}
+            keyFn={(e) => String(e.seq)}
+            dense
+          />
         </section>
       {/if}
 
@@ -142,49 +148,16 @@
       </footer>
     </article>
   {/if}
-</section>
+</PageShell>
+</div>
 
 <style>
-  .page {
-    max-width: 52rem;
-  }
-  .page-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-  .head-actions {
-    display: inline-flex;
-    gap: var(--space-2);
-  }
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
   .small {
     font-size: var(--text-xs);
-  }
-
-  .panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-4) var(--space-6);
   }
 
   .report {
@@ -206,22 +179,9 @@
 
   .metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
     gap: var(--space-3);
     margin-bottom: var(--space-6);
-  }
-  .metric {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-3) var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-  }
-  .metric .n {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    color: var(--color-text);
   }
 
   .integrity {
@@ -242,66 +202,10 @@
     color: var(--color-danger);
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-  }
-  th,
-  td {
-    text-align: left;
-    padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--color-border);
-  }
-  th {
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-label);
-  }
-  .mono {
-    font-family: var(--font-mono);
-  }
-  .hash {
-    color: var(--color-text-muted);
-  }
   .report-foot {
     margin-top: var(--space-6);
     border-top: 1px solid var(--color-border);
     padding-top: var(--space-3);
-  }
-
-  .btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--color-text);
-  }
-  .btn.primary {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
-  }
-  .btn.primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-  }
-  .btn.ghost {
-    background: none;
-    color: var(--color-text-muted);
-  }
-  .btn:disabled {
-    opacity: 0.55;
-    cursor: progress;
-  }
-  .inline-error {
-    font-size: var(--text-sm);
-    color: var(--color-danger);
   }
 
   /* Impressão → PDF: esconde a navegação e neutraliza o cromado. */

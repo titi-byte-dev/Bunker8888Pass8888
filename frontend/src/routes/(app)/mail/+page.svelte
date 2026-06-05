@@ -9,6 +9,17 @@
     type EmailAlias,
   } from "$lib/mail/aliases";
   import { listInbox, type InboxMessage } from "$lib/mail/inbox";
+  import {
+    Button,
+    confirmDialog,
+    EmptyState,
+    Field,
+    PageShell,
+    Panel,
+    Skeleton,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
 
   let loading = $state(true);
   let inboxLoading = $state(true);
@@ -18,7 +29,6 @@
   let inbox = $state<InboxMessage[]>([]);
   let destination = $state("");
   let label = $state("");
-  let copied = $state("");
   let composeAliasId = $state("");
   let composeTo = $state("");
   let composeSubject = $state("");
@@ -62,6 +72,7 @@
       destination = "";
       label = "";
       await refresh();
+      toast.success("Alias criado.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao criar alias";
     } finally {
@@ -74,6 +85,7 @@
     try {
       await setAliasActive(a.id, !a.active);
       await refresh();
+      toast.info(a.active ? "Alias desligado." : "Alias activado.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao alterar alias";
     } finally {
@@ -81,11 +93,19 @@
     }
   }
 
-  async function onDelete(id: string) {
+  async function onDelete(a: EmailAlias) {
+    const ok = await confirmDialog({
+      title: "Apagar alias?",
+      message: `Remove «${a.aliasAddress}». O reencaminhamento deixa de funcionar de imediato.`,
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     try {
-      await deleteAlias(id);
+      await deleteAlias(a.id);
       await refresh();
+      toast.success("Alias apagado.");
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar alias";
     } finally {
@@ -108,6 +128,7 @@
       composeTo = "";
       composeSubject = "";
       composeBody = "";
+      toast.success("E-mail enviado (Mailpit em dev).");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao enviar";
     } finally {
@@ -118,10 +139,9 @@
   async function copy(addr: string) {
     try {
       await navigator.clipboard.writeText(addr);
-      copied = addr;
-      setTimeout(() => (copied = ""), 1500);
+      toast.success("Endereço copiado.");
     } catch {
-      copied = "";
+      toast.error("Não foi possível copiar.");
     }
   }
 </script>
@@ -130,40 +150,53 @@
   <title>Aliases de E-mail — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">MAIL-001/002 · Aliases + SMTP dev (Mailpit)</p>
-      <h1>Aliases de E-mail</h1>
-    </div>
-    <p class="lead">
-      Endereços descartáveis que reencaminham para o teu e-mail real. Dá um alias
-      a cada serviço; se vazar ou fizer spam, desligas só esse alias. O envio
-      efectivo em dev usa Mailpit (SMTP <code>localhost:1025</code>). Envia para o teu
-      alias <code>@aegis.email</code> e a mensagem aparece na inbox abaixo — depois
-      corre a prospeção em <a href="/crm">CRM</a>.
-    </p>
-  </header>
+<PageShell
+  title="Aliases de E-mail"
+  taskId="MAIL-001/002"
+  description="Endereços descartáveis que reencaminham para o teu e-mail real. Envio em dev via Mailpit (SMTP localhost:1025). Envia para o teu alias @aegis.email e corre a prospeção no CRM."
+  width="narrow"
+>
+  {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-  {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
-
-  <section class="panel">
-    <div class="panel-head"><p class="eyebrow">Novo alias</p></div>
+  <Panel title="Novo alias">
     <form onsubmit={onCreate} class="row-form">
-      <input type="email" bind:value={destination} placeholder="Reencaminhar para (e-mail real)" disabled={busy} />
-      <input type="text" bind:value={label} placeholder="Rótulo (ex.: Netflix)" disabled={busy} />
-      <button type="submit" class="btn primary" disabled={busy || !destination.trim()}>
+      <Field label="Reencaminhar para (e-mail real)" required>
+        {#snippet control({ id, describedBy })}
+          <input
+            {id}
+            aria-describedby={describedBy}
+            type="email"
+            bind:value={destination}
+            placeholder="tu@empresa.pt"
+            disabled={busy}
+            required
+          />
+        {/snippet}
+      </Field>
+      <Field label="Rótulo (opcional)">
+        {#snippet control({ id, describedBy })}
+          <input
+            {id}
+            aria-describedby={describedBy}
+            type="text"
+            bind:value={label}
+            placeholder="ex.: Netflix"
+            disabled={busy}
+          />
+        {/snippet}
+      </Field>
+      <Button type="submit" disabled={busy || !destination.trim()} loading={busy}>
         Gerar alias
-      </button>
+      </Button>
     </form>
-  </section>
+  </Panel>
 
-  <section class="panel">
-    <div class="panel-head"><p class="eyebrow">Os meus aliases</p></div>
+  <Panel title="Os meus aliases">
     {#if loading}
-      <p class="muted">A carregar…</p>
+      <Skeleton variant="row" />
+      <Skeleton variant="row" />
     {:else if aliases.length === 0}
-      <p class="muted">Sem aliases. Gera o primeiro acima.</p>
+      <EmptyState title="Sem aliases" description="Gera o primeiro alias acima." />
     {:else}
       <ul class="list">
         {#each aliases as a (a.id)}
@@ -172,65 +205,67 @@
               <button type="button" class="addr mono" onclick={() => copy(a.aliasAddress)}>
                 {a.aliasAddress}
               </button>
-              {#if copied === a.aliasAddress}<span class="copied">copiado!</span>{/if}
               <span class="muted sm">→ {a.destination}</span>
               {#if a.label}<span class="tag">{a.label}</span>{/if}
             </div>
             <div class="a-actions">
               <span class="state" class:on={a.active}>{a.active ? "activo" : "desligado"}</span>
-              <button type="button" class="link-btn" onclick={() => onToggle(a)} disabled={busy}>
+              <Button variant="ghost" size="sm" onclick={() => onToggle(a)} disabled={busy}>
                 {a.active ? "desligar" : "ligar"}
-              </button>
-              <button type="button" class="link-btn" onclick={() => onDelete(a.id)} disabled={busy}>
+              </Button>
+              <Button variant="ghost" size="sm" onclick={() => onDelete(a)} disabled={busy}>
                 apagar
-              </button>
+              </Button>
             </div>
           </li>
         {/each}
       </ul>
     {/if}
-  </section>
+  </Panel>
 
-  <section class="panel">
-    <div class="panel-head"><p class="eyebrow">Compor e-mail (MAIL-004)</p></div>
+  <Panel title="Compor e-mail (MAIL-004)">
     <form class="compose-form" onsubmit={onCompose}>
-      <label>
-        Alias (remetente)
-        <select bind:value={composeAliasId} disabled={busy || aliases.length === 0}>
-          <option value="">— escolhe —</option>
-          {#each aliases.filter((a) => a.active) as a (a.id)}
-            <option value={a.id}>{a.aliasAddress}</option>
-          {/each}
-        </select>
-      </label>
-      <label>
-        Para
-        <input type="email" bind:value={composeTo} required disabled={busy} />
-      </label>
-      <label>
-        Assunto
-        <input bind:value={composeSubject} required disabled={busy} />
-      </label>
-      <label>
-        Mensagem
-        <textarea bind:value={composeBody} rows="3" required disabled={busy}></textarea>
-      </label>
-      <button type="submit" class="btn primary" disabled={busy || !composeAliasId}>Enviar</button>
+      <Field label="Alias (remetente)" required>
+        {#snippet control({ id, describedBy })}
+          <select {id} aria-describedby={describedBy} bind:value={composeAliasId} disabled={busy || aliases.length === 0}>
+            <option value="">— escolhe —</option>
+            {#each aliases.filter((a) => a.active) as a (a.id)}
+              <option value={a.id}>{a.aliasAddress}</option>
+            {/each}
+          </select>
+        {/snippet}
+      </Field>
+      <Field label="Para" required>
+        {#snippet control({ id, describedBy })}
+          <input {id} aria-describedby={describedBy} type="email" bind:value={composeTo} required disabled={busy} />
+        {/snippet}
+      </Field>
+      <Field label="Assunto" required>
+        {#snippet control({ id, describedBy })}
+          <input {id} aria-describedby={describedBy} bind:value={composeSubject} required disabled={busy} />
+        {/snippet}
+      </Field>
+      <Field label="Mensagem" required>
+        {#snippet control({ id, describedBy })}
+          <textarea {id} aria-describedby={describedBy} bind:value={composeBody} rows="3" required disabled={busy}></textarea>
+        {/snippet}
+      </Field>
+      <Button type="submit" disabled={busy || !composeAliasId} loading={busy}>Enviar</Button>
     </form>
-  </section>
+  </Panel>
 
-  <section class="panel">
-    <div class="panel-head">
-      <p class="eyebrow">Caixa de entrada (MAIL-002)</p>
-      <a class="crm-link" href="/crm">Prospeção no CRM →</a>
-    </div>
+  <Panel title="Caixa de entrada (MAIL-002)">
+    {#snippet actions()}
+      <Button variant="ghost" size="sm" href="/crm">Prospeção no CRM →</Button>
+    {/snippet}
     {#if inboxLoading}
-      <p class="muted">A carregar inbox…</p>
+      <Skeleton variant="row" />
+      <Skeleton variant="row" />
     {:else if inbox.length === 0}
-      <p class="muted">
-        Sem mensagens. Envia SMTP para um alias activo (ex.: via Mailpit UI ou
-        <code>swaks --to TEU_ALIAS@aegis.email --server localhost:1025</code>).
-      </p>
+      <EmptyState
+        title="Inbox vazia"
+        description="Envia SMTP para um alias activo (Mailpit UI ou swaks --to TEU_ALIAS@aegis.email --server localhost:1025)."
+      />
     {:else}
       <ul class="list inbox-list">
         {#each inbox as m (m.id)}
@@ -247,70 +282,10 @@
         {/each}
       </ul>
     {/if}
-  </section>
-</section>
+  </Panel>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 48rem;
-  }
-  .page-head {
-    margin-bottom: var(--space-6);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-  .lead {
-    margin: var(--space-3) 0 0;
-    max-width: 40rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-  .panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    padding: var(--space-4) var(--space-6);
-    margin-bottom: var(--space-4);
-  }
-  .panel-head {
-    margin-bottom: var(--space-3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-2);
-  }
-  .crm-link {
-    font-size: var(--text-xs);
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-  .inbox-list .inbox-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-2);
-  }
-  .inbox-item.done {
-    opacity: 0.65;
-  }
-  .snippet {
-    margin: var(--space-1) 0 0;
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-  }
-  .panel-head .eyebrow {
-    margin: 0;
-  }
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
@@ -325,35 +300,21 @@
   .compose-form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
   .row-form {
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
   }
-  .compose-form label {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    font-size: var(--text-sm);
+  .row-form :global(.field) {
+    flex: 1;
+    min-width: 10rem;
   }
   .compose-form select,
-  .compose-form textarea {
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-bg-inset);
-    color: var(--color-text);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-  }
-  @media (max-width: 560px) {
-    .row-form {
-      flex-direction: column;
-    }
-  }
+  .compose-form textarea,
   input {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     padding: var(--space-2) var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -363,9 +324,17 @@
     font-size: var(--text-sm);
     box-sizing: border-box;
   }
-  input:focus-visible {
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
     outline: none;
     border-color: var(--color-accent);
+  }
+  @media (max-width: 560px) {
+    .row-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
   .list {
     margin: 0;
@@ -373,7 +342,7 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
   .alias {
     display: flex;
@@ -402,10 +371,6 @@
     padding: 0;
     font-size: var(--text-sm);
   }
-  .copied {
-    font-size: var(--text-xs);
-    color: var(--color-success-fg);
-  }
   .tag {
     font-size: var(--text-xs);
     padding: 1px var(--space-2);
@@ -416,7 +381,7 @@
   .a-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     flex-shrink: 0;
   }
   .state {
@@ -426,43 +391,22 @@
   .state.on {
     color: var(--color-success-fg);
   }
-  .btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-sm);
+  .inbox-list .inbox-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: var(--space-3);
     border: 1px solid var(--color-border);
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
   }
-  .btn.primary {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
-    border-color: transparent;
+  .inbox-item.done {
+    opacity: 0.65;
   }
-  .btn.primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-  }
-  .btn:disabled {
-    opacity: 0.55;
-    cursor: progress;
-  }
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
+  .snippet {
+    margin: var(--space-1) 0 0;
     font-size: var(--text-xs);
-    cursor: pointer;
-    padding: 0;
-  }
-  .link-btn:hover {
-    color: var(--color-danger);
-  }
-  .inline-error {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-sm);
-    color: var(--color-danger);
+    color: var(--color-text-muted);
   }
 </style>

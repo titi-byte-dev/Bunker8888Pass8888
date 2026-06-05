@@ -11,6 +11,15 @@
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
   import { buildPurchaseOrderDraft, type PurchaseOrderDraft } from "$lib/ops/purchaseOrder";
+  import {
+    Button,
+    confirmDialog,
+    PageShell,
+    Panel,
+    Skeleton,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
 
   let loading = $state(true);
   let busy = $state(false);
@@ -116,11 +125,18 @@
   }
 
   async function handleDelete(item: InventoryItem) {
-    if (!confirm(`Apagar «${item.name}»?`)) return;
+    const ok = await confirmDialog({
+      title: "Apagar artigo?",
+      message: `Remove «${item.name}» do inventário.`,
+      confirmLabel: "Apagar",
+      variant: "danger",
+    });
+    if (!ok) return;
     busy = true;
     try {
       await deleteInventoryItem(item.id);
       await refresh();
+      toast.success("Artigo apagado.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao apagar";
     } finally {
@@ -133,25 +149,20 @@
   <title>Inventário — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">AGENT-008 · Inventário & compras</p>
-      <h1>Inventário</h1>
-      <DocHelpLink slug="journey-ops-agent-inventory" label="Como funciona o agente de operações?" />
-    </div>
-    <a class="back" href="/work">← Trabalho</a>
-  </header>
+<PageShell
+  title="Inventário"
+  taskId="AGENT-008"
+  description="Gere stock operacional. Quando a quantidade desce ao nível de reordenação, o orquestrador sugere uma ordem de compra — aprova antes de gerar o rascunho."
+  width="wide"
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-ops-agent-inventory" label="Como funciona o agente de operações?" />
+    <Button variant="ghost" size="sm" href="/work">← Trabalho</Button>
+  {/snippet}
 
-  <p class="lead">
-    Gere stock operacional. Quando a quantidade desce ao nível de reordenação, o
-    orquestrador sugere uma ordem de compra — aprova antes de gerar o rascunho.
-  </p>
+  {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-  {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
-
-  <section class="panel events">
-    <h2>Actividade dos agentes</h2>
+  <Panel title="Actividade dos agentes">
     {#if agentEvents.length === 0}
       <p class="muted">Sem eventos recentes.</p>
     {:else}
@@ -186,7 +197,7 @@
         {/each}
       </ul>
     {/if}
-  </section>
+  </Panel>
 
   {#if drafts.length > 0}
     <section class="panel drafts">
@@ -234,7 +245,8 @@
   <section class="panel">
     <h2>Stock</h2>
     {#if loading}
-      <p class="muted">A carregar…</p>
+      <Skeleton variant="row" />
+      <Skeleton variant="row" />
     {:else if items.length === 0}
       <p class="muted">Sem artigos — adiciona o primeiro acima.</p>
     {:else}
@@ -257,23 +269,10 @@
       </ul>
     {/if}
   </section>
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 42rem; }
-  .page-head { margin-bottom: var(--space-4); }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 { margin: 0; font-family: var(--font-display); font-size: var(--text-2xl); }
   h2 { margin: 0 0 var(--space-3); font-size: var(--text-base); }
-  .back { font-size: var(--text-xs); color: var(--color-text-muted); text-decoration: none; }
-  .lead { margin: 0 0 var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
   .panel {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -283,7 +282,6 @@
   }
   .muted { color: var(--color-text-muted); font-size: var(--text-sm); }
   .sm { font-size: var(--text-xs); }
-  .inline-error { margin: 0 0 var(--space-4); font-size: var(--text-sm); color: var(--color-danger); }
   .grid {
     display: grid;
     gap: var(--space-3);

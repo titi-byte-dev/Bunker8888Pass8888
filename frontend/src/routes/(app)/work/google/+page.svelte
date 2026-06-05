@@ -5,6 +5,7 @@
     getGoogleWorkspaceStatus,
     type GoogleWorkspaceStatus,
   } from "$lib/work/googleWorkspaceService";
+  import { Button, PageShell, Panel, Skeleton, StatusBanner } from "$lib/ui";
 
   let loading = $state(true);
   let error = $state("");
@@ -23,22 +24,23 @@
 
 <svelte:head><title>Google Workspace — AegisPass</title></svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">GOOGLE-001</p>
-      <h1>Google Workspace</h1>
-      <DocHelpLink slug="journey-google-dev-stub" label="Stub de desenvolvimento" />
-    </div>
-    <a class="back" href="/work">← Trabalho</a>
-  </header>
+<PageShell
+  title="Google Workspace"
+  taskId="GOOGLE-001"
+  description="Estado do provider e scopes planeados para Drive ZK e masking de Sheets."
+  width="narrow"
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-google-dev-stub" label="Stub de desenvolvimento" />
+    <Button variant="ghost" size="sm" href="/work">← Trabalho</Button>
+  {/snippet}
 
   {#if loading}
-    <p class="muted">A verificar provider…</p>
+    <Skeleton variant="block" height="6rem" />
   {:else if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {:else if status}
-    <section class="panel">
+    <Panel title="Estado do provider">
       <dl class="status-grid">
         <dt>Provider</dt>
         <dd><code>{status.provider}</code></dd>
@@ -60,69 +62,56 @@
           <li><code>{scope}</code></li>
         {/each}
       </ul>
-    </section>
+    </Panel>
 
     {#if status.provider === "mock"}
-      <section class="panel cta">
+      <Panel title="Desenvolvimento local">
         <p>
           Em desenvolvimento local usa o <strong>stub</strong> — Drive cifrado e Sheets com
           masking sem ligar à Google.
         </p>
-        <a class="btn primary" href="/work/google-dev">Abrir simulação dev</a>
-      </section>
+        <Button href="/work/google-dev">Abrir simulação dev</Button>
+      </Panel>
     {:else}
-      <section class="panel cta">
+      <Panel title="Produção">
         <p>Service Account configurada. GOOGLE-002/003 (Drive ZK + masking) em breve.</p>
-      </section>
+      </Panel>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 42rem; }
-  .page-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--space-5);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 { margin: 0; font-family: var(--font-display); }
-  .back { font-size: var(--text-sm); color: var(--color-text-muted); }
-  .panel {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-    margin-bottom: var(--space-4);
-  }
   .status-grid {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: var(--space-2) var(--space-4);
     margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
   }
-  dt { color: var(--color-text-muted); font-size: var(--text-sm); }
-  dd { margin: 0; }
-  .hint { font-size: var(--text-sm); color: var(--color-text-muted); }
-  ul { margin: 0; padding-left: 1.25rem; font-size: var(--text-sm); }
-  .cta p { margin: 0 0 var(--space-3); }
-  .btn.primary {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-accent);
-    color: var(--color-on-accent);
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    font-weight: 600;
+  dt {
+    color: var(--color-text-label);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
-  .muted, .error { font-size: var(--text-sm); }
-  .error { color: var(--color-danger); }
+  dd {
+    margin: 0;
+  }
+  h2 {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-label);
+  }
+  ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .hint {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
 </style>

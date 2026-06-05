@@ -9,6 +9,7 @@
     seedRecruitmentEmail,
     type CandidateDraft,
   } from "$lib/hr/recruitmentService";
+  import { Button, PageShell, Panel, StatusBanner, toast } from "$lib/ui";
 
   let busy = $state(false);
   let error = $state("");
@@ -55,6 +56,7 @@
     try {
       await rejectSuggestion(ev.id);
       await refreshEvents();
+      toast.info("Sugestão rejeitada.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao rejeitar";
     } finally {
@@ -68,6 +70,7 @@
     try {
       drafts = await runRecruitment();
       await refreshEvents();
+      toast.success(`${drafts.length} candidato(s) após triagem às cegas.`);
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha na triagem";
     } finally {
@@ -82,6 +85,7 @@
     try {
       await seedRecruitmentEmail(seedFrom.trim(), seedSubject.trim(), seedBody.trim());
       await refreshEvents();
+      toast.success("Candidatura simulada na inbox.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao simular e-mail";
     } finally {
@@ -94,6 +98,7 @@
     try {
       await markInboxProcessed(d.message_id);
       drafts = drafts.filter((x) => x.message_id !== d.message_id);
+      toast.info("Candidatura marcada como processada.");
     } finally {
       busy = false;
     }
@@ -104,25 +109,20 @@
   <title>Recrutamento — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">AGENT-007 · Triagem às cegas</p>
-      <h1>Recrutamento</h1>
-      <DocHelpLink slug="journey-hr-agent-recruitment" label="Como funciona a triagem às cegas?" />
-    </div>
-    <a class="back" href="/hr">← Fichas</a>
-  </header>
+<PageShell
+  title="Recrutamento"
+  taskId="AGENT-007"
+  description="Candidaturas por e-mail com triagem às cegas — género, etnia e idade ficam ocultos antes do resumo (CT-RGPD-04)."
+  width="narrow"
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-hr-agent-recruitment" label="Como funciona a triagem às cegas?" />
+    <Button variant="ghost" size="sm" href="/hr">← Fichas</Button>
+  {/snippet}
 
-  <p class="lead">
-    Candidaturas por e-mail são analisadas com <strong>triagem às cegas</strong> — género, etnia e
-    idade ficam ocultos antes de chegares ao resumo (CT-RGPD-04).
-  </p>
+  {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-  {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
-
-  <section class="panel events">
-    <h2>Sugestões do orquestrador</h2>
+  <Panel title="Sugestões do orquestrador">
     {#if agentEvents.length === 0}
       <p class="muted">Sem eventos recentes.</p>
     {:else}
@@ -133,12 +133,23 @@
               <span class="ev-label">{ev.label}</span>
               {#if isPendingSuggestion(ev) && ev.payload.action === "screen_candidate"}
                 <div class="ev-actions">
-                  <button type="button" class="btn approve" disabled={decidingId !== null || busy} onclick={() => handleApprove(ev)}>
-                    {decidingId === ev.id ? "…" : "Aprovar"}
-                  </button>
-                  <button type="button" class="btn reject" disabled={decidingId !== null} onclick={() => handleRejectSuggestion(ev)}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={decidingId === ev.id}
+                    disabled={decidingId !== null || busy}
+                    onclick={() => handleApprove(ev)}
+                  >
+                    Aprovar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={decidingId !== null}
+                    onclick={() => handleRejectSuggestion(ev)}
+                  >
                     Rejeitar
-                  </button>
+                  </Button>
                 </div>
               {/if}
             </div>
@@ -146,10 +157,9 @@
         {/each}
       </ul>
     {/if}
-  </section>
+  </Panel>
 
-  <section class="panel">
-    <h2>Simular candidatura</h2>
+  <Panel title="Simular candidatura">
     <form class="seed" onsubmit={handleSeed}>
       <label>
         De
@@ -163,51 +173,81 @@
         Corpo (com campos a ocultar)
         <textarea bind:value={seedBody} rows="3" disabled={busy}></textarea>
       </label>
-      <button type="submit" class="btn secondary" disabled={busy}>Simular</button>
+      <Button type="submit" variant="secondary" disabled={busy}>Simular</Button>
     </form>
-    <button type="button" class="btn primary" disabled={busy} onclick={handleScreening}>
-      {busy ? "A processar…" : "Correr triagem"}
-    </button>
-  </section>
+    <Button disabled={busy} loading={busy} onclick={handleScreening}>Correr triagem</Button>
+  </Panel>
 
   {#if drafts.length > 0}
-    <section class="panel">
-      <h2>Candidatos (triagem às cegas)</h2>
+    <Panel title="Candidatos (triagem às cegas)">
       <ul class="drafts">
         {#each drafts as d (d.message_id)}
           <li>
             <p class="draft-head"><strong>{d.email}</strong> — {d.subject}</p>
             <pre class="summary">{d.summary}</pre>
             {#if d.blind}<span class="badge">Triagem às cegas</span>{/if}
-            <button type="button" class="btn sm" disabled={busy} onclick={() => dismissDraft(d)}>Marcar processada</button>
+            <Button variant="ghost" size="sm" disabled={busy} onclick={() => dismissDraft(d)}>
+              Marcar processada
+            </Button>
           </li>
         {/each}
       </ul>
-    </section>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 42rem; }
-  .eyebrow { font-size: var(--text-xs); text-transform: uppercase; color: var(--color-text-muted); }
-  h1 { margin: 0; font-family: var(--font-display); }
-  h2 { margin: 0 0 var(--space-3); font-size: var(--text-base); }
-  .lead { color: var(--color-text-muted); font-size: var(--text-sm); }
-  .panel { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-4); background: var(--color-bg-surface); }
-  .muted { color: var(--color-text-muted); font-size: var(--text-sm); }
-  .inline-error { color: var(--color-danger); font-size: var(--text-sm); }
-  .back { font-size: var(--text-xs); color: var(--color-text-muted); }
-  label { display: block; margin-bottom: var(--space-2); font-size: var(--text-sm); }
-  input, textarea { width: 100%; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); box-sizing: border-box; }
-  .btn { padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--color-border); cursor: pointer; margin-top: var(--space-2); }
-  .btn.primary { background: var(--color-accent); color: var(--color-accent-fg); border: none; }
-  .btn.approve { background: var(--color-success-bg); color: var(--color-success-fg); border: none; }
-  .btn.sm { font-size: var(--text-xs); padding: var(--space-1) var(--space-2); }
-  .event-list, .drafts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-  .event-list li, .drafts li { padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-inset); }
+  .muted { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+  label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-label);
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-sizing: border-box;
+    background: var(--color-bg-inset);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+  }
+
+  .event-list, .drafts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .event-list li, .drafts li {
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+  }
+
   .event-list li.suggested { border-color: var(--color-accent); }
-  .ev-actions { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
-  .summary { font-size: var(--text-xs); white-space: pre-wrap; overflow-x: auto; max-height: 12rem; }
+
+  .ev-body { display: flex; flex-direction: column; gap: var(--space-2); }
+  .ev-label { font-size: var(--text-sm); }
+  .ev-actions { display: flex; gap: var(--space-2); }
+
+  .summary {
+    font-size: var(--text-xs);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-height: 12rem;
+    margin: var(--space-2) 0;
+  }
+
   .badge { font-size: var(--text-xs); color: var(--color-accent); }
   .seed { margin-bottom: var(--space-3); }
+  .draft-head { margin: 0 0 var(--space-1); font-size: var(--text-sm); }
 </style>
