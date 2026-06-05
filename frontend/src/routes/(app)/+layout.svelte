@@ -5,7 +5,7 @@
   import AppSidebar from "$lib/shell/AppSidebar.svelte";
   import AppTabBar from "$lib/shell/AppTabBar.svelte";
   import CommandPalette from "$lib/shell/CommandPalette.svelte";
-  import { tabBarItems, visibleNavItems } from "$lib/shell/nav";
+  import { navModules, tabBarModules } from "$lib/shell/routes";
   import {
     loadThemePreference,
     setThemePreference,
@@ -44,13 +44,13 @@
     goto("/auth/login");
   }
 
-  const navItems = visibleNavItems();
-  const tabs = tabBarItems();
+  const navItems = navModules();
+  const tabs = tabBarModules();
   const userEmail = $derived(loadUserEmail());
 </script>
 
 <div class="app-shell">
-  <AppSidebar items={navItems} pathname={page.url.pathname} />
+  <AppSidebar modules={navItems} pathname={page.url.pathname} />
 
   <div class="shell-main">
     <header class="topbar">

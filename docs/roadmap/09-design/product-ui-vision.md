@@ -18,7 +18,7 @@
 | Browser sandbox (VAULT-013) | ⚪ XL | Diferenciador BYOD |
 | Acesso emergência (VAULT-016) | ⚪ L | Confiança empresarial |
 | RH, Mail, infra VPS/WireGuard | ⚪ | Fecha Fase 1 comercializável |
-| Design system / app real | ❌ | Gap crítico — ver tasks `UI-*` |
+| Design system / app real | 🟡 | Tokens + shell 🟢; `lib/ui/` + nav hierárquica ⚪ — ver [`design-system.md`](design-system.md) |
 
 ### 1.2 Sequência recomendada
 
@@ -109,17 +109,25 @@ Não é “cyberpunk neon”. É **calma, confiança e precisão** — cofre su�
 
 ### 4.1 Navegação top-level
 
+A sidebar e os breadcrumbs seguem uma **árvore** (módulo → sub-páginas), não uma
+lista plana. Mapa completo, componentes e migração em
+[`design-system.md`](design-system.md).
+
 ```
 COFRE      → Vault, itens, pesquisa, import
 SEGURANÇA  → Higiene, breaches, dispositivos, sessões
 TRABALHO   → Turnos, sandbox, CLI, passkeys
 EQUIPA     → Shared vaults, secret links (Fase 2)
 RH         → Fichas, contratos, onboarding, RGPD
-FIN        → SaaS spend, licenças (Fase 2–3)
+FINANÇAS   → Custos SaaS, fiscal, faturas, banca (hub /fin)
 CRM        → Leads, funil (Fase 2)
 AGENTES    → Guardião, aprovações (Fase 2+)
 ADMIN      → Tenant, políticas, audit, remote wipe
 ```
+
+> 💡 **Conceito — Breadcrumb:** trilho `Finanças › Fiscal` que orienta o
+> utilizador em sub-páginas sem repetir toda a sidebar. Fonte de verdade única:
+> `ROUTE_TREE` (task UI-011).
 
 ### 4.2 Páginas Fase 1 (MVP comercial)
 
@@ -130,7 +138,7 @@ ADMIN      → Tenant, políticas, audit, remote wipe
 | **Segurança** | Score higiene, dispositivos, sessões | Score no cliente |
 | **Conta** | Passkeys, recovery, CLI devices | Revogar dispositivos |
 | **Admin** | Utilizadores, turnos, geofence, wipe | Multi-step para acções destrutivas |
-| **Settings** | Perfil, aparência, notificações | Light / dark / system |
+| **Settings** | Perfil, aparência, notificações | Modo light/dark/system + paletas (UI-013) |
 
 ### 4.3 Páginas Fase 1+
 
@@ -193,6 +201,9 @@ Line-height: corpo `1.6`, títulos `1.2`.
 ### 5.5 Componentes base
 
 Button, Input, Card, ListRow, Badge, Modal, Toast, Skeleton, Progress (Argon2id), CommandPalette (⌘K).
+
+Biblioteca reutilizável em `frontend/src/lib/ui/` — ver catálogo de componentes,
+API e ordem de migração em [`design-system.md` §5](design-system.md) (tasks UI-012–017).
 
 ---
 
@@ -259,19 +270,33 @@ Respeitar `prefers-reduced-motion: reduce` em todas as animações (GSAP + CSS).
 
 ## 9. Checklist documentação viva
 
-- [ ] Tokens implementados (`UI-001`)
-- [ ] App shell com routing (`UI-002`)
-- [ ] Auth flows substituem playground (`UI-003`)
-- [ ] Vault polido (`UI-004`)
-- [ ] Motion guidelines + reduced motion testado (`UI-005`)
+**Fase 1 — fundação (UI-001–010)**
+
+- [x] Tokens implementados (`UI-001`)
+- [x] App shell com routing (`UI-002`)
+- [x] Auth flows substituem playground (`UI-003`)
+- [x] Vault polido (`UI-004`)
+- [x] Motion guidelines + reduced motion testado (`UI-005`)
+- [x] Catálogo componentes dev (`UI-010`)
 - [ ] Copy PT-PT estados segurança (unlock, wipe, turno)
 - [ ] Lighthouse a11y ≥ 90 (auth + vault)
-- [ ] Playground movido para `/dev` ou desactivado em produção
+- [x] Playground movido para `/dev` ou desactivado em produção
+
+**Fase 2 — design system aplicado (UI-011–017)** — detalhe em [`design-system.md` §9](design-system.md)
+
+- [ ] `ROUTE_TREE` + sidebar hierárquica + breadcrumbs (`UI-011`)
+- [ ] `lib/ui/` com componentes importáveis (`UI-012`)
+- [ ] Paletas múltiplas + picker em `/settings` (`UI-013`)
+- [ ] Hubs `/fin`, `/team` (`UI-014`)
+- [ ] DataTable, MetricCard, ListRow (`UI-015`)
+- [ ] Migração `/fin/*` para `PageShell` (`UI-016`)
+- [ ] Toast, Skeleton, ConfirmDialog (`UI-017`)
 
 ---
 
 ## 10. Ligações
 
+- Design system (plano operacional): [`design-system.md`](design-system.md)
 - Backlog UI: [`../05-tasks/backlog.md`](../05-tasks/backlog.md) (prefixo `UI-*`)
 - Epic Vault: [`../03-epics/epic-vault.md`](../03-epics/epic-vault.md)
 - Performance: [`../07-non-functional/performance.md`](../07-non-functional/performance.md)

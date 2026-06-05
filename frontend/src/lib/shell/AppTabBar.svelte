@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { NavItem } from "./nav";
-  import { isNavActive } from "./nav";
+  import { isRouteActive, type RouteNode } from "./routes";
 
   interface Props {
-    items: NavItem[];
+    items: RouteNode[];
     pathname: string;
   }
 
@@ -11,12 +10,12 @@
 </script>
 
 <nav class="tab-bar" aria-label="Navegação rápida">
-  {#each items as item (item.id)}
+  {#each items as item (item.href)}
     <a
       href={item.href}
       class="tab"
-      class:active={isNavActive(pathname, item.href)}
-      aria-current={isNavActive(pathname, item.href) ? "page" : undefined}
+      class:active={isRouteActive(pathname, item.href)}
+      aria-current={isRouteActive(pathname, item.href) ? "page" : undefined}
     >
       <span class="tab-icon" aria-hidden="true">{item.label.charAt(0)}</span>
       <span class="tab-label">{item.label}</span>

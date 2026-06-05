@@ -1,0 +1,49 @@
+import { describe, expect, it } from "vitest";
+import {
+  ROUTE_TREE,
+  navModules,
+  tabBarModules,
+  isRouteActive,
+  routeTrail,
+  flattenRoutes,
+} from "./routes";
+
+describe("ROUTE_TREE (UI-011)", () => {
+  it("navModules devolve os modulos de topo na ordem definida", () => {
+    expect(navModules()).toBe(ROUTE_TREE);
+    expect(navModules()[0].label).toBe("Cofre");
+  });
+
+  it("tabBarModules: cofre, seguranca, trabalho, definicoes (max 5)", () => {
+    const tabs = tabBarModules().map((m) => m.href);
+    expect(tabs).toEqual(["/vault", "/security", "/work", "/settings"]);
+    expect(tabs.length).toBeLessThanOrEqual(5);
+  });
+
+  it("isRouteActive distingue exacto e prefixo de seccao", () => {
+    expect(isRouteActive("/fin", "/fin")).toBe(true);
+    expect(isRouteActive("/fin/fiscal", "/fin")).toBe(true);
+    expect(isRouteActive("/finance", "/fin")).toBe(false); // nao e sub-rota
+    expect(isRouteActive("/crm", "/fin")).toBe(false);
+  });
+
+  it("routeTrail constroi o trilho raiz->folha (Financas > Fiscal)", () => {
+    const trail = routeTrail("/fin/fiscal").map((n) => n.label);
+    expect(trail).toEqual(["Financas", "Fiscal"]);
+  });
+
+  it("routeTrail usa prefixo mais longo para rotas dinamicas", () => {
+    const trail = routeTrail("/security/devices/abc").map((n) => n.label);
+    expect(trail).toEqual(["Seguranca", "Dispositivos e sessoes"]);
+  });
+
+  it("routeTrail devolve [] quando nada corresponde", () => {
+    expect(routeTrail("/desconhecido")).toEqual([]);
+  });
+
+  it("flattenRoutes inclui modulos e filhos sem perder nenhum href", () => {
+    const flat = flattenRoutes();
+    expect(flat.some((n) => n.href === "/fin/commissions")).toBe(true);
+    expect(flat.length).toBeGreaterThan(ROUTE_TREE.length);
+  });
+});
