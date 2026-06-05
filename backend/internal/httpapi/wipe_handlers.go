@@ -14,17 +14,8 @@ type wipeRequest struct {
 
 // handleAdminRemoteWipe permite a um operador (chave admin) apagar dados locais
 // nos dispositivos de um utilizador e revogar todas as sessões.
-func handleAdminRemoteWipe(adminKey string, userRepo *users.Repo, wipe *security.WipeService) http.HandlerFunc {
+func handleAdminRemoteWipe(userRepo *users.Repo, wipe *security.WipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if adminKey == "" {
-			writeError(w, http.StatusServiceUnavailable, "remote wipe admin desactivado")
-			return
-		}
-		if r.Header.Get("X-Admin-Key") != adminKey {
-			writeError(w, http.StatusForbidden, "chave admin inválida")
-			return
-		}
-
 		targetID := r.PathValue("id")
 		if targetID == "" {
 			writeError(w, http.StatusBadRequest, "user id em falta")

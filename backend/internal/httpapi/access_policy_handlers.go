@@ -59,16 +59,8 @@ func handleGetAccessGeofence(geoRepo *geofence.Repo) http.HandlerFunc {
 	}
 }
 
-func handleAdminSetAccessGeofence(adminKey string, userRepo *users.Repo, geoRepo *geofence.Repo) http.HandlerFunc {
+func handleAdminSetAccessGeofence(userRepo *users.Repo, geoRepo *geofence.Repo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if adminKey == "" {
-			writeError(w, http.StatusServiceUnavailable, "geofence admin desactivado")
-			return
-		}
-		if r.Header.Get("X-Admin-Key") != adminKey {
-			writeError(w, http.StatusForbidden, "chave admin inválida")
-			return
-		}
 		targetID := r.PathValue("id")
 		if targetID == "" {
 			writeError(w, http.StatusBadRequest, "user id em falta")

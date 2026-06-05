@@ -48,17 +48,8 @@ func handleGetAccessShift(shiftsRepo *shifts.Repo) http.HandlerFunc {
 	}
 }
 
-func handleAdminSetAccessShift(adminKey string, userRepo *users.Repo, shiftsRepo *shifts.Repo) http.HandlerFunc {
+func handleAdminSetAccessShift(userRepo *users.Repo, shiftsRepo *shifts.Repo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if adminKey == "" {
-			writeError(w, http.StatusServiceUnavailable, "turnos admin desactivados")
-			return
-		}
-		if r.Header.Get("X-Admin-Key") != adminKey {
-			writeError(w, http.StatusForbidden, "chave admin inválida")
-			return
-		}
-
 		targetID := r.PathValue("id")
 		if targetID == "" {
 			writeError(w, http.StatusBadRequest, "user id em falta")
