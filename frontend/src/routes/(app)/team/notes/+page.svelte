@@ -1,6 +1,7 @@
 <script lang="ts">
   import { loadSessionToken } from "$lib/session";
   import { buildNoteLink, encryptNoteContent, generateNoteKey } from "$lib/share/burnNote";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { burnNoteManually, createBurnNote } from "$lib/share/burnNoteApi";
 
   const TTL_OPTIONS = [
@@ -98,6 +99,7 @@
     <div>
       <p class="eyebrow">SHARE-005 · Notas que ardem após leitura</p>
       <h1>Notas Auto-Destrutivas</h1>
+      <DocHelpLink />
     </div>
     <p class="lead">
       Uma nota cifrada que se lê <strong>uma única vez</strong> e arde a seguir. A

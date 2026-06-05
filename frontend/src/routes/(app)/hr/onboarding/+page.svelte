@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { onboardEmployee, type OnboardingResult, type OnboardingStep } from "$lib/hr/onboarding";
 
   let locked = $state(false);
@@ -68,6 +69,7 @@
     <div>
       <p class="eyebrow">HR-007 · Onboarding em 1 clique</p>
       <h1>Onboarding de Empregado</h1>
+      <DocHelpLink />
     </div>
     <a class="back" href="/hr">← Fichas</a>
   </header>

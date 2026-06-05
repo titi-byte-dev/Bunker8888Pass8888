@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
 </script>
 
 <svelte:head>
@@ -8,6 +9,7 @@
 <section class="page">
   <h1>Segurança</h1>
   <p class="lead">Higiene, dispositivos, sessões e confiança operacional.</p>
+  <DocHelpLink />
 
   <ul class="links">
     <li>

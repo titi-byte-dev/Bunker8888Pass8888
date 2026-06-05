@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import AdminGate from "$lib/admin/AdminGate.svelte";
   import { hasAdminKey } from "$lib/admin/adminKey";
   import { listWipeAuditEvents, type WipeAuditEvent } from "$lib/admin/api";
@@ -37,6 +38,7 @@
 <section class="page">
   <a href="/admin" class="back">← Administração</a>
   <h1>Auditoria</h1>
+  <DocHelpLink />
   <p class="lead">Registo append-only de remote wipe (VAULT-012).</p>
 
   <AdminGate onUnlocked={onGateChange} />

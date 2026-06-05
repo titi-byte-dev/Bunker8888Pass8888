@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { filterLogins, loadDecodedLogins, type DecodedLogin } from "$lib/vault/ui";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { animateListStagger } from "$lib/motion/presets";
   import { runMotionScope } from "$lib/motion/scope";
 
@@ -49,6 +50,7 @@
       <p class="subtitle">{items.length} login{items.length === 1 ? "" : "s"} cifrados</p>
     </div>
     <div class="header-actions">
+      <DocHelpLink />
       <button type="button" class="secondary" onclick={refresh} disabled={busy}>Actualizar</button>
       <a class="primary" href="/vault/new">Novo login</a>
     </div>

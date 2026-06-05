@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { onMount } from "svelte";
   import {
     addVaultItem,
@@ -274,6 +275,7 @@
     <div>
       <p class="eyebrow">SHARE-002 · Cofres partilhados</p>
       <h1>Cofres Partilhados</h1>
+      <DocHelpLink />
     </div>
     <p class="lead">
       Coleções cifradas sob uma chave de cofre própria. Convidar um colega =

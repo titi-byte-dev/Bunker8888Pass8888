@@ -10,6 +10,7 @@
     type CliDevice,
     type HttpSession,
   } from "$lib/security/api";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import type { PasskeyMeta } from "$lib/passkey";
 
   let sessions = $state<HttpSession[]>([]);
@@ -77,6 +78,7 @@
 <section class="page">
   <a href="/security" class="back">← Segurança</a>
   <h1>Dispositivos e sessões</h1>
+  <DocHelpLink />
   <p class="lead">Sessões HTTP, passkeys WebAuthn e certificados CLI activos na tua conta.</p>
 
   {#if status}

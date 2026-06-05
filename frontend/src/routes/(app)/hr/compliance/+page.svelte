@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { actionLabel, type AuditEntry } from "$lib/hr/audit";
   import {
     fetchAuditLog,
@@ -57,6 +58,7 @@
     <div>
       <p class="eyebrow">HR-008 · Conformidade RGPD</p>
       <h1>Relatório de Conformidade</h1>
+      <DocHelpLink />
     </div>
     <div class="head-actions">
       <a class="btn ghost" href="/hr">← Fichas</a>
