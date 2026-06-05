@@ -9,6 +9,7 @@
     seedInboxMessage,
     type ProspectionDraft,
   } from "$lib/crm/prospectionService";
+  import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { LEAD_STAGES, type Lead, type LeadStage } from "$lib/crm/leads";
 
@@ -30,6 +31,7 @@
   let seedSubject = $state("Pedido de demonstração");
   let seedBody = $state("Olá, gostávamos de agendar uma demo do produto.");
   let agentEvents = $state<AgentEvent[]>([]);
+  let decidingId = $state<string | null>(null);
 
   const byStage = $derived(
     LEAD_STAGES.map((s) => ({
@@ -105,6 +107,39 @@
     }
   }
 
+  function isPendingSuggestion(ev: AgentEvent): boolean {
+    return ev.type === "orchestrator.action.suggested" && (ev.approvalStatus ?? "pending") === "pending";
+  }
+
+  async function handleApproveSuggestion(ev: AgentEvent) {
+    decidingId = ev.id;
+    error = "";
+    try {
+      const result = await approveSuggestion(ev.id);
+      await refreshEvents();
+      if (result.action === "run_prospection") {
+        await handleProspection();
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao aprovar";
+    } finally {
+      decidingId = null;
+    }
+  }
+
+  async function handleRejectSuggestion(ev: AgentEvent) {
+    decidingId = ev.id;
+    error = "";
+    try {
+      await rejectSuggestion(ev.id);
+      await refreshEvents();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao rejeitar";
+    } finally {
+      decidingId = null;
+    }
+  }
+
   async function handleProspection() {
     prospectionBusy = true;
     error = "";
@@ -166,9 +201,9 @@
 <section class="page">
   <header class="page-head">
     <div>
-      <p class="eyebrow">CRM-001/002 · AGENT-003 · Funil de vendas</p>
+      <p class="eyebrow">CRM-001/002 · AGENT-009 · Funil de vendas</p>
       <h1>Leads</h1>
-      <DocHelpLink slug="journey-crm-prospection" label="Como funciona a prospeção?" />
+      <DocHelpLink slug="journey-human-in-the-loop" label="Como funcionam as aprovações?" />
     </div>
     <p class="lead">
       Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Arrasta
@@ -186,14 +221,42 @@
 
     <section class="panel events">
       <h2>Actividade dos agentes</h2>
-      <p class="muted small">Event Bus AGENT-004 — feed auditável de mail e prospeção.</p>
+      <p class="muted small">
+        Event Bus AGENT-004 — aprova ou rejeita sugestões (AGENT-009) antes de correr tools ZK.
+      </p>
       {#if agentEvents.length === 0}
         <p class="muted">Sem eventos recentes.</p>
       {:else}
         <ul class="event-list">
           {#each agentEvents.slice(0, 8) as ev (ev.id)}
-            <li class:suggested={ev.type === "orchestrator.action.suggested"}>
-              <span class="ev-label">{ev.label}</span>
+            <li
+              class:suggested={isPendingSuggestion(ev)}
+              class:approved={ev.approvalStatus === "approved"}
+              class:rejected={ev.approvalStatus === "rejected"}
+            >
+              <div class="ev-body">
+                <span class="ev-label">{ev.label}</span>
+                {#if isPendingSuggestion(ev)}
+                  <div class="ev-actions">
+                    <button
+                      type="button"
+                      class="btn approve"
+                      disabled={decidingId !== null || prospectionBusy}
+                      onclick={() => handleApproveSuggestion(ev)}
+                    >
+                      {decidingId === ev.id ? "…" : "Aprovar"}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn reject"
+                      disabled={decidingId !== null}
+                      onclick={() => handleRejectSuggestion(ev)}
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                {/if}
+              </div>
               <span class="ev-meta">{new Date(ev.createdAt).toLocaleString("pt-PT")}</span>
             </li>
           {/each}
@@ -493,10 +556,44 @@
   .event-list li {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     gap: var(--space-2);
     font-size: var(--text-xs);
-    padding: var(--space-1) 0;
+    padding: var(--space-2);
     border-bottom: 1px solid var(--color-border);
+  }
+  .ev-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+  }
+  .ev-actions {
+    display: flex;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+  }
+  .ev-actions .btn {
+    margin: 0;
+    padding: 2px var(--space-2);
+    font-size: var(--text-xs);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .ev-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .ev-actions .approve {
+    background: var(--color-accent);
+    color: var(--color-bg-base);
+  }
+  .ev-actions .reject {
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
   }
   .ev-label {
     font-weight: 500;
@@ -508,7 +605,14 @@
   .event-list li.suggested {
     background: var(--color-accent-muted, rgba(99, 102, 241, 0.08));
     border-radius: var(--radius-sm);
-    padding: var(--space-1) var(--space-2);
+  }
+  .event-list li.approved {
+    opacity: 0.85;
+  }
+  .event-list li.rejected {
+    opacity: 0.6;
+    text-decoration: line-through;
+    text-decoration-color: var(--color-border);
   }
   .prospection h2 {
     margin: 0 0 var(--space-2);

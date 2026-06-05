@@ -44,20 +44,24 @@ flowchart TD
 
 ## Estados de uma sugestão (stateDiagram)
 
+Ver também [`human-in-the-loop.md`](human-in-the-loop.md) (AGENT-009).
+
 ```mermaid
 stateDiagram-v2
     [*] --> Sugerida: orchestrator.action.suggested
-    Sugerida --> Ignorada: utilizador não actua
-    Sugerida --> Executada: run_prospection manual
+    Sugerida --> Aprovada: POST approve
+    Sugerida --> Rejeitada: POST reject
+    Aprovada --> Executada: prospection/run (cliente ZK)
     Executada --> [*]
-    Ignorada --> [*]
+    Rejeitada --> [*]
 ```
 
 ## API
 
 ```
 GET /api/agent/orchestrator/status  → lista workers registados
-GET /api/agent/events               → feed inclui sugestões
+GET /api/agent/events               → feed inclui sugestões + approval_status
+POST /api/agent/orchestrator/actions/{id}/approve|reject  → AGENT-009
 ```
 
 Evolução: mais workers (FIN, RH), filas persistentes, NATS (AGENT-004 roadmap).

@@ -40,7 +40,7 @@
           "id": "flow-1",
           "title": "",
           "type": "sequence",
-          "source": "sequenceDiagram\r\n    participant SMTP as E-mail\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n    participant CRM as /crm\r\n\r\n    SMTP->>API: ingest alias\r\n    API->>Orq: mail.inbox.received\r\n    Orq->>API: orchestrator.action.suggested\r\n    CRM->>API: GET /api/agent/events\r\n    Note over CRM: «Sugestão: correr prospeção»\r\n    CRM->>API: POST prospection/run (utilizador)",
+          "source": "sequenceDiagram\r\n    participant SMTP as E-mail\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n    participant CRM as /crm\r\n\r\n    SMTP->>API: ingest alias\r\n    API->>Orq: mail.inbox.received\r\n    Orq->>API: orchestrator.action.suggested\r\n    CRM->>API: GET /api/agent/events\r\n    Note over CRM: «Sugestão: correr prospeção»\r\n    CRM->>API: POST approve (AGENT-009)\r\n    CRM->>API: POST prospection/run (utilizador)",
           "steps": [
             {
               "kind": "message",
@@ -69,6 +69,13 @@
               "to": "API",
               "arrow": "->>",
               "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST approve (AGENT-009)"
             },
             {
               "kind": "message",
@@ -135,6 +142,13 @@
                 "id": "step-4",
                 "source": "CRM",
                 "target": "API",
+                "label": "POST approve (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "CRM",
+                "target": "API",
                 "label": "POST prospection/run (utilizador)",
                 "dashed": false
               }
@@ -147,7 +161,7 @@
     {
       "level": 2,
       "title": "Passo-a-passo",
-      "html": "<ol>\n<li>Recebe e-mail no alias (SMTP ou simulação).</li>\n<li>Abre <code>/crm</code> — feed mostra <strong>Sugestão: correr prospeção</strong>.</li>\n<li>Clica <strong>Correr prospeção</strong> (acção humana).</li>\n<li>Importa rascunhos com cifragem local.</li>\n</ol>\n",
+      "html": "<ol>\n<li>Recebe e-mail no alias (SMTP ou simulação).</li>\n<li>Abre <code>/crm</code> — feed mostra <strong>Sugestão: correr prospeção</strong>.</li>\n<li>Clica <strong>Aprovar</strong> na sugestão (AGENT-009) — ou <strong>Correr prospeção</strong> manualmente.</li>\n<li>Importa rascunhos com cifragem local.</li>\n</ol>\n",
       "flows": [],
       "collapsed": true
     },
