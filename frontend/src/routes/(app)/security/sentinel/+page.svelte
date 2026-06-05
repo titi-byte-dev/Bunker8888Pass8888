@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { listSentinelEvents, reasonLabel, type LoginEvent } from "$lib/sentinel/api";
 
   let events = $state<LoginEvent[]>([]);
@@ -31,6 +32,7 @@
 <section class="page">
   <a href="/security" class="back">← Segurança</a>
   <h1>Sentinel Mode</h1>
+  <DocHelpLink />
   <p class="lead">
     Deteção de logins geograficamente impossíveis (DW-004). Compara GPS entre sessões;
     se a velocidade implícita exceder ~900 km/h, exige passkey antes de emitir token.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
 </script>
 
 <svelte:head>
@@ -8,6 +9,7 @@
 <section class="page">
   <a href="/work" class="back">← Trabalho</a>
   <h1>CLI mTLS</h1>
+  <DocHelpLink />
   <p class="lead">
     A CLI <code>aegis</code> injecta segredos em scripts via certificado mTLS — a Master Password
     fica só em memória local (Zero-Knowledge).

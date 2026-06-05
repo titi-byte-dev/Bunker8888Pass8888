@@ -5,6 +5,7 @@
     encryptSecret,
     generateLinkKey,
   } from "$lib/share/secretLink";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { createSecretLink } from "$lib/share/secretLinkApi";
 
   const TTL_OPTIONS = [
@@ -77,6 +78,7 @@
     <div>
       <p class="eyebrow">SHARE-003 · Links efémeros</p>
       <h1>Secret Links</h1>
+      <DocHelpLink />
     </div>
     <p class="lead">
       Partilha um segredo de uso único com quem não tem conta. O segredo é cifrado

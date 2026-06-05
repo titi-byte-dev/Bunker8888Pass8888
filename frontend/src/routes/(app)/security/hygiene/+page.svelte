@@ -9,6 +9,7 @@
     saveHealthSnapshot,
     type BreachCheckResult,
   } from "$lib/darkweb";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import SecurityHealthCard from "$lib/security/SecurityHealthCard.svelte";
   import { loadDecodedLogins } from "$lib/vault/ui";
 
@@ -101,6 +102,7 @@
 <section class="page">
   <a href="/security" class="back">← Segurança</a>
   <h1>Saúde de segurança</h1>
+  <DocHelpLink />
   <p class="lead">
     Higiene + fugas (DW-003). Análise no cliente; k-anonymity para breach check (DW-001).
   </p>

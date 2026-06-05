@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import AdminGate from "$lib/admin/AdminGate.svelte";
   import { hasAdminKey } from "$lib/admin/adminKey";
 
@@ -16,6 +17,7 @@
 <section class="page">
   <h1>Administração</h1>
   <p class="lead">Utilizadores, políticas de acesso, auditoria e remote wipe (UI-008).</p>
+  <DocHelpLink />
 
   <AdminGate onUnlocked={refreshGate} />
 

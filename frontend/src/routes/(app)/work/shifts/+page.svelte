@@ -9,6 +9,7 @@
     shiftStatusTone,
   } from "$lib/work/shift-display";
   import { fetchServerTime, isClockSkewAcceptable } from "$lib/vault/shift";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { getCurrentPosition } from "$lib/vault/geofence";
 
   let shift = $state<ShiftStatus | null>(null);
@@ -85,6 +86,7 @@
 <section class="page">
   <a href="/work" class="back">← Trabalho</a>
   <h1>Turnos e geofence</h1>
+  <DocHelpLink />
   <p class="lead">
     O servidor valida horário (NTP) e zona geográfica antes de permitir acesso ao cofre.
   </p>

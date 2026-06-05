@@ -6,6 +6,7 @@
     isSandboxReadyPayload,
     postSandboxFill,
   } from "$lib/sandbox";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { loadDecodedLogins, type DecodedLogin } from "$lib/vault/ui";
 
   type SandboxMode = "demo" | "external";
@@ -94,6 +95,7 @@
 <section class="page">
   <a href="/work" class="back">← Trabalho</a>
   <h1>Browser sandbox</h1>
+  <DocHelpLink />
   <p class="lead">
     Contexto isolado para login. A Master Password <strong>nunca</strong> aparece
     nem é copiável neste painel — só é enviada ao iframe via postMessage.

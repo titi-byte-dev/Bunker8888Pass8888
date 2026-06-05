@@ -16,6 +16,7 @@
     type RecordSummary,
     type VerifiedCertificate,
   } from "$lib/hr/employeesService";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { certificateToJSON } from "$lib/hr/erasure";
   import {
     downloadContract,
@@ -292,6 +293,7 @@
     <div>
       <p class="eyebrow">HR-001 · Cifragem campo-a-campo</p>
       <h1>Fichas de Empregado</h1>
+      <DocHelpLink />
     </div>
     <span class="report-link">
       <a class="btn ghost" href="/hr/onboarding">Onboarding →</a>

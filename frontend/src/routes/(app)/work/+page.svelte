@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import ShiftStatusCard from "$lib/work/ShiftStatusCard.svelte";
 </script>
 
@@ -9,6 +10,7 @@
 <section class="page">
   <h1>Trabalho</h1>
   <p class="lead">Turnos, sandbox browser, CLI e ferramentas operacionais BYOD.</p>
+  <DocHelpLink />
 
   <ShiftStatusCard />
 

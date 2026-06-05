@@ -7,6 +7,7 @@
     type RecipientLookup,
     type ShareIdentity,
   } from "$lib/share/setup";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
 
   type Status = "loading" | "locked" | "ready" | "error";
 
@@ -86,6 +87,7 @@
     <div>
       <p class="eyebrow">SHARE · Partilha blindada</p>
       <h1>Equipa</h1>
+      <DocHelpLink />
     </div>
     <p class="lead">
       Chaves assimétricas por utilizador — a base para partilhar segredos sem o

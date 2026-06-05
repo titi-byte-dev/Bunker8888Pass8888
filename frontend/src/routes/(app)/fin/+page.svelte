@@ -10,6 +10,7 @@
     type VaultLoginRef,
   } from "$lib/fin/subscriptionsService";
   import type { BillingCycle, Subscription } from "$lib/fin/subscriptions";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { costSummary, detectAlerts, monthlyCost, type Alert } from "$lib/fin/alerts";
 
   let locked = $state(false);
@@ -137,6 +138,7 @@
     <div>
       <p class="eyebrow">FIN-001/002 · Custos SaaS</p>
       <h1>Monitorização de Custos</h1>
+      <DocHelpLink />
     </div>
     <p class="lead">
       As subscrições são cifradas com a tua Master Key — só tu vês os custos. O

@@ -21,6 +21,7 @@
     secondsUntil,
     type EmergencyRequest,
   } from "$lib/emergency/api";
+  import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
 
   let heirEmail = $state("");
   let waitDays = $state(7);
@@ -194,6 +195,7 @@
   <header>
     <a href="/security" class="back">← Segurança</a>
     <h1>Acesso de emergência</h1>
+    <DocHelpLink />
     <p class="lead">
       Designa um herdeiro digital com período de espera. O servidor orquestra pedidos;
       a Master Key viaja só num blob cifrado (Zero-Knowledge).
