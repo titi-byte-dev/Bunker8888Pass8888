@@ -9,7 +9,7 @@ feature: vault
 level: 1
 in_app: true
 summary: Higiene, dispositivos, turnos, geofencing, Sentinel e emergência.
-related: [vault, glossary, journey-remote-wipe]
+related: [vault, glossary, journey-remote-wipe, journey-sentinel, journey-emergency-access, journey-passkey]
 ---
 
 :::summary

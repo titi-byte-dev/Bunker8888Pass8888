@@ -1,0 +1,235 @@
+{
+  "slug": "journey-shared-vault",
+  "title": "Journey: Partilhar credenciais com a equipa (Shared Vault)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "shared_vault",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Partilhar credenciais com a equipa (Shared Vault)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Admin ou membro da equipa · <strong>Epics:</strong> <code>SHARE</code>, <code>VAULT</code></p>\n</blockquote>\n<p>Substitui o envio de passwords por chat ou e-mail: um cofre partilhado com\npermissões explícitas e cifragem Zero-Knowledge para cada membro.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>O tenant tem pelo menos dois utilizadores com chaves assimétricas geradas.</li>\n<li>O admin (ou proprietário do cofre) tem permissão para convidar membros.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant A as Admin\r\n    participant App as App (Svelte)\r\n    participant G as Go API\r\n    participant M as Membro\r\n\r\n    A->>App: cria Shared Vault + convida membro\r\n    App->>App: cifra chave do cofre com chave pública do membro\r\n    App->>G: grava blobs cifrados + ACL (tenant_id)\r\n    G-->>App: cofre criado\r\n    M->>App: aceita convite + desbloqueia cofre\r\n    App->>G: pede blobs do Shared Vault\r\n    G-->>App: blobs cifrados (RLS)\r\n    App->>App: decifra envelope com chave privada local\r\n    App-->>M: mostra itens partilhados",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "A",
+              "to": "App",
+              "arrow": "->>",
+              "label": "cria Shared Vault + convida membro"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "cifra chave do cofre com chave pública do membro"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "grava blobs cifrados + ACL (tenant_id)"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "cofre criado"
+            },
+            {
+              "kind": "message",
+              "from": "M",
+              "to": "App",
+              "arrow": "->>",
+              "label": "aceita convite + desbloqueia cofre"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "pede blobs do Shared Vault"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "blobs cifrados (RLS)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "decifra envelope com chave privada local"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "M",
+              "arrow": "-->>",
+              "label": "mostra itens partilhados"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "A",
+                "label": "Admin",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "M",
+                "label": "Membro",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "A",
+                "target": "App",
+                "label": "cria Shared Vault + convida membro",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "App",
+                "label": "cifra chave do cofre com chave pública do membro",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "App",
+                "target": "G",
+                "label": "grava blobs cifrados + ACL (tenant_id)",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "G",
+                "target": "App",
+                "label": "cofre criado",
+                "dashed": true
+              },
+              {
+                "id": "step-4",
+                "source": "M",
+                "target": "App",
+                "label": "aceita convite + desbloqueia cofre",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "App",
+                "target": "G",
+                "label": "pede blobs do Shared Vault",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "G",
+                "target": "App",
+                "label": "blobs cifrados (RLS)",
+                "dashed": true
+              },
+              {
+                "id": "step-7",
+                "source": "App",
+                "target": "App",
+                "label": "decifra envelope com chave privada local",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "App",
+                "target": "M",
+                "label": "mostra itens partilhados",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>O admin cria um <strong>Shared Vault</strong> em <code>/team/vaults</code> e define o papel de cada\nmembro (ler, editar, administrar).</li>\n<li>No cliente, a <strong>chave simétrica do cofre</strong> é re-cifrada para a chave pública\nde cada membro — o servidor só armazena envelopes, nunca a chave em claro.</li>\n<li>O membro convidado aceita o convite; ao desbloquear o cofre pessoal, consegue\ndecifrar o envelope com a sua chave privada (que nunca sai do dispositivo).</li>\n<li>Alterações a itens são sincronizadas via WebSocket; revogação de acesso\nreflecte-se em segundos.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Membro sai da equipa:</strong> o admin revoga o acesso; envelopes desse membro\ndeixam de ser úteis e o offboarding pode incluir remote wipe.</li>\n<li><strong>Sem Master Key desbloqueada:</strong> o membro vê o cofre na lista mas não consegue\nler itens até fazer unlock — a sessão HTTP sozinha não basta.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Re-cifragem assimétrica:</strong> em Zero-Knowledge, partilhar um segredo não\nsignifica &quot;enviar a password ao servidor&quot;. Significa cifrar a chave do item\ncom a <strong>chave pública</strong> do destinatário. Só ele, com a chave privada local,\nconsegue ler.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> mesmo que a BD seja comprometida, os blobs do Shared Vault\npermanecem inúteis sem as chaves privadas de cada membro.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Credenciais da equipa acessíveis só a membros autorizados.</li>\n<li>Evento de convite/revogação registado no log de auditoria.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Admin ou membro da equipa",
+  "order": 99
+}

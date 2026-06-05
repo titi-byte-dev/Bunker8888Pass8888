@@ -1,0 +1,235 @@
+{
+  "slug": "journey-saas-costs",
+  "title": "Journey: Controlar custos SaaS e licenças sem uso",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "saas_costs",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Controlar custos SaaS e licenças sem uso</h1>\n<blockquote>\n<p><strong>Ator:</strong> Gestor / Admin financeiro · <strong>Epics:</strong> <code>FIN</code>, <code>VAULT</code></p>\n</blockquote>\n<p>Cruza subscrições SaaS com credenciais no cofre para ver gasto mensal e\nalertar licenças pagas que ninguém usa — sem o servidor ver passwords.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Cofre desbloqueado (Master Key em memória).</li>\n<li>Subscrições registadas em <code>/fin</code> com custo e ciclo de facturação.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant G as Gestor\r\n    participant App as App (Svelte)\r\n    participant API as Go API\r\n    participant V as Vault (cliente)\r\n\r\n    G->>App: abre /fin com cofre desbloqueado\r\n    App->>API: lista subscrições (metadados, tenant_id)\r\n    API-->>App: nomes, custos, last_used_at, vault_item_id\r\n    App->>V: opcional: liga subscrição a login do cofre\r\n    V-->>App: referência ao item (sem enviar password)\r\n    App->>App: costSummary + detectAlerts (cliente)\r\n    App-->>G: total mensal + alertas \"sem uso\"\r\n    G->>App: revoga acesso / desactiva subscrição\r\n    App->>API: PATCH subscrição ou offboarding no vault",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "->>",
+              "label": "abre /fin com cofre desbloqueado"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "API",
+              "arrow": "->>",
+              "label": "lista subscrições (metadados, tenant_id)"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "nomes, custos, last_used_at, vault_item_id"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "V",
+              "arrow": "->>",
+              "label": "opcional: liga subscrição a login do cofre"
+            },
+            {
+              "kind": "message",
+              "from": "V",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "referência ao item (sem enviar password)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "costSummary + detectAlerts (cliente)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "-->>",
+              "label": "total mensal + alertas \"sem uso\""
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "->>",
+              "label": "revoga acesso / desactiva subscrição"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "API",
+              "arrow": "->>",
+              "label": "PATCH subscrição ou offboarding no vault"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "G",
+                "label": "Gestor",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "V",
+                "label": "Vault (cliente)",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "G",
+                "target": "App",
+                "label": "abre /fin com cofre desbloqueado",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "API",
+                "label": "lista subscrições (metadados, tenant_id)",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "API",
+                "target": "App",
+                "label": "nomes, custos, last_used_at, vault_item_id",
+                "dashed": true
+              },
+              {
+                "id": "step-3",
+                "source": "App",
+                "target": "V",
+                "label": "opcional: liga subscrição a login do cofre",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "V",
+                "target": "App",
+                "label": "referência ao item (sem enviar password)",
+                "dashed": true
+              },
+              {
+                "id": "step-5",
+                "source": "App",
+                "target": "App",
+                "label": "costSummary + detectAlerts (cliente)",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "App",
+                "target": "G",
+                "label": "total mensal + alertas \"sem uso\"",
+                "dashed": true
+              },
+              {
+                "id": "step-7",
+                "source": "G",
+                "target": "App",
+                "label": "revoga acesso / desactiva subscrição",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "App",
+                "target": "API",
+                "label": "PATCH subscrição ou offboarding no vault",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>O gestor regista cada SaaS: nome, custo, moeda, ciclo (<code>monthly</code> / <code>yearly</code>),\ncategoria e data de último uso.</li>\n<li>Pode <strong>associar</strong> a subscrição a um item do cofre (login) — só o ID, não a\npassword.</li>\n<li>O cliente calcula <code>monthlyCost</code> e <code>detectAlerts</code>: licenças activas com\n<code>last_used_at</code> antigo ou inexistente.</li>\n<li>O painel mostra totais por moeda e lista de alertas acionáveis.</li>\n<li>Ao sair um funcionário, o offboarding pode desactivar subscrições ligadas\nao mesmo tempo que revoga cofres.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Cruzamento vault + Fin:</strong> o valor está em ligar <strong>quem paga</strong> (subscrição)\na <strong>quem usa</strong> (login no cofre + <code>last_used_at</code>). O servidor gere contabilidade;\no cliente decide o que é &quot;uso&quot; sem expor segredos.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> custos e alertas são metadados de negócio — ainda assim\nfiltramos por <code>tenant_id</code> + RLS. Credenciais SaaS permanecem cifradas no vault.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Cofre bloqueado:</strong> <code>/fin</code> mostra aviso; metadados de subscrições podem\nlistar-se, mas ligação a logins exige unlock.</li>\n<li><strong>Sem vault_item_id:</strong> alerta de custo funciona; higiene de password é manual.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Visibilidade do gasto recorrente e licenças candidatas a corte.</li>\n<li>Acções de revogação alinhadas com auditoria e offboarding.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Gestor / Admin financeiro",
+  "order": 99
+}

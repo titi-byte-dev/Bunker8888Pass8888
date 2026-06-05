@@ -1,0 +1,299 @@
+{
+  "slug": "journey-emergency-access",
+  "title": "Journey: Acesso de emergência (herdeiro digital)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "emergency_access",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Acesso de emergência (herdeiro digital)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Proprietário do cofre · Herdeiro designado · <strong>Epics:</strong> <code>VAULT</code></p>\n</blockquote>\n<p>Permite que uma pessoa de confiança aceda ao cofre se o titular estiver\nincapacitado — com <strong>período de espera</strong> configurável e aprovação do titular\nse ainda estiver activo.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>O proprietário configurou herdeiro e dias de espera em <code>/security/emergency</code>.</li>\n<li>Foi gerado um <strong>código de emergência</strong> (envelope da Master Key cifrado).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant O as Proprietário\r\n    participant App as App (Svelte)\r\n    participant G as Go API\r\n    participant H as Herdeiro\r\n\r\n    O->>App: define herdeiro + wait_days + confirma Master Password\r\n    App->>App: wrap Master Key com código de emergência (cliente)\r\n    App->>G: grava config + blob cifrado (sem plaintext)\r\n    H->>App: pede acesso de emergência (email do titular)\r\n    App->>G: POST emergency/request\r\n    G-->>App: pedido pendente + countdown\r\n    alt titular ainda activo\r\n        O->>App: aprova ou rejeita pedido\r\n        App->>G: approve / reject\r\n    else período de espera expira\r\n        G->>G: marca pedido elegível\r\n    end\r\n    H->>App: introduz código de emergência + desbloqueia\r\n    App->>G: fetch blob cifrado\r\n    App->>App: unwrap Master Key localmente\r\n    App-->>H: acesso temporário ao cofre (auditado)",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "O",
+              "to": "App",
+              "arrow": "->>",
+              "label": "define herdeiro + wait_days + confirma Master Password"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "wrap Master Key com código de emergência (cliente)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "grava config + blob cifrado (sem plaintext)"
+            },
+            {
+              "kind": "message",
+              "from": "H",
+              "to": "App",
+              "arrow": "->>",
+              "label": "pede acesso de emergência (email do titular)"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "POST emergency/request"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "pedido pendente + countdown"
+            },
+            {
+              "kind": "branch",
+              "label": "alt titular ainda activo"
+            },
+            {
+              "kind": "message",
+              "from": "O",
+              "to": "App",
+              "arrow": "->>",
+              "label": "aprova ou rejeita pedido"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "approve / reject"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "marca pedido elegível"
+            },
+            {
+              "kind": "branch",
+              "label": "end"
+            },
+            {
+              "kind": "message",
+              "from": "H",
+              "to": "App",
+              "arrow": "->>",
+              "label": "introduz código de emergência + desbloqueia"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "fetch blob cifrado"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "unwrap Master Key localmente"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "H",
+              "arrow": "-->>",
+              "label": "acesso temporário ao cofre (auditado)"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "O",
+                "label": "Proprietário",
+                "x": 0
+              },
+              {
+                "id": "App",
+                "label": "App (Svelte)",
+                "x": 200
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "H",
+                "label": "Herdeiro",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "O",
+                "target": "App",
+                "label": "define herdeiro + wait_days + confirma Master Password",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "App",
+                "target": "App",
+                "label": "wrap Master Key com código de emergência (cliente)",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "App",
+                "target": "G",
+                "label": "grava config + blob cifrado (sem plaintext)",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "H",
+                "target": "App",
+                "label": "pede acesso de emergência (email do titular)",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "App",
+                "target": "G",
+                "label": "POST emergency/request",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "G",
+                "target": "App",
+                "label": "pedido pendente + countdown",
+                "dashed": true
+              },
+              {
+                "id": "step-6",
+                "source": "O",
+                "target": "App",
+                "label": "aprova ou rejeita pedido",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "App",
+                "target": "G",
+                "label": "approve / reject",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "G",
+                "target": "G",
+                "label": "marca pedido elegível",
+                "dashed": false
+              },
+              {
+                "id": "step-9",
+                "source": "H",
+                "target": "App",
+                "label": "introduz código de emergência + desbloqueia",
+                "dashed": false
+              },
+              {
+                "id": "step-10",
+                "source": "App",
+                "target": "G",
+                "label": "fetch blob cifrado",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "App",
+                "target": "App",
+                "label": "unwrap Master Key localmente",
+                "dashed": false
+              },
+              {
+                "id": "step-12",
+                "source": "App",
+                "target": "H",
+                "label": "acesso temporário ao cofre (auditado)",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>O proprietário, com cofre desbloqueado, define o e-mail do herdeiro e o\n<strong>wait_days</strong> (ex.: 7 dias).</li>\n<li>No cliente, a Master Key é envolvida num envelope cifrado com um código de\nemergência — só o blob vai para o servidor.</li>\n<li>O herdeiro inicia pedido em <code>/security/emergency</code>; começa a contagem decrescente.</li>\n<li>Se o titular estiver disponível, <strong>aprova ou rejeita</strong> antes do fim do prazo.</li>\n<li>Após elegibilidade, o herdeiro usa o código (entregue offline) para unwrap\nlocal da Master Key e aceder ao cofre — tudo auditado.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Herdeiro digital:</strong> pessoa pré-autorizada com acesso <em>adiado</em>, não imediato.\nO período de espera dá ao titular tempo para cancelar um pedido fraudulento.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> o código de emergência deve ser guardado <strong>fora da app</strong>\n(papel, cofre físico). Quem o tiver + elegibilidade temporal pode recuperar\na Master Key — trata-o como segredo de nível máximo.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Titular rejeita:</strong> pedido cancelado; herdeiro notificado.</li>\n<li><strong>Titular recupera conta:</strong> pode revogar configuração de emergência a qualquer momento.</li>\n<li><strong>Código errado:</strong> unwrap falha no cliente; sem tentativas ilimitadas no servidor.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Acesso de emergência registado no log imutável.</li>\n<li>Configuração revogável pelo titular sem expor o código em claro no servidor.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Proprietário do cofre",
+  "order": 99
+}

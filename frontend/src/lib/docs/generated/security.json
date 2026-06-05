@@ -54,7 +54,10 @@
   "related": [
     "vault",
     "glossary",
-    "journey-remote-wipe"
+    "journey-remote-wipe",
+    "journey-sentinel",
+    "journey-emergency-access",
+    "journey-passkey"
   ],
   "order": 3
 }

@@ -38,6 +38,7 @@ e o cofre continuar bloqueado até introduzires a Master Password.
 | **Trabalho** | Turnos, sandbox browser, CLI |
 | **Equipa** | Cofres partilhados, secret links |
 | **RH** | Fichas, contratos, onboarding, RGPD |
+| **Finanças** | Custos SaaS, alertas de licenças sem uso (`/fin`) |
 | **Definições** | Conta, tema, passkeys, **esta documentação** |
 :::
 
