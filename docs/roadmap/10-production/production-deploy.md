@@ -9,7 +9,7 @@
 |---|---|
 | `docker-compose.prod.yml` | Serviços sem portas públicas desnecessárias |
 | `.env.production.example` | Modelo de variáveis — copiar para `.env` na VPS |
-| `scripts/backup-postgres.ps1` / `backend/cmd/backup` | Backups `.enc` (INFRA-004) |
+| `scripts/backup-postgres.sh` (Linux) / `backup-postgres.ps1` (Windows) | Backups `.enc` (INFRA-004) |
 
 ## 1. Preparar `.env` na VPS
 

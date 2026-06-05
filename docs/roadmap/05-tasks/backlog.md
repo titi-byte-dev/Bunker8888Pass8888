@@ -120,7 +120,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | FIN-002 | Alertas de licenças sem uso | 2 | S | 🟢 | FIN-001 |
 | FIN-003 | Integração Open Banking (mTLS) | 3 | XL | 🟡 | INFRA-002 |
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
-| FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
+| FIN-005 | Categorização fiscal automática | 3 | M | 🟢 | FIN-001, AGENT-002 |
 | FIN-006 | Faturação (pro-forma/fatura/recibo + numeração legal) | 3 | M | 🟢 | CRM-001 |
 | FIN-007 | Comissões de vendas sobre faturas pagas | 3 | M | 🟢 | FIN-006 |
 

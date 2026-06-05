@@ -6,6 +6,7 @@
  * são calculados no cliente depois de decifrar.
  */
 import { decrypt, encrypt, fromBytes, toBytes, type Bytes } from "$lib/crypto";
+import type { FiscalCode } from "./fiscal";
 
 export type BillingCycle = "monthly" | "yearly";
 
@@ -16,6 +17,8 @@ export interface SubscriptionPayload {
   currency: string; // ex.: "EUR"
   cycle: BillingCycle;
   category?: string;
+  /** Classificação fiscal IRC (FIN-005) — cifrada no blob. */
+  fiscalCode?: FiscalCode;
   /** Liga ao login correspondente no cofre ("cruza com vault"). */
   vaultItemId?: string;
   vaultItemTitle?: string;

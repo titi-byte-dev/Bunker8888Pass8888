@@ -1,0 +1,61 @@
+{
+  "slug": "journey-fiscal-categorization",
+  "title": "Journey — Categorização fiscal (FIN-005)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "fiscal_categorization",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey — Categorização fiscal (FIN-005)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Gestor financeiro · <strong>Pré-requisito:</strong> subscrições SaaS em <code>/fin</code></p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Fluxo",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart LR\r\n    SUB[Subscrições ZK] --> DEC[Decifrar no cliente]\r\n    DEC --> SUG[Sugestão heurística / agente]\r\n    SUG --> HITL[Revisão humana]\r\n    HITL --> BLOB[Re-cifrar com fiscalCode]\r\n    BLOB --> SUM[Resumo dedutível /fin/fiscal]",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passos",
+      "html": "<ol>\n<li>Em <code>/fin</code>, cada subscrição pode ter <strong>código fiscal</strong> no blob cifrado.</li>\n<li>Em <code>/fin/fiscal</code>, vê totais mensais e parcela <strong>dedutível estimada</strong>.</li>\n<li><strong>Sugerir automaticamente</strong> aplica regras (SaaS → <code>dedutivel_100</code>, hardware → <code>investimento</code>).</li>\n<li>Ajusta manualmente no dropdown — a classificação volta a cifrar-se.</li>\n</ol>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> totais e códigos fiscais <strong>nunca</strong> passam pelo servidor em claro.\nO agente futuro (Guardião) só verá campos estritamente necessários.</p>\n</blockquote>\n<blockquote>\n<p>💡 <strong>Conceito:</strong> <em>dedução fiscal</em> reduz o lucro tributável — nem todas as despesas\nSaaS são 100% dedutíveis; hardware pode ser amortizado como investimento.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Verificação",
+      "html": "<ul>\n<li><input disabled=\"\" type=\"checkbox\"> Subscrição «Figma» classificada como <code>dedutivel_100</code></li>\n<li><input disabled=\"\" type=\"checkbox\"> Resumo mostra dedutível = 100% do custo mensal dessa linha</li>\n<li><input disabled=\"\" type=\"checkbox\"> Servidor continua a ver só blob opaco (inspecionar rede)</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Gestor financeiro",
+  "order": 99
+}

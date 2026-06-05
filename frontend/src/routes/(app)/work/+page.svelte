@@ -40,6 +40,12 @@
       </a>
     </li>
     <li>
+      <a href="/work/google">
+        <strong>Google Workspace</strong>
+        <span>Estado do provider OAuth / Service Account (GOOGLE-001)</span>
+      </a>
+    </li>
+    <li>
       <a href="/work/google-dev">
         <strong>Google proxy (simulação dev)</strong>
         <span>Drive cifrado + mascaramento Sheets sem OAuth real (DoD Fase 2)</span>

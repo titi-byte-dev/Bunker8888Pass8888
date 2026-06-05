@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T18:15:51.936Z",
+  "generatedAt": "2026-06-05T18:20:39.343Z",
   "categories": [
     {
       "id": "concepts",
@@ -305,6 +305,27 @@
       "summary": "",
       "related": [],
       "actor": "Responsável financeiro",
+      "order": 99
+    },
+    {
+      "slug": "journey-fiscal-categorization",
+      "title": "Journey — Categorização fiscal (FIN-005)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "fiscal_categorization",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Gestor financeiro",
       "order": 99
     },
     {

@@ -21,6 +21,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/googleworkspace"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/commissions"
@@ -71,6 +72,7 @@ type Deps struct {
 	MailWebhookSecret string                     // vazio desactiva webhook
 	Fin               *fin.Repo                  // nil desactiva endpoints /api/fin/*
 	OpenBanking       *openbanking.Service       // nil desactiva endpoints /api/fin/banking/*
+	GoogleWorkspace   *googleworkspace.Service   // nil desactiva endpoints /api/work/google/*
 	Invoicing         *invoicing.Repo            // nil desactiva endpoints /api/fin/invoices/*
 	Commissions       *commissions.Repo          // nil desactiva endpoints /api/fin/commissions/*
 	Ops               *ops.Repo                  // nil desactiva endpoints /api/ops/*
@@ -283,6 +285,10 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/fin/banking/status", requireAuth(deps.Auth, handleBankingStatus(deps.OpenBanking)))
 		mux.Handle("POST /api/fin/banking/connect", requireAuth(deps.Auth, handleBankingConnect(deps.OpenBanking)))
 		mux.Handle("POST /api/fin/banking/sync", requireAuth(deps.Auth, handleBankingSync(deps.OpenBanking)))
+	}
+	if deps.GoogleWorkspace != nil && deps.Auth != nil {
+		// Google Workspace (GOOGLE-001) — estado do provider mock ou service account.
+		mux.Handle("GET /api/work/google/status", requireAuth(deps.Auth, handleGoogleWorkspaceStatus(deps.GoogleWorkspace)))
 	}
 	if deps.Ops != nil && deps.Auth != nil {
 		// Inventário operacional (AGENT-008).

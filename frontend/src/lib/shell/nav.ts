@@ -24,6 +24,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "hr", label: "RH", href: "/hr" },
   { id: "mail", label: "Aliases", href: "/mail" },
   { id: "fin", label: "Custos", href: "/fin" },
+  { id: "fiscal", label: "Fiscal", href: "/fin/fiscal" },
   { id: "invoices", label: "Faturas", href: "/fin/invoices" },
   { id: "commissions", label: "Comissoes", href: "/fin/commissions" },
   { id: "crm", label: "CRM", href: "/crm" },

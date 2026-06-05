@@ -12,6 +12,12 @@
   import type { BillingCycle, Subscription } from "$lib/fin/subscriptions";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { costSummary, detectAlerts, monthlyCost, type Alert } from "$lib/fin/alerts";
+  import {
+    FISCAL_CATEGORIES,
+    fiscalLabel,
+    suggestFiscalCode,
+    type FiscalCode,
+  } from "$lib/fin/fiscal";
   import { reportStaleAlerts } from "$lib/fin/financeAgentService";
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
@@ -31,6 +37,7 @@
   let fCurrency = $state("EUR");
   let fCycle = $state<BillingCycle>("monthly");
   let fCategory = $state("");
+  let fFiscalCode = $state<FiscalCode>("pendente");
   let fVaultItemId = $state("");
   let fLastUsedAt = $state("");
   let fActive = $state(true);
@@ -124,6 +131,7 @@
     fCurrency = "EUR";
     fCycle = "monthly";
     fCategory = "";
+    fFiscalCode = "pendente";
     fVaultItemId = "";
     fLastUsedAt = "";
     fActive = true;
@@ -136,6 +144,7 @@
     fCurrency = s.currency;
     fCycle = s.cycle;
     fCategory = s.category ?? "";
+    fFiscalCode = s.fiscalCode ?? "pendente";
     fVaultItemId = s.vaultItemId ?? "";
     fLastUsedAt = s.lastUsedAt ? s.lastUsedAt.slice(0, 10) : "";
     fActive = s.active;
@@ -153,6 +162,7 @@
       currency: fCurrency,
       cycle: fCycle,
       category: fCategory.trim() || undefined,
+      fiscalCode: fFiscalCode === "pendente" ? undefined : fFiscalCode,
       vaultItemId: fVaultItemId || undefined,
       vaultItemTitle: login?.title,
       lastUsedAt: fLastUsedAt ? new Date(fLastUsedAt).toISOString() : undefined,
@@ -203,7 +213,10 @@
       <h1>Monitorização de Custos</h1>
       <DocHelpLink slug="journey-finance-agent-saas" label="Como funciona o agente financeiro?" />
     </div>
-    <a class="back" href="/fin/banking">Open Banking →</a>
+    <div class="head-links">
+      <a class="back" href="/fin/fiscal">Fiscal →</a>
+      <a class="back" href="/fin/banking">Open Banking →</a>
+    </div>
   </header>
   <p class="lead">
     As subscrições são cifradas com a tua Master Key — só tu vês os custos. O
@@ -303,6 +316,18 @@
         <div class="row">
           <label class="field"><span>Categoria</span>
             <input bind:value={fCategory} placeholder="Entretenimento" disabled={busy} /></label>
+          <label class="field grow"><span>Fiscal (FIN-005)</span>
+            <select bind:value={fFiscalCode} disabled={busy}>
+              {#each FISCAL_CATEGORIES as cat}
+                <option value={cat.code}>{cat.label}</option>
+              {/each}
+            </select></label>
+          <button
+            type="button"
+            class="link-btn"
+            disabled={busy || !fName.trim()}
+            onclick={() => { fFiscalCode = suggestFiscalCode({ name: fName, category: fCategory }); }}
+          >sugerir</button>
           <label class="field grow"><span>Login no cofre (cruza com vault)</span>
             <select bind:value={fVaultItemId} disabled={busy}>
               <option value="">— sem associação —</option>
@@ -330,7 +355,7 @@
       {:else}
         <table>
           <thead>
-            <tr><th>Serviço</th><th>Mensal</th><th>Ciclo</th><th>Cofre</th><th>Estado</th><th></th></tr>
+            <tr><th>Serviço</th><th>Mensal</th><th>Fiscal</th><th>Ciclo</th><th>Cofre</th><th>Estado</th><th></th></tr>
           </thead>
           <tbody>
             {#each subs as s (s.id)}
@@ -340,6 +365,7 @@
                   {#if alertsFor(s.id).length > 0}<span class="flag">⚠</span>{/if}
                 </td>
                 <td class="mono">{money(monthlyCost(s), s.currency)}</td>
+                <td class="muted sm">{fiscalLabel(s.fiscalCode)}</td>
                 <td>{s.cycle === "yearly" ? "Anual" : "Mensal"}</td>
                 <td class="muted sm">{s.vaultItemTitle ?? "—"}</td>
                 <td>{s.active ? "activa" : "inactiva"}</td>
@@ -367,11 +393,17 @@
     gap: var(--space-4);
     margin-bottom: var(--space-5);
   }
+  .head-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
   .back {
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     text-decoration: none;
-    flex-shrink: 0;
   }
   .eyebrow {
     margin: 0 0 var(--space-1);

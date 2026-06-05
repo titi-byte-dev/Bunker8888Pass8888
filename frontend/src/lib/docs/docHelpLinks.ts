@@ -16,6 +16,8 @@ export const DOC_HELP_ROUTES: DocHelpRoute[] = [
   { prefix: "/team/notes", slug: "team-sharing", label: "Como funcionam as notas temporárias?" },
   { prefix: "/team", slug: "team-sharing", label: "Como funciona a partilha?" },
   { prefix: "/work/google-dev", slug: "journey-google-dev-stub", label: "Como funciona o Google em dev?" },
+  { prefix: "/work/google", slug: "journey-google-dev-stub", label: "Como ligar o Google Workspace?" },
+  { prefix: "/fin/fiscal", slug: "journey-fiscal-categorization", label: "Como funciona a categorização fiscal?" },
   { prefix: "/security/guardian", slug: "journey-guardian-audit", label: "Como auditar o Guardião?" },
   { prefix: "/fin/invoices", slug: "journey-erp-flow-dev", label: "Como funciona o fluxo ERP?" },
   { prefix: "/fin/banking", slug: "journey-finance-agent-reconcile", label: "Como funciona a reconciliação?" },
