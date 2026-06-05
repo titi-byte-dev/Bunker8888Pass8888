@@ -17,16 +17,17 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/crm"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/invoicing"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -42,45 +43,46 @@ import (
 
 // Deps são as dependências injetadas no router.
 type Deps struct {
-	Auth         *auth.Service
-	Vault        *vault.Repo
-	Hub          *realtime.Hub // nil desactiva WebSocket e notificações push
-	Wipe         *security.WipeService
-	Users        *users.Repo
-	Shifts       *shifts.Repo
-	Geofence     *geofence.Repo
-	Recovery     *recovery.Repo
-	Devices      *clidevices.Repo
-	CLIca        *clidevices.CA
-	CLICertTTL   time.Duration
-	Passkeys     *passkeys.Service
-	Emergency    *emergency.Service
-	Sentinel     *sentinel.Service
-	ShareKeys    *sharekeys.Repo    // nil desactiva endpoints /api/share/*
-	SharedVaults *sharedvaults.Repo // nil desactiva endpoints /api/share/vaults*
-	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
-	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
-	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
-	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/aliases*
-	MailInbox    *mail.InboxRepo       // nil desactiva endpoints /api/mail/inbox*
-	MailIngest        *mail.IngestService // nil desactiva webhook Mailpit
-	MailRelay         *mail.RelayService  // nil desactiva compose/relay SMTP
-	MailRateLimiter   *mail.RateLimiter   // nil desactiva quotas MAIL-005
-	MailWebhookSecret string              // vazio desactiva webhook
-	Fin          *fin.Repo              // nil desactiva endpoints /api/fin/*
-	OpenBanking  *openbanking.Service   // nil desactiva endpoints /api/fin/banking/*
-	Ops          *ops.Repo          // nil desactiva endpoints /api/ops/*
-	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
-	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
-	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
-	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
-	Recruitment  *agent.Recruitment  // nil desactiva POST /api/agent/recruitment/run
-	AgentBus     *eventbus.Bus       // nil desactiva publicação de eventos
-	AgentEvents  *eventbus.PGStore      // nil desactiva GET /api/agent/events
-	Orchestrator *orchestrator.Orchestrator // nil desactiva GET /api/agent/orchestrator/status
-	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
-	AdminKey     string             // vazio desactiva endpoints /api/admin/*
-	Pool         *pgxpool.Pool
+	Auth              *auth.Service
+	Vault             *vault.Repo
+	Hub               *realtime.Hub // nil desactiva WebSocket e notificações push
+	Wipe              *security.WipeService
+	Users             *users.Repo
+	Shifts            *shifts.Repo
+	Geofence          *geofence.Repo
+	Recovery          *recovery.Repo
+	Devices           *clidevices.Repo
+	CLIca             *clidevices.CA
+	CLICertTTL        time.Duration
+	Passkeys          *passkeys.Service
+	Emergency         *emergency.Service
+	Sentinel          *sentinel.Service
+	ShareKeys         *sharekeys.Repo            // nil desactiva endpoints /api/share/*
+	SharedVaults      *sharedvaults.Repo         // nil desactiva endpoints /api/share/vaults*
+	SecretLinks       *secretlinks.Store         // nil desactiva endpoints /api/share/links*
+	BurnNotes         *burnnotes.Store           // nil desactiva endpoints /api/share/notes*
+	HR                *hr.Repo                   // nil desactiva endpoints /api/hr/*
+	Mail              *mail.Repo                 // nil desactiva endpoints /api/mail/aliases*
+	MailInbox         *mail.InboxRepo            // nil desactiva endpoints /api/mail/inbox*
+	MailIngest        *mail.IngestService        // nil desactiva webhook Mailpit
+	MailRelay         *mail.RelayService         // nil desactiva compose/relay SMTP
+	MailRateLimiter   *mail.RateLimiter          // nil desactiva quotas MAIL-005
+	MailWebhookSecret string                     // vazio desactiva webhook
+	Fin               *fin.Repo                  // nil desactiva endpoints /api/fin/*
+	OpenBanking       *openbanking.Service       // nil desactiva endpoints /api/fin/banking/*
+	Invoicing         *invoicing.Repo            // nil desactiva endpoints /api/fin/invoices/*
+	Ops               *ops.Repo                  // nil desactiva endpoints /api/ops/*
+	Agent             *agent.Registry            // nil desactiva endpoints /api/agent/*
+	AgentRunner       *agent.Runner              // executor de tools (AGENT-001)
+	AgentAudit        *guardian.AuditRepo        // nil desactiva GET /api/agent/audit
+	Prospection       *agent.Prospection         // nil desactiva POST /api/agent/prospection/run
+	Recruitment       *agent.Recruitment         // nil desactiva POST /api/agent/recruitment/run
+	AgentBus          *eventbus.Bus              // nil desactiva publicação de eventos
+	AgentEvents       *eventbus.PGStore          // nil desactiva GET /api/agent/events
+	Orchestrator      *orchestrator.Orchestrator // nil desactiva GET /api/agent/orchestrator/status
+	CRM               *crm.Repo                  // nil desactiva endpoints /api/crm/*
+	AdminKey          string                     // vazio desactiva endpoints /api/admin/*
+	Pool              *pgxpool.Pool
 }
 
 // ctxKey é um tipo privado para chaves de context (evita colisões entre pacotes).
@@ -259,6 +261,12 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/fin/subscriptions", requireAuth(deps.Auth, handleCreateSubscription(deps.Fin)))
 		mux.Handle("PUT /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleUpdateSubscription(deps.Fin)))
 		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
+	}
+	if deps.Invoicing != nil && deps.Auth != nil {
+		// Faturacao com numeracao legal (FIN-006).
+		mux.Handle("GET /api/fin/invoices", requireAuth(deps.Auth, handleListInvoices(deps.Invoicing)))
+		mux.Handle("POST /api/fin/invoices", requireAuth(deps.Auth, handleIssueInvoice(deps.Invoicing)))
+		mux.Handle("PUT /api/fin/invoices/{id}/status", requireAuth(deps.Auth, handleUpdateInvoiceStatus(deps.Invoicing)))
 	}
 	if deps.OpenBanking != nil && deps.Auth != nil {
 		// Open Banking scaffold (FIN-003) — mock provider em dev.
