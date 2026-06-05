@@ -18,18 +18,19 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/crm"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/invoicing"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -90,6 +91,7 @@ func main() {
 		mailRepo := mail.NewRepo(pool)
 		mailInbox := mail.NewInboxRepo(pool)
 		finRepo := fin.NewRepo(pool)
+		invoicingRepo := invoicing.NewRepo(pool)
 		openBankingSvc := openbanking.NewService(openbanking.NewRepo(pool), openbanking.MockProvider{})
 		opsRepo := ops.NewRepo(pool)
 		crmRepo := crm.NewRepo(pool)
@@ -148,9 +150,9 @@ func main() {
 		)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
-			InboundPerHour:  cfg.MailRateInboundPerHour,
-			RelayPerHour:    cfg.MailRateRelayPerHour,
-			ComposePerHour:  cfg.MailRateComposePerHour,
+			InboundPerHour: cfg.MailRateInboundPerHour,
+			RelayPerHour:   cfg.MailRateRelayPerHour,
+			ComposePerHour: cfg.MailRateComposePerHour,
 		})
 		var mailRelay *mail.RelayService
 		if cfg.SMTPRelayHost != "" {
@@ -169,44 +171,45 @@ func main() {
 		}
 
 		deps = httpapi.Deps{
-			Auth:         auth.NewService(userRepo, sessionRepo, sessionTTL),
-			Vault:        vault.NewRepo(pool),
-			Hub:          hub,
-			Wipe:         wipeSvc,
-			Users:        userRepo,
-			Shifts:       shiftRepo,
-			Geofence:     geoRepo,
-			Recovery:     recoveryRepo,
-			Emergency:    emergency.NewService(emergencyRepo, userRepo),
-			Devices:      deviceRepo,
-			CLIca:        cliCA,
-			Passkeys:     passkeySvc,
-			Sentinel:     sentinel.NewService(sentinelRepo),
-			ShareKeys:    shareKeysRepo,
-			SharedVaults: sharedVaultsRepo,
-			SecretLinks:  secretLinksStore,
-			BurnNotes:    burnNotesStore,
-			HR:           hrRepo,
-			Mail:         mailRepo,
+			Auth:              auth.NewService(userRepo, sessionRepo, sessionTTL),
+			Vault:             vault.NewRepo(pool),
+			Hub:               hub,
+			Wipe:              wipeSvc,
+			Users:             userRepo,
+			Shifts:            shiftRepo,
+			Geofence:          geoRepo,
+			Recovery:          recoveryRepo,
+			Emergency:         emergency.NewService(emergencyRepo, userRepo),
+			Devices:           deviceRepo,
+			CLIca:             cliCA,
+			Passkeys:          passkeySvc,
+			Sentinel:          sentinel.NewService(sentinelRepo),
+			ShareKeys:         shareKeysRepo,
+			SharedVaults:      sharedVaultsRepo,
+			SecretLinks:       secretLinksStore,
+			BurnNotes:         burnNotesStore,
+			HR:                hrRepo,
+			Mail:              mailRepo,
 			MailInbox:         mailInbox,
 			MailIngest:        mailIngest,
 			MailRelay:         mailRelay,
 			MailRateLimiter:   mailLimiter,
 			MailWebhookSecret: cfg.MailWebhookSecret,
-			Fin:          finRepo,
-			OpenBanking:  openBankingSvc,
-			Ops:          opsRepo,
-			Agent:        agentReg,
-			AgentRunner:  agentRun,
-			AgentAudit:   agentAudit,
-			Prospection:  prospectionSvc,
-			Recruitment:  recruitmentSvc,
-			AgentBus:     agentBus,
-			AgentEvents:  agentEventStore,
-			Orchestrator: agentOrchestrator,
-			CRM:          crmRepo,
-			AdminKey:     cfg.AdminKey,
-			Pool:         pool,
+			Fin:               finRepo,
+			Invoicing:         invoicingRepo,
+			OpenBanking:       openBankingSvc,
+			Ops:               opsRepo,
+			Agent:             agentReg,
+			AgentRunner:       agentRun,
+			AgentAudit:        agentAudit,
+			Prospection:       prospectionSvc,
+			Recruitment:       recruitmentSvc,
+			AgentBus:          agentBus,
+			AgentEvents:       agentEventStore,
+			Orchestrator:      agentOrchestrator,
+			CRM:               crmRepo,
+			AdminKey:          cfg.AdminKey,
+			Pool:              pool,
 		}
 		logger.Info("base de dados ligada e migrada")
 	} else {

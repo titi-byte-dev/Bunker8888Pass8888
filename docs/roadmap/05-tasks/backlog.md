@@ -120,6 +120,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | FIN-003 | Integração Open Banking (mTLS) | 3 | XL | 🟡 | INFRA-002 |
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
 | FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
+| FIN-006 | Faturação (pro-forma/fatura/recibo + numeração legal) | 3 | M | 🟢 | CRM-001 |
 
 ## CRM — Pipeline de vendas
 
@@ -127,6 +128,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 |---|---|---|---|---|---|
 | CRM-001 | Modelo leads cifrados + API CRUD | 2 | M | 🟢 | VAULT-005 |
 | CRM-002 | UI funil básico (`/crm`) | 2 | M | 🟢 | CRM-001, UI-002 |
+| CRM-003 | Fluxo `deal_closed` → pro-forma a partir de lead ganho | 3 | S | 🟢 | CRM-001, FIN-006 |
 
 ## AGENT — Agentes de IA
 
