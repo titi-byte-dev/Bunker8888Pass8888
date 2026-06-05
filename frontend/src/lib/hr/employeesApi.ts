@@ -62,8 +62,13 @@ export class EmployeesAPI {
   }
 
   /** Cria uma ficha vazia; os campos entram depois, um a um. */
-  async create(): Promise<EmployeeRecordDTO> {
-    const res = await this.fetch("/api/hr/employees", { method: "POST" });
+  async create(opts?: { suggestOnboarding?: boolean }): Promise<EmployeeRecordDTO> {
+    const body =
+      opts?.suggestOnboarding === true ? JSON.stringify({ suggest_onboarding: true }) : undefined;
+    const res = await this.fetch("/api/hr/employees", {
+      method: "POST",
+      body,
+    });
     return (await res.json()) as EmployeeRecordDTO;
   }
 

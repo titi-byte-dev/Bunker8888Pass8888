@@ -15,6 +15,8 @@ export interface OnboardingInput {
   fullName: string;
   email: string;
   role?: string;
+  /** Ficha já criada (ex.: após aprovar sugestão AGENT-007). */
+  recordId?: string;
 }
 
 export interface OnboardingStep {
@@ -47,8 +49,13 @@ export async function onboardEmployee(
     onStep?.([...steps]);
   };
 
-  const recordId = await createRecord();
-  tick(0);
+  const recordId = input.recordId ?? (await createRecord());
+  if (!input.recordId) {
+    tick(0);
+  } else {
+    steps[0].done = true;
+    onStep?.([...steps]);
+  }
 
   await saveField(recordId, "full_name", input.fullName);
   tick(1);

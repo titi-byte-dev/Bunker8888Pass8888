@@ -163,7 +163,7 @@
     busy = true;
     error = "";
     try {
-      const id = await createRecord();
+      const id = await createRecord({ suggestOnboarding: true });
       await refresh();
       await onOpen(id);
     } catch (e) {

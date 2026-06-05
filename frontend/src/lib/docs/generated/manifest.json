@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T14:48:43.734Z",
+  "generatedAt": "2026-06-05T15:19:33.694Z",
   "categories": [
     {
       "id": "concepts",
@@ -242,6 +242,27 @@
       "summary": "",
       "related": [],
       "actor": "Funcionário",
+      "order": 99
+    },
+    {
+      "slug": "journey-hr-agent-onboarding",
+      "title": "Journey: Agente RH sugere onboarding (AGENT-007)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "hr_agent_onboarding",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Administrador RH",
       "order": 99
     },
     {

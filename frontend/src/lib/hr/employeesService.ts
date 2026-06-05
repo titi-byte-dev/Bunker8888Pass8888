@@ -61,8 +61,8 @@ export async function listRecords(): Promise<RecordSummary[]> {
 }
 
 /** Cria uma ficha vazia e devolve o seu id. */
-export async function createRecord(): Promise<string> {
-  return (await api().create()).id;
+export async function createRecord(opts?: { suggestOnboarding?: boolean }): Promise<string> {
+  return (await api().create(opts)).id;
 }
 
 /** Abre uma ficha e decifra todos os campos acessíveis. */

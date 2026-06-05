@@ -3,6 +3,8 @@
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { onboardEmployee, type OnboardingResult, type OnboardingStep } from "$lib/hr/onboarding";
+  import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
+  import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
 
   let locked = $state(false);
   let busy = $state(false);
@@ -16,9 +18,56 @@
   let result = $state<OnboardingResult | null>(null);
   let copied = $state(false);
 
+  let agentEvents = $state<AgentEvent[]>([]);
+  let decidingId = $state<string | null>(null);
+  /** Ficha aprovada via AGENT-007 — o wizard reutiliza-a em vez de criar outra. */
+  let approvedRecordId = $state<string | null>(null);
+
   onMount(() => {
     locked = !getMasterKey();
+    if (!locked) void refreshEvents();
   });
+
+  async function refreshEvents() {
+    try {
+      agentEvents = await listAgentEvents();
+    } catch {
+      agentEvents = [];
+    }
+  }
+
+  function isPendingSuggestion(ev: AgentEvent): boolean {
+    return ev.type === "orchestrator.action.suggested" && (ev.approvalStatus ?? "pending") === "pending";
+  }
+
+  async function handleApproveSuggestion(ev: AgentEvent) {
+    decidingId = ev.id;
+    error = "";
+    try {
+      const result = await approveSuggestion(ev.id);
+      await refreshEvents();
+      if (result.action === "run_onboarding" && typeof ev.payload.record_id === "string") {
+        approvedRecordId = ev.payload.record_id;
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao aprovar";
+    } finally {
+      decidingId = null;
+    }
+  }
+
+  async function handleRejectSuggestion(ev: AgentEvent) {
+    decidingId = ev.id;
+    error = "";
+    try {
+      await rejectSuggestion(ev.id);
+      await refreshEvents();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao rejeitar";
+    } finally {
+      decidingId = null;
+    }
+  }
 
   async function run(e: SubmitEvent) {
     e.preventDefault();
@@ -29,9 +78,15 @@
     steps = [];
     try {
       result = await onboardEmployee(
-        { fullName: fullName.trim(), email: email.trim(), role: role.trim() },
+        {
+          fullName: fullName.trim(),
+          email: email.trim(),
+          role: role.trim(),
+          recordId: approvedRecordId ?? undefined,
+        },
         (s) => (steps = s),
       );
+      approvedRecordId = null;
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha no onboarding";
     } finally {
@@ -46,6 +101,7 @@
     steps = [];
     result = null;
     error = "";
+    approvedRecordId = null;
   }
 
   async function copyAlias() {
@@ -67,9 +123,9 @@
 <section class="page">
   <header class="page-head">
     <div>
-      <p class="eyebrow">HR-007 · Onboarding em 1 clique</p>
+      <p class="eyebrow">HR-007 · AGENT-007 · Onboarding em 1 clique</p>
       <h1>Onboarding de Empregado</h1>
-      <DocHelpLink />
+      <DocHelpLink slug="journey-hr-agent-onboarding" label="Como funciona o agente RH?" />
     </div>
     <a class="back" href="/hr">← Fichas</a>
   </header>
@@ -87,6 +143,58 @@
     </p>
 
     {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+
+    <section class="panel events">
+      <h2>Sugestões do orquestrador</h2>
+      <p class="muted sm">
+        Quando crias uma ficha vazia em Fichas, o agente RH sugere completar o onboarding
+        (AGENT-009 — aprova antes de cifrar dados).
+      </p>
+      {#if agentEvents.length === 0}
+        <p class="muted">Sem eventos recentes.</p>
+      {:else}
+        <ul class="event-list">
+          {#each agentEvents.slice(0, 6) as ev (ev.id)}
+            <li
+              class:suggested={isPendingSuggestion(ev)}
+              class:approved={ev.approvalStatus === "approved"}
+              class:rejected={ev.approvalStatus === "rejected"}
+            >
+              <div class="ev-body">
+                <span class="ev-label">{ev.label}</span>
+                {#if isPendingSuggestion(ev)}
+                  <div class="ev-actions">
+                    <button
+                      type="button"
+                      class="btn approve"
+                      disabled={decidingId !== null || busy}
+                      onclick={() => handleApproveSuggestion(ev)}
+                    >
+                      {decidingId === ev.id ? "…" : "Aprovar"}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn reject"
+                      disabled={decidingId !== null}
+                      onclick={() => handleRejectSuggestion(ev)}
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                {/if}
+              </div>
+              <span class="ev-meta">{new Date(ev.createdAt).toLocaleString("pt-PT")}</span>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
+
+    {#if approvedRecordId}
+      <p class="hint" role="status">
+        Ficha <code class="mono">{approvedRecordId}</code> aprovada — preenche os dados abaixo.
+      </p>
+    {/if}
 
     {#if !result}
       <section class="panel">
@@ -294,5 +402,65 @@
     margin: 0 0 var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-danger);
+  }
+  h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+  }
+  .event-list {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .event-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    font-size: var(--text-sm);
+  }
+  .event-list li.suggested {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent-muted) 40%, var(--color-bg-inset));
+  }
+  .ev-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .ev-label {
+    font-weight: 500;
+  }
+  .ev-meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+  .ev-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .btn.approve {
+    background: var(--color-success-bg);
+    color: var(--color-success-fg);
+    border-color: transparent;
+  }
+  .btn.reject {
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+  .hint {
+    margin: 0 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-muted);
+    font-size: var(--text-sm);
   }
 </style>

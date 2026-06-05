@@ -134,7 +134,10 @@ func main() {
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
 		agentEventStore := eventbus.NewPGStore(pool)
 		agentBus := eventbus.New(agentEventStore, logger, 256)
-		agentOrchestrator := orchestrator.New(agentBus, logger, orchestrator.NewProspectionWorker(agentBus))
+		agentOrchestrator := orchestrator.New(agentBus, logger,
+			orchestrator.NewProspectionWorker(agentBus),
+			orchestrator.NewOnboardingWorker(agentBus),
+		)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
 			InboundPerHour:  cfg.MailRateInboundPerHour,

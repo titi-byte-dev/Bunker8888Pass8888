@@ -1,0 +1,179 @@
+{
+  "slug": "journey-hr-agent-onboarding",
+  "title": "Journey: Agente RH sugere onboarding (AGENT-007)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "hr_agent_onboarding",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Agente RH sugere onboarding (AGENT-007)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Administrador RH · <strong>Epics:</strong> <code>AGENT</code>, <code>HR</code>, <code>MAIL</code></p>\n</blockquote>\n<p>Quando crias uma ficha vazia em <code>/hr</code>, o orquestrador sugere «completar onboarding»\nno feed — sem cifrar campos automaticamente (Zero-Knowledge).</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador activo com worker <code>onboarding</code> (AGENT-005).</li>\n<li>Master Key desbloqueada para cifrar campos no cliente.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant RH as /hr\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n    participant OB as /hr/onboarding\r\n\r\n    RH->>API: POST /api/hr/employees (suggest_onboarding)\r\n    API->>Orq: hr.employee.created\r\n    Orq->>API: orchestrator.action.suggested\r\n    OB->>API: GET /api/agent/events\r\n    Note over OB: «Sugestão: completar onboarding»\r\n    OB->>API: POST approve (AGENT-009)\r\n    OB->>OB: wizard HR-007 (cifra + alias MAIL-001)",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "RH",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/hr/employees (suggest_onboarding)"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "hr.employee.created"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST approve (AGENT-009)"
+            },
+            {
+              "kind": "message",
+              "from": "OB",
+              "to": "OB",
+              "arrow": "->>",
+              "label": "wizard HR-007 (cifra + alias MAIL-001)"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "RH",
+                "label": "/hr",
+                "x": 0
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 200
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 400
+              },
+              {
+                "id": "OB",
+                "label": "/hr/onboarding",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "RH",
+                "target": "API",
+                "label": "POST /api/hr/employees (suggest_onboarding)",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "API",
+                "target": "Orq",
+                "label": "hr.employee.created",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "OB",
+                "target": "API",
+                "label": "GET /api/agent/events",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "OB",
+                "target": "API",
+                "label": "POST approve (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "OB",
+                "target": "OB",
+                "label": "wizard HR-007 (cifra + alias MAIL-001)",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Em <strong>Fichas</strong> (<code>/hr</code>), clica <strong>Nova ficha</strong> — cria registo vazio e dispara o evento.</li>\n<li>Abre <strong>Onboarding</strong> (<code>/hr/onboarding</code>) — vês a sugestão no feed.</li>\n<li>Clica <strong>Aprovar</strong> — decisão auditada (AGENT-009).</li>\n<li>Preenche nome, e-mail e função — o wizard reutiliza a ficha aprovada.</li>\n<li>Alias de e-mail gerado (MAIL-001) com reencaminhamento.</li>\n</ol>\n<p>Alternativa: <strong>Rejeitar</strong> — sugestão fica marcada, sem wizard automático.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Ficha com campos cifrados campo-a-campo (HR-001).</li>\n<li>Alias activo no registo imutável (HR-002).</li>\n<li>Nenhum PII em claro no servidor.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Administrador RH",
+  "order": 99
+}

@@ -207,7 +207,7 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.HR != nil && deps.Auth != nil {
 		// Fichas de empregado com cifragem campo-a-campo (HR-001). Tudo exige
 		// sessão; cada utilizador só vê e gere as suas próprias fichas.
-		mux.Handle("POST /api/hr/employees", requireAuth(deps.Auth, handleCreateEmployeeRecord(deps.HR)))
+		mux.Handle("POST /api/hr/employees", requireAuth(deps.Auth, handleCreateEmployeeRecord(deps.HR, deps.AgentBus)))
 		mux.Handle("GET /api/hr/employees", requireAuth(deps.Auth, handleListEmployeeRecords(deps.HR)))
 		mux.Handle("GET /api/hr/employees/{id}", requireAuth(deps.Auth, handleGetEmployeeRecord(deps.HR)))
 		mux.Handle("DELETE /api/hr/employees/{id}", requireAuth(deps.Auth, handleDeleteEmployeeRecord(deps.HR)))

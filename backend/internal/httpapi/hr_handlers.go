@@ -2,9 +2,12 @@ package httpapi
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 )
 
@@ -68,12 +71,30 @@ func fieldJSON(f *hr.Field) map[string]any {
 	return m
 }
 
-func handleCreateEmployeeRecord(repo *hr.Repo) http.HandlerFunc {
+type createEmployeeRequest struct {
+	// SuggestOnboarding pede ao orquestrador (AGENT-007) que sugira completar onboarding.
+	// O wizard HR-007 omite este flag para não duplicar sugestões.
+	SuggestOnboarding bool `json:"suggest_onboarding"`
+}
+
+func handleCreateEmployeeRecord(repo *hr.Repo, bus *eventbus.Bus) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(userIDKey).(string)
+		var req createEmployeeRequest
+		if r.Body != nil {
+			body, _ := io.ReadAll(r.Body)
+			if len(body) > 0 {
+				_ = json.Unmarshal(body, &req)
+			}
+		}
 		rec, err := repo.CreateRecord(r.Context(), userID)
 		if mapHRError(w, err) {
 			return
+		}
+		if req.SuggestOnboarding && bus != nil {
+			_ = eventbus.PublishJSON(r.Context(), bus, eventbus.HREmployeeCreated, userID, "hr.employees", map[string]any{
+				"record_id": rec.ID,
+			})
 		}
 		writeJSON(w, http.StatusCreated, recordJSON(rec))
 	}

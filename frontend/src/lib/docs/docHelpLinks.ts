@@ -23,7 +23,7 @@ export const DOC_HELP_ROUTES: DocHelpRoute[] = [
   { prefix: "/security/hygiene", slug: "security", label: "Como funciona a higiene?" },
   { prefix: "/security/devices", slug: "journey-passkey", label: "Como funcionam passkeys e sessões?" },
   { prefix: "/security", slug: "security", label: "Como funciona a segurança?" },
-  { prefix: "/hr/onboarding", slug: "journey-admin-onboarding", label: "Como funciona o onboarding?" },
+  { prefix: "/hr/onboarding", slug: "journey-hr-agent-onboarding", label: "Como funciona o agente RH?" },
   { prefix: "/hr/compliance", slug: "journey-rgpd-erasure", label: "Como funciona o direito ao esquecimento?" },
   { prefix: "/hr", slug: "hr-rgpd", label: "Como funciona o RH cifrado?" },
   { prefix: "/work/shifts", slug: "security", label: "Como funcionam turnos e geofence?" },

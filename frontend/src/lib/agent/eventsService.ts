@@ -36,8 +36,11 @@ function labelForType(type: string, payload?: Record<string, unknown>): string {
     case "orchestrator.action.suggested": {
       const action = payload?.action;
       if (action === "run_prospection") return "Sugestão: correr prospeção";
+      if (action === "run_onboarding") return "Sugestão: completar onboarding";
       return "Sugestão do orquestrador";
     }
+    case "hr.employee.created":
+      return "Ficha de empregado criada";
     case "orchestrator.action.approved":
       return "Sugestão aprovada";
     case "orchestrator.action.rejected":

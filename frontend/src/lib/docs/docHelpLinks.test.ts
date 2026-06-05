@@ -18,6 +18,10 @@ describe("doc help links (DOC-013)", () => {
     expect(resolveDocHelp("/unknown", "glossary")?.slug).toBe("glossary");
   });
 
+  it("resolve onboarding RH com journey do agente", () => {
+    expect(resolveDocHelp("/hr/onboarding")?.slug).toBe("journey-hr-agent-onboarding");
+  });
+
   it("devolve null para rotas sem doc", () => {
     expect(resolveDocHelp("/settings")).toBeNull();
   });
