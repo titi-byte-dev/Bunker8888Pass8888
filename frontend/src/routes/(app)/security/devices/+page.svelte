@@ -118,7 +118,10 @@
     <section class="block">
       <h2>Passkeys</h2>
       {#if passkeys.length === 0}
-        <p class="muted">Nenhuma passkey registada. Adiciona em Definições (em breve) ou no playground /dev.</p>
+        <p class="muted">
+          Nenhuma passkey registada.
+          <a href="/settings">Registar em Definições</a>.
+        </p>
       {:else}
         <ul>
           {#each passkeys as pk (pk.id)}

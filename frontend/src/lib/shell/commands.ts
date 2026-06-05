@@ -76,6 +76,20 @@ export function buildActionCommands(): CommandEntry[] {
       href: "/security/devices",
     },
     {
+      id: "action-shifts",
+      label: "Turnos e geofence",
+      group: "action",
+      keywords: "trabalho horário turno geofence ntp",
+      href: "/work/shifts",
+    },
+    {
+      id: "action-settings",
+      label: "Definições",
+      group: "action",
+      keywords: "tema aparência passkey conta settings",
+      href: "/settings",
+    },
+    {
       id: "action-unlock",
       label: "Desbloquear cofre",
       group: "action",
