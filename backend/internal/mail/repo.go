@@ -151,6 +151,25 @@ func (r *Repo) DeleteAlias(ctx context.Context, ownerID, aliasID string) error {
 	return nil
 }
 
+// GetActiveAliasByAddress resolve o dono de um alias activo pelo endereço completo.
+// Usado pelo ingest MAIL-002 quando SMTP chega para *@aegis.email.
+func (r *Repo) GetActiveAliasByAddress(ctx context.Context, aliasAddress string) (*Alias, error) {
+	aliasAddress = strings.ToLower(strings.TrimSpace(aliasAddress))
+	a := &Alias{}
+	err := r.pool.QueryRow(ctx, `
+		SELECT id::text, owner_id::text, alias_address, destination, label, active, created_at
+		FROM email_aliases WHERE lower(alias_address) = $1 AND active = true`,
+		aliasAddress,
+	).Scan(&a.ID, &a.OwnerID, &a.AliasAddress, &a.Destination, &a.Label, &a.Active, &a.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return a, nil
+}
+
 // GetAlias devolve um alias do utilizador (usado em testes/uso interno).
 func (r *Repo) GetAlias(ctx context.Context, ownerID, aliasID string) (*Alias, error) {
 	a := &Alias{}
