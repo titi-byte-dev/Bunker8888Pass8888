@@ -11,8 +11,6 @@ const subs: Subscription[] = [
     cycle: "monthly",
     category: "",
     active: true,
-    createdAt: "",
-    updatedAt: "",
   },
   {
     id: "s2",
@@ -22,8 +20,6 @@ const subs: Subscription[] = [
     cycle: "monthly",
     category: "",
     active: true,
-    createdAt: "",
-    updatedAt: "",
   },
 ];
 
