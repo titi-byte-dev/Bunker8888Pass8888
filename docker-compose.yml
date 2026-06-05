@@ -41,6 +41,8 @@ services:
       AEGIS_MTLS_AUTO_DEV: "true"
       # Dentro da rede do compose, o host da BD e o nome do servico: "db".
       AEGIS_DATABASE_URL: "postgres://${POSTGRES_USER:-aegis}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-aegis}?sslmode=disable"
+      # Chave admin para /api/admin/* (dev). Em produção: valor longo e aleatório no .env.
+      AEGIS_ADMIN_KEY: ${AEGIS_ADMIN_KEY:-dev-admin-change-me}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
       - "${BACKEND_MTLS_PORT:-8443}:8443"

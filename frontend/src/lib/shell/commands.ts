@@ -90,6 +90,13 @@ export function buildActionCommands(): CommandEntry[] {
       href: "/settings",
     },
     {
+      id: "action-admin",
+      label: "Administração",
+      group: "action",
+      keywords: "admin utilizadores turno wipe auditoria",
+      href: "/admin",
+    },
+    {
       id: "action-unlock",
       label: "Desbloquear cofre",
       group: "action",

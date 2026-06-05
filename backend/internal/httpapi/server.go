@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
@@ -39,7 +40,8 @@ type Deps struct {
 	CLICertTTL time.Duration
 	Passkeys   *passkeys.Service
 	Emergency  *emergency.Service
-	AdminKey string // vazio desactiva POST /api/admin/.../remote-wipe
+	AdminKey string // vazio desactiva endpoints /api/admin/*
+	Pool     *pgxpool.Pool
 }
 
 // ctxKey é um tipo privado para chaves de context (evita colisões entre pacotes).
@@ -84,24 +86,7 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.Geofence != nil && deps.Auth != nil {
 		mux.Handle("GET /api/access/geofence", requireAuth(deps.Auth, handleGetAccessGeofence(deps.Geofence)))
 	}
-	if deps.Shifts != nil && deps.Users != nil && deps.AdminKey != "" {
-		mux.HandleFunc(
-			"PUT /api/admin/users/{id}/access-shift",
-			handleAdminSetAccessShift(deps.AdminKey, deps.Users, deps.Shifts),
-		)
-	}
-	if deps.Geofence != nil && deps.Users != nil && deps.AdminKey != "" {
-		mux.HandleFunc(
-			"PUT /api/admin/users/{id}/access-geofence",
-			handleAdminSetAccessGeofence(deps.AdminKey, deps.Users, deps.Geofence),
-		)
-	}
-	if deps.Wipe != nil && deps.Users != nil && deps.AdminKey != "" {
-		mux.HandleFunc(
-			"POST /api/admin/users/{id}/remote-wipe",
-			handleAdminRemoteWipe(deps.AdminKey, deps.Users, deps.Wipe),
-		)
-	}
+	registerAdminRoutes(mux, deps)
 	if deps.Wipe != nil && deps.Auth != nil {
 		mux.Handle(
 			"POST /api/security/remote-wipe/self",

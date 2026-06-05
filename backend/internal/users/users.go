@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -70,6 +71,37 @@ func (r *Repo) ByEmail(ctx context.Context, email string) (*User, error) {
 		return nil, err
 	}
 	return u, nil
+}
+
+// Summary é a vista pública de um utilizador (sem segredos criptográficos).
+type Summary struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+}
+
+// ListSummaries devolve todos os utilizadores (id + email) para painel admin.
+func (r *Repo) ListSummaries(ctx context.Context) ([]Summary, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT id::text, email, created_at
+		FROM users
+		ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("listar utilizadores: %w", err)
+	}
+	defer rows.Close()
+
+	var out []Summary
+	for rows.Next() {
+		var s Summary
+		var createdAt time.Time
+		if err := rows.Scan(&s.ID, &s.Email, &createdAt); err != nil {
+			return nil, err
+		}
+		s.CreatedAt = createdAt.UTC().Format(time.RFC3339)
+		out = append(out, s)
+	}
+	return out, rows.Err()
 }
 
 // ByID procura um utilizador pelo UUID. Devolve ErrNotFound se não existir.

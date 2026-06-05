@@ -112,6 +112,7 @@ func main() {
 			CLIca:    cliCA,
 			Passkeys: passkeySvc,
 			AdminKey: cfg.AdminKey,
+			Pool:     pool,
 		}
 		logger.Info("base de dados ligada e migrada")
 	} else {
