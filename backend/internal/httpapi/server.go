@@ -17,10 +17,11 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
-	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharedvaults"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharekeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
@@ -29,23 +30,24 @@ import (
 
 // Deps são as dependências injetadas no router.
 type Deps struct {
-	Auth     *auth.Service
-	Vault    *vault.Repo
-	Hub      *realtime.Hub // nil desactiva WebSocket e notificações push
-	Wipe     *security.WipeService
-	Users    *users.Repo
-	Shifts    *shifts.Repo
-	Geofence  *geofence.Repo
-	Recovery  *recovery.Repo
-	Devices   *clidevices.Repo
-	CLIca     *clidevices.CA
-	CLICertTTL time.Duration
-	Passkeys   *passkeys.Service
-	Emergency  *emergency.Service
-	Sentinel   *sentinel.Service
-	ShareKeys  *sharekeys.Repo // nil desactiva endpoints /api/share/*
-	AdminKey string // vazio desactiva endpoints /api/admin/*
-	Pool     *pgxpool.Pool
+	Auth         *auth.Service
+	Vault        *vault.Repo
+	Hub          *realtime.Hub // nil desactiva WebSocket e notificações push
+	Wipe         *security.WipeService
+	Users        *users.Repo
+	Shifts       *shifts.Repo
+	Geofence     *geofence.Repo
+	Recovery     *recovery.Repo
+	Devices      *clidevices.Repo
+	CLIca        *clidevices.CA
+	CLICertTTL   time.Duration
+	Passkeys     *passkeys.Service
+	Emergency    *emergency.Service
+	Sentinel     *sentinel.Service
+	ShareKeys    *sharekeys.Repo    // nil desactiva endpoints /api/share/*
+	SharedVaults *sharedvaults.Repo // nil desactiva endpoints /api/share/vaults*
+	AdminKey     string             // vazio desactiva endpoints /api/admin/*
+	Pool         *pgxpool.Pool
 }
 
 // ctxKey é um tipo privado para chaves de context (evita colisões entre pacotes).
@@ -130,6 +132,21 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/share/keypair", requireAuth(deps.Auth, handleGetShareKeypair(deps.ShareKeys)))
 		mux.Handle("GET /api/share/keypair/status", requireAuth(deps.Auth, handleShareKeypairStatus(deps.ShareKeys)))
 		mux.Handle("GET /api/share/public-key", requireAuth(deps.Auth, handleGetSharePublicKey(deps.ShareKeys)))
+	}
+	if deps.SharedVaults != nil && deps.Auth != nil {
+		// Cofres
+		mux.Handle("POST /api/share/vaults", requireAuth(deps.Auth, handleCreateSharedVault(deps.SharedVaults)))
+		mux.Handle("GET /api/share/vaults", requireAuth(deps.Auth, handleListSharedVaults(deps.SharedVaults)))
+		mux.Handle("GET /api/share/vaults/{id}", requireAuth(deps.Auth, handleGetSharedVault(deps.SharedVaults)))
+		mux.Handle("DELETE /api/share/vaults/{id}", requireAuth(deps.Auth, handleDeleteSharedVault(deps.SharedVaults)))
+		// Membros (permissões + revogação)
+		mux.Handle("GET /api/share/vaults/{id}/members", requireAuth(deps.Auth, handleListSharedVaultMembers(deps.SharedVaults)))
+		mux.Handle("POST /api/share/vaults/{id}/members", requireAuth(deps.Auth, handleAddSharedVaultMember(deps.SharedVaults)))
+		mux.Handle("DELETE /api/share/vaults/{id}/members/{userId}", requireAuth(deps.Auth, handleRemoveSharedVaultMember(deps.SharedVaults)))
+		// Itens do cofre
+		mux.Handle("GET /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleListSharedVaultItems(deps.SharedVaults)))
+		mux.Handle("POST /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleCreateSharedVaultItem(deps.SharedVaults)))
+		mux.Handle("DELETE /api/share/vaults/{id}/items/{itemId}", requireAuth(deps.Auth, handleDeleteSharedVaultItem(deps.SharedVaults)))
 	}
 
 	return mux
