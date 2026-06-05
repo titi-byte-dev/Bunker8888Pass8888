@@ -79,9 +79,9 @@
             },
             {
               "kind": "message",
-              "from": "App-",
+              "from": "App",
               "to": "G",
-              "arrow": "->>",
+              "arrow": "-->>",
               "label": "confirma wipe"
             },
             {
@@ -91,7 +91,83 @@
               "arrow": "->>",
               "label": "regista no log imutável"
             }
-          ]
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "Adm",
+                "label": "Admin",
+                "x": 0
+              },
+              {
+                "id": "G",
+                "label": "Go API",
+                "x": 200
+              },
+              {
+                "id": "WS",
+                "label": "WebSocket",
+                "x": 400
+              },
+              {
+                "id": "App",
+                "label": "App do funcionário",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "Adm",
+                "target": "G",
+                "label": "aciona Remote Wipe (userID)",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "G",
+                "target": "G",
+                "label": "invalida sessão + revoga chave de desencriptação",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "G",
+                "target": "WS",
+                "label": "push \"wipe\" para o dispositivo",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "WS",
+                "target": "App",
+                "label": "comando wipe",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "App",
+                "target": "App",
+                "label": "apaga cache local cifrada + descarta Master Key",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "App",
+                "target": "G",
+                "label": "confirma wipe",
+                "dashed": true
+              },
+              {
+                "id": "step-6",
+                "source": "G",
+                "target": "G",
+                "label": "regista no log imutável",
+                "dashed": false
+              }
+            ]
+          }
         }
       ],
       "collapsed": true

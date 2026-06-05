@@ -55,7 +55,10 @@ sequenceDiagram
 
 **Níveis:** `1` Essencial · `2` Intermédio · `3` Técnico
 
-**Fluxos:** blocos `mermaid` renderizam como diagrama + player passo-a-passo (DOC-008/009).
+**Fluxos:** blocos `mermaid` em `sequenceDiagram` usam **Svelte Flow** (highlight no diagrama);
+outros tipos ficam em Mermaid. Player passo-a-passo (DOC-008–012).
+
+`:::flow{renderer=mermaid}` força Mermaid em vez de Svelte Flow.
 
 ## Regenerar para a app
 

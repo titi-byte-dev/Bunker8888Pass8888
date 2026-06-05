@@ -41,7 +41,8 @@
           "title": "",
           "type": "flowchart",
           "source": "flowchart TB\r\n    A[\"Pedido de erasure (titular)\"] --> B[\"Admin valida identidade do pedido\"]\r\n    B --> C[\"Destrói a chave do funcionário (crypto-shred)\"]\r\n    C --> D[\"Remove dados de tabelas operacionais\"]\r\n    D --> E[\"Gera certificado criptográfico de eliminação\"]\r\n    E --> F[\"Regista evento no log imutável (sem dados pessoais)\"]\r\n    F --> G[\"Entrega certificado ao titular/auditoria\"]",
-          "steps": []
+          "steps": [],
+          "renderer": "mermaid"
         }
       ],
       "collapsed": true
