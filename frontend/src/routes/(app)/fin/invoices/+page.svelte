@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import {
@@ -22,6 +23,16 @@
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
   import { commissionFromInvoice } from "$lib/fin/commissions";
   import { createCommission } from "$lib/fin/commissionsService";
+  import {
+    Button,
+    DataTable,
+    EmptyState,
+    PageShell,
+    Panel,
+    StatusBanner,
+    toast,
+    type DataColumn,
+  } from "$lib/ui";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -34,7 +45,6 @@
   const DEFAULT_RATE = 10;
   const DEFAULT_BENEFICIARY = "Vendedor";
 
-  // Formulario de emissao.
   let fDocType = $state<DocType>("invoice");
   let fClientName = $state("");
   let fClientTaxId = $state("");
@@ -52,6 +62,20 @@
       issuedAt: new Date().toISOString(),
     }),
   );
+
+  const docColumns = $derived<DataColumn<InvoiceDocument>[]>([
+    { id: "number", label: "Número", mono: true, accessor: (d) => d.number },
+    { id: "type", label: "Tipo", accessor: (d) => docTypeLabel(d.docType) },
+    { id: "client", label: "Cliente", accessor: (d) => d.client.name },
+    {
+      id: "total",
+      label: "Total",
+      align: "right",
+      mono: true,
+      accessor: (d) => money(invoiceTotals(d).gross, d.currency),
+    },
+    { id: "status", label: "Estado", accessor: (d) => d.status },
+  ]);
 
   function money(n: number, currency = fCurrency): string {
     try {
@@ -84,7 +108,7 @@
       docs = await listInvoices();
       await refreshEvents();
     } catch (e) {
-      error = (e as Error).message;
+      error = e instanceof Error ? e.message : "Falha ao carregar";
     } finally {
       loading = false;
     }
@@ -127,22 +151,23 @@
       fClientEmail = "";
       fLines = [{ description: "", quantity: 1, unitPrice: 0, vatRate: 23 }];
       await refresh();
+      toast.success("Documento emitido.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao emitir";
     } finally {
       busy = false;
     }
   }
 
-  // CRM-004: converte uma pro-forma emitida na fatura definitiva (FT).
   async function convertToInvoice(d: InvoiceDocument) {
     busy = true;
     error = "";
     try {
       await issueInvoice("invoice", invoiceFromProforma(d));
       await refresh();
+      toast.success("Pro-forma convertida em fatura.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha na conversão";
     } finally {
       busy = false;
     }
@@ -157,10 +182,13 @@
       if (status === "paid" && doc?.docType === "invoice") {
         await reportInvoicePaid(doc.id, doc.number);
         await refreshEvents();
+        toast.success("Fatura marcada como paga.");
+      } else if (status === "void") {
+        toast.info("Documento anulado.");
       }
       await refresh();
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao actualizar";
     } finally {
       busy = false;
     }
@@ -172,8 +200,9 @@
     try {
       await issueInvoice("receipt", receiptFromInvoice(d));
       await refresh();
+      toast.success("Recibo emitido.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao emitir recibo";
     } finally {
       busy = false;
     }
@@ -189,11 +218,12 @@
         const doc = docs.find((d) => d.id === invId);
         if (doc) {
           await createCommission(invId, commissionFromInvoice(doc, DEFAULT_RATE, DEFAULT_BENEFICIARY));
-          window.location.href = "/fin/commissions";
+          toast.success("Comissão calculada — a abrir registo.");
+          await goto("/fin/commissions");
         }
       }
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao aprovar";
     } finally {
       decidingId = null;
     }
@@ -204,78 +234,82 @@
     try {
       await rejectSuggestion(ev.id);
       await refreshEvents();
+      toast.info("Sugestão rejeitada.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao rejeitar";
     } finally {
       decidingId = null;
     }
   }
 </script>
 
-<svelte:head><title>Faturacao — AegisPass</title></svelte:head>
+<svelte:head><title>Faturação — AegisPass</title></svelte:head>
 
-<section class="page">
-  <header class="head">
-    <div>
-      <h1>Faturacao</h1>
-      <p class="muted">Pro-forma, faturas e recibos com numeracao legal (FIN-006).</p>
-    </div>
-    <a class="link" href="/fin/costs">&larr; Custos</a>
-  </header>
+<PageShell
+  title="Faturação"
+  taskId="FIN-006"
+  description="Pro-forma, faturas e recibos com numeração legal — emitidos e cifrados no cliente."
+  width="wide"
+>
+  {#snippet actions()}
+    <Button variant="ghost" size="sm" href="/fin/costs">← Custos</Button>
+  {/snippet}
 
   {#if locked}
-    <p class="lock">Cofre bloqueado — desbloqueia para gerir faturas.</p>
+    <EmptyState title="Cofre bloqueado" description="Desbloqueia a Master Key para gerir faturas.">
+      {#snippet action()}
+        <Button href="/vault">Ir desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else}
-    {#if error}<p class="err">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-    <form class="card" onsubmit={handleIssue}>
-      <h2>Emitir documento</h2>
-      <div class="row">
-        <label>
-          Tipo
-          <select bind:value={fDocType}>
-            {#each DOC_TYPES as t}<option value={t.id}>{t.label}</option>{/each}
-          </select>
-        </label>
-        <label>Cliente<input bind:value={fClientName} placeholder="Nome / empresa" /></label>
-        <label>NIF<input bind:value={fClientTaxId} placeholder="opcional" /></label>
-        <label>Email<input bind:value={fClientEmail} placeholder="opcional" /></label>
-        <label>Moeda<input bind:value={fCurrency} maxlength="3" /></label>
-      </div>
+    <Panel title="Emitir documento">
+      <form class="issue-form" onsubmit={handleIssue}>
+        <div class="row">
+          <label>
+            Tipo
+            <select bind:value={fDocType}>
+              {#each DOC_TYPES as t}<option value={t.id}>{t.label}</option>{/each}
+            </select>
+          </label>
+          <label>Cliente<input bind:value={fClientName} placeholder="Nome / empresa" /></label>
+          <label>NIF<input bind:value={fClientTaxId} placeholder="opcional" /></label>
+          <label>Email<input bind:value={fClientEmail} placeholder="opcional" /></label>
+          <label>Moeda<input bind:value={fCurrency} maxlength="3" /></label>
+        </div>
 
-      <table class="lines">
-        <thead>
-          <tr><th>Descricao</th><th>Qtd</th><th>Preco</th><th>IVA %</th><th></th></tr>
-        </thead>
-        <tbody>
-          {#each fLines as line, i}
-            <tr>
-              <td><input bind:value={line.description} placeholder="Artigo / servico" /></td>
-              <td><input type="number" min="0" step="0.01" bind:value={line.quantity} /></td>
-              <td><input type="number" min="0" step="0.01" bind:value={line.unitPrice} /></td>
-              <td><input type="number" min="0" step="1" bind:value={line.vatRate} /></td>
-              <td>
-                <button type="button" class="mini" onclick={() => removeLine(i)} disabled={fLines.length === 1}>x</button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      <button type="button" class="mini" onclick={addLine}>+ linha</button>
+        <table class="lines">
+          <thead>
+            <tr><th>Descrição</th><th>Qtd</th><th>Preço</th><th>IVA %</th><th></th></tr>
+          </thead>
+          <tbody>
+            {#each fLines as line, i}
+              <tr>
+                <td><input bind:value={line.description} placeholder="Artigo / serviço" /></td>
+                <td><input type="number" min="0" step="0.01" bind:value={line.quantity} /></td>
+                <td><input type="number" min="0" step="0.01" bind:value={line.unitPrice} /></td>
+                <td><input type="number" min="0" step="1" bind:value={line.vatRate} /></td>
+                <td>
+                  <Button variant="ghost" size="sm" onclick={() => removeLine(i)} disabled={fLines.length === 1}>×</Button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        <Button variant="ghost" size="sm" type="button" onclick={addLine}>+ linha</Button>
 
-      <div class="totals">
-        <span>Liquido <strong>{money(draftTotals.net)}</strong></span>
-        <span>IVA <strong>{money(draftTotals.vat)}</strong></span>
-        <span>Total <strong>{money(draftTotals.gross)}</strong></span>
-      </div>
+        <div class="totals">
+          <span>Líquido <strong>{money(draftTotals.net)}</strong></span>
+          <span>IVA <strong>{money(draftTotals.vat)}</strong></span>
+          <span>Total <strong>{money(draftTotals.gross)}</strong></span>
+        </div>
 
-      <button class="primary" type="submit" disabled={busy}>
-        {busy ? "A emitir..." : "Emitir"}
-      </button>
-    </form>
+        <Button type="submit" loading={busy} disabled={busy}>Emitir</Button>
+      </form>
+    </Panel>
 
-    <div class="card">
-      <h2>Actividade dos agentes</h2>
+    <Panel title="Actividade dos agentes">
       {#if agentEvents.length === 0}
         <p class="muted">Sem eventos.</p>
       {:else}
@@ -285,87 +319,116 @@
               <span>{ev.label}</span>
               {#if isPendingSuggestion(ev) && ev.payload.action === "calculate_commission"}
                 <span class="ev-actions">
-                  <button class="mini" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</button>
-                  <button class="mini" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</button>
+                  <Button variant="primary" size="sm" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</Button>
+                  <Button variant="ghost" size="sm" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</Button>
                 </span>
               {/if}
             </li>
           {/each}
         </ul>
       {/if}
-    </div>
+    </Panel>
 
-    <div class="card">
-      <h2>Documentos</h2>
-      {#if loading}
-        <p class="muted">A carregar...</p>
-      {:else if docs.length === 0}
-        <p class="muted">Sem documentos emitidos.</p>
-      {:else}
-        <table class="list">
-          <thead>
-            <tr><th>Numero</th><th>Tipo</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr>
-          </thead>
-          <tbody>
-            {#each docs as d}
-              {@const t = invoiceTotals(d)}
-              <tr>
-                <td class="mono">{d.number}</td>
-                <td>{docTypeLabel(d.docType)}</td>
-                <td>{d.client.name}</td>
-                <td>{money(t.gross, d.currency)}</td>
-                <td><span class="badge {d.status}">{d.status}</span></td>
-                <td class="actions">
-                  {#if canConvertToInvoice(d)}
-                    <button class="mini" onclick={() => convertToInvoice(d)} disabled={busy}>Converter em fatura</button>
-                  {/if}
-                  {#if d.status === "issued"}
-                    <button class="mini" onclick={() => setStatus(d.id, "paid")} disabled={busy}>Marcar pago</button>
-                    <button class="mini" onclick={() => setStatus(d.id, "void")} disabled={busy}>Anular</button>
-                  {/if}
-                  {#if canIssueReceipt(d)}
-                    <button class="mini" onclick={() => issueReceipt(d)} disabled={busy}>Emitir recibo</button>
-                  {/if}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </div>
+    <Panel title="Documentos" padding="none">
+      <DataTable
+        columns={docColumns}
+        rows={docs}
+        keyFn={(d) => d.id}
+        loading={loading}
+        dense
+        emptyTitle="Sem documentos emitidos"
+      >
+        {#snippet actions(d)}
+          <div class="doc-actions">
+            {#if canConvertToInvoice(d)}
+              <Button variant="ghost" size="sm" onclick={() => convertToInvoice(d)} disabled={busy}>Converter</Button>
+            {/if}
+            {#if d.status === "issued"}
+              <Button variant="ghost" size="sm" onclick={() => setStatus(d.id, "paid")} disabled={busy}>Pago</Button>
+              <Button variant="ghost" size="sm" onclick={() => setStatus(d.id, "void")} disabled={busy}>Anular</Button>
+            {/if}
+            {#if canIssueReceipt(d)}
+              <Button variant="ghost" size="sm" onclick={() => issueReceipt(d)} disabled={busy}>Recibo</Button>
+            {/if}
+          </div>
+        {/snippet}
+      </DataTable>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 960px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; }
-  h1 { font-size: 1.25rem; margin: 0; }
-  h2 { font-size: 0.95rem; margin: 0 0 0.75rem; }
-  .muted { color: var(--text-muted, #888); font-size: 0.85rem; }
-  .link { font-size: 0.85rem; color: var(--accent, #4f7cff); text-decoration: none; }
-  .lock, .err { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; }
-  .lock { background: #2a2a33; color: #ccc; }
-  .err { background: #3a1f24; color: #ffb4bd; }
-  .card { background: var(--surface, #1b1b22); border: 1px solid var(--border, #2c2c36); border-radius: 8px; padding: 1rem; }
-  .row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; }
-  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: #aaa; }
-  input, select { background: #111; border: 1px solid #333; border-radius: 5px; padding: 0.35rem 0.5rem; color: #eee; font-size: 0.85rem; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .lines th, .lines td { padding: 0.25rem; text-align: left; }
+  .muted { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-text-label);
+  }
+
+  input, select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+  }
+
+  .lines {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+  }
+
+  .lines th, .lines td { padding: var(--space-1); text-align: left; }
   .lines input { width: 100%; box-sizing: border-box; }
-  .list th, .list td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #262630; text-align: left; }
-  .mono { font-family: ui-monospace, monospace; }
-  .totals { display: flex; gap: 1.25rem; margin: 0.75rem 0; font-size: 0.85rem; color: #bbb; }
-  .actions { display: flex; gap: 0.4rem; }
-  .mini { background: #23232c; border: 1px solid #34343f; color: #ddd; border-radius: 5px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; }
-  .primary { background: var(--accent, #4f7cff); color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1rem; font-size: 0.85rem; cursor: pointer; margin-top: 0.5rem; }
-  .primary:disabled { opacity: 0.6; cursor: default; }
-  .badge { padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem; text-transform: uppercase; }
-  .badge.issued { background: #2b3147; color: #9db4ff; }
-  .badge.paid { background: #1f3a2a; color: #8ff0b4; }
-  .badge.void { background: #3a2a2a; color: #d99; }
-  .ev-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-  .ev-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border: 1px solid #2c2c36; border-radius: 5px; font-size: 0.82rem; }
-  .ev-list li.suggested { border-color: var(--accent, #4f7cff); }
-  .ev-actions { display: flex; gap: 0.3rem; }
+
+  .totals {
+    display: flex;
+    gap: var(--space-6);
+    margin: var(--space-3) 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .ev-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .ev-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+
+  .ev-list li.suggested { border-color: var(--color-accent); }
+  .ev-actions { display: flex; gap: var(--space-2); flex-shrink: 0; }
+
+  .doc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    justify-content: flex-end;
+  }
 </style>

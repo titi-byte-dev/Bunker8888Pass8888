@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
   import { listInvoices } from "$lib/fin/invoicesService";
@@ -18,6 +19,17 @@
   import { reportCommissionRecorded } from "$lib/fin/erpFlowService";
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
+  import {
+    Button,
+    DataTable,
+    EmptyState,
+    MetricCard,
+    PageShell,
+    Panel,
+    StatusBanner,
+    toast,
+    type DataColumn,
+  } from "$lib/ui";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -27,7 +39,6 @@
   let commissions = $state<CommissionDocument[]>([]);
   let paidInvoices = $state<InvoiceDocument[]>([]);
 
-  // Formulario: gerar comissao a partir de uma fatura paga.
   let fInvoiceId = $state("");
   let fBeneficiary = $state("");
   let fRate = $state(10);
@@ -40,6 +51,23 @@
       ? commissionAmount(commissionFromInvoice(selectedInvoice, fRate, fBeneficiary || "—"))
       : 0,
   );
+
+  const totalPending = $derived(commissions.filter((c) => c.status === "pending").length);
+  const totalPaid = $derived(commissions.filter((c) => c.status === "paid").length);
+
+  const commissionColumns = $derived<DataColumn<CommissionDocument>[]>([
+    { id: "beneficiary", label: "Beneficiário", accessor: (c) => c.beneficiary },
+    { id: "invoice", label: "Fatura", mono: true, accessor: (c) => c.invoiceNumber ?? "—" },
+    { id: "rate", label: "Taxa", accessor: (c) => `${c.ratePct}%` },
+    {
+      id: "amount",
+      label: "Valor",
+      align: "right",
+      mono: true,
+      accessor: (c) => money(commissionAmount(c), c.currency),
+    },
+    { id: "status", label: "Estado", accessor: (c) => commissionStatusLabel(c.status) },
+  ]);
 
   function money(n: number, currency = "EUR"): string {
     try {
@@ -55,7 +83,6 @@
     try {
       const [coms, invs] = await Promise.all([listCommissions(), listInvoices()]);
       commissions = coms;
-      // So faturas (FT) pagas geram comissao.
       paidInvoices = invs.filter((i) => i.docType === "invoice" && i.status === "paid");
       try {
         agentEvents = await listAgentEvents();
@@ -63,7 +90,7 @@
         agentEvents = [];
       }
     } catch (e) {
-      error = (e as Error).message;
+      error = e instanceof Error ? e.message : "Falha ao carregar";
     } finally {
       loading = false;
     }
@@ -85,7 +112,7 @@
       return;
     }
     if (!fBeneficiary.trim()) {
-      error = "Indica o beneficiario.";
+      error = "Indica o beneficiário.";
       return;
     }
     busy = true;
@@ -99,8 +126,9 @@
       fRate = 10;
       fInvoiceId = "";
       await refresh();
+      toast.success("Comissão registada.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao registar";
     } finally {
       busy = false;
     }
@@ -115,11 +143,12 @@
     try {
       await approveSuggestion(ev.id);
       if (ev.payload.action === "generate_rgpd_report") {
-        window.location.href = "/hr/compliance";
+        toast.success("Relatório RGPD — a abrir conformidade.");
+        await goto("/hr/compliance");
       }
       agentEvents = await listAgentEvents();
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao aprovar";
     } finally {
       decidingId = null;
     }
@@ -130,8 +159,9 @@
     try {
       await rejectSuggestion(ev.id);
       agentEvents = await listAgentEvents();
+      toast.info("Sugestão rejeitada.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao rejeitar";
     } finally {
       decidingId = null;
     }
@@ -143,32 +173,45 @@
     try {
       await updateCommissionStatus(id, status);
       await refresh();
+      toast.success(status === "paid" ? "Comissão liquidada." : "Comissão anulada.");
     } catch (err) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : "Falha ao actualizar";
     } finally {
       busy = false;
     }
   }
 </script>
 
-<svelte:head><title>Comissoes — AegisPass</title></svelte:head>
+<svelte:head><title>Comissões — AegisPass</title></svelte:head>
 
-<section class="page">
-  <header class="head">
-    <div>
-      <h1>Comissoes</h1>
-      <p class="muted">Comissoes de vendas sobre faturas pagas (FIN-007).</p>
-    </div>
-    <a class="link" href="/fin/invoices">&larr; Faturas</a>
-  </header>
+<PageShell
+  title="Comissões"
+  taskId="FIN-007"
+  description="Comissões de vendas sobre faturas pagas — calculadas e cifradas no cliente."
+  width="wide"
+>
+  {#snippet actions()}
+    <Button variant="ghost" size="sm" href="/fin/invoices">← Faturas</Button>
+  {/snippet}
 
   {#if locked}
-    <p class="lock">Cofre bloqueado — desbloqueia para gerir comissoes.</p>
+    <EmptyState title="Cofre bloqueado" description="Desbloqueia a Master Key para gerir comissões.">
+      {#snippet action()}
+        <Button href="/vault">Ir desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else}
-    {#if error}<p class="err">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-    <div class="card">
-      <h2>Actividade dos agentes</h2>
+    {#if !loading && commissions.length > 0}
+      <section class="metrics">
+        <MetricCard label="registadas" value={String(commissions.length)} />
+        <MetricCard label="pendentes" value={String(totalPending)} />
+        <MetricCard label="liquidadas" value={String(totalPaid)} variant="success" />
+      </section>
+    {/if}
+
+    <Panel title="Actividade dos agentes">
       {#if agentEvents.length === 0}
         <p class="muted">Sem eventos.</p>
       {:else}
@@ -178,105 +221,120 @@
               <span>{ev.label}</span>
               {#if isPendingSuggestion(ev) && ev.payload.action === "generate_rgpd_report"}
                 <span class="ev-actions">
-                  <button class="mini" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</button>
-                  <button class="mini" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</button>
+                  <Button variant="primary" size="sm" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</Button>
+                  <Button variant="ghost" size="sm" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</Button>
                 </span>
               {/if}
             </li>
           {/each}
         </ul>
       {/if}
-    </div>
+    </Panel>
 
-    <form class="card" onsubmit={handleCreate}>
-      <h2>Gerar comissao</h2>
+    <Panel title="Gerar comissão">
       {#if paidInvoices.length === 0}
         <p class="muted">Sem faturas pagas. Marca uma fatura como paga primeiro.</p>
       {:else}
-        <div class="row">
-          <label>
-            Fatura paga
-            <select bind:value={fInvoiceId}>
-              <option value="">— escolher —</option>
-              {#each paidInvoices as inv}
-                <option value={inv.id}>{inv.number} · {money(invoiceTotals(inv).net, inv.currency)} liq.</option>
-              {/each}
-            </select>
-          </label>
-          <label>Beneficiario<input bind:value={fBeneficiary} placeholder="Nome do vendedor" /></label>
-          <label>Taxa %<input type="number" min="0" step="0.5" bind:value={fRate} /></label>
-        </div>
-        <div class="totals">
-          <span>Comissao estimada <strong>{money(preview, selectedInvoice?.currency)}</strong></span>
-        </div>
-        <button class="primary" type="submit" disabled={busy || !fInvoiceId}>
-          {busy ? "A registar..." : "Registar comissao"}
-        </button>
+        <form class="form" onsubmit={handleCreate}>
+          <div class="row">
+            <label>
+              Fatura paga
+              <select bind:value={fInvoiceId}>
+                <option value="">— escolher —</option>
+                {#each paidInvoices as inv}
+                  <option value={inv.id}>{inv.number} · {money(invoiceTotals(inv).net, inv.currency)} líq.</option>
+                {/each}
+              </select>
+            </label>
+            <label>Beneficiário<input bind:value={fBeneficiary} placeholder="Nome do vendedor" /></label>
+            <label>Taxa %<input type="number" min="0" step="0.5" bind:value={fRate} /></label>
+          </div>
+          <p class="preview">Comissão estimada <strong>{money(preview, selectedInvoice?.currency)}</strong></p>
+          <Button type="submit" disabled={busy || !fInvoiceId} loading={busy}>Registar comissão</Button>
+        </form>
       {/if}
-    </form>
+    </Panel>
 
-    <div class="card">
-      <h2>Registo</h2>
-      {#if loading}
-        <p class="muted">A carregar...</p>
-      {:else if commissions.length === 0}
-        <p class="muted">Sem comissoes registadas.</p>
-      {:else}
-        <table class="list">
-          <thead>
-            <tr><th>Beneficiario</th><th>Fatura</th><th>Taxa</th><th>Valor</th><th>Estado</th><th></th></tr>
-          </thead>
-          <tbody>
-            {#each commissions as c}
-              <tr>
-                <td>{c.beneficiary}</td>
-                <td class="mono">{c.invoiceNumber ?? "—"}</td>
-                <td>{c.ratePct}%</td>
-                <td>{money(commissionAmount(c), c.currency)}</td>
-                <td><span class="badge {c.status}">{commissionStatusLabel(c.status)}</span></td>
-                <td class="actions">
-                  {#if c.status === "pending"}
-                    <button class="mini" onclick={() => setStatus(c.id, "paid")} disabled={busy}>Liquidar</button>
-                    <button class="mini" onclick={() => setStatus(c.id, "void")} disabled={busy}>Anular</button>
-                  {/if}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </div>
+    <Panel title="Registo" padding="none">
+      <DataTable
+        columns={commissionColumns}
+        rows={commissions}
+        keyFn={(c) => c.id}
+        loading={loading}
+        dense
+        emptyTitle="Sem comissões registadas"
+      >
+        {#snippet actions(c)}
+          {#if c.status === "pending"}
+            <Button variant="ghost" size="sm" onclick={() => setStatus(c.id, "paid")} disabled={busy}>Liquidar</Button>
+            <Button variant="ghost" size="sm" onclick={() => setStatus(c.id, "void")} disabled={busy}>Anular</Button>
+          {/if}
+        {/snippet}
+      </DataTable>
+    </Panel>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page { max-width: 960px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; }
-  h1 { font-size: 1.25rem; margin: 0; }
-  h2 { font-size: 0.95rem; margin: 0 0 0.75rem; }
-  .muted { color: var(--text-muted, #888); font-size: 0.85rem; }
-  .link { font-size: 0.85rem; color: var(--accent, #4f7cff); text-decoration: none; }
-  .lock, .err { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; }
-  .lock { background: #2a2a33; color: #ccc; }
-  .err { background: #3a1f24; color: #ffb4bd; }
-  .card { background: var(--surface, #1b1b22); border: 1px solid var(--border, #2c2c36); border-radius: 8px; padding: 1rem; }
-  .row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; }
-  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: #aaa; }
-  input, select { background: #111; border: 1px solid #333; border-radius: 5px; padding: 0.35rem 0.5rem; color: #eee; font-size: 0.85rem; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .list th, .list td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #262630; text-align: left; }
-  .mono { font-family: ui-monospace, monospace; }
-  .totals { display: flex; gap: 1.25rem; margin: 0.5rem 0 0.75rem; font-size: 0.85rem; color: #bbb; }
-  .actions { display: flex; gap: 0.4rem; }
-  .mini { background: #23232c; border: 1px solid #34343f; color: #ddd; border-radius: 5px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; }
-  .ev-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-  .ev-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border: 1px solid #2c2c36; border-radius: 5px; font-size: 0.82rem; }
-  .ev-list li.suggested { border-color: var(--accent, #4f7cff); }
-  .ev-actions { display: flex; gap: 0.3rem; }
-  .primary { background: var(--accent, #4f7cff); color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1rem; font-size: 0.85rem; cursor: pointer; margin-top: 0.5rem; }
-  .primary:disabled { opacity: 0.6; cursor: default; }
-  .badge { padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem; text-transform: uppercase; }
-  .badge.pending { background: #2b3147; color: #9db4ff; }
-  .badge.paid { background: #1f3a2a; color: #8ff0b4; }
-  .badge.void { background: #3a2a2a; color: #d99; }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .muted { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-text-label);
+  }
+
+  input, select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    min-width: 10rem;
+  }
+
+  .preview {
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .ev-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .ev-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+
+  .ev-list li.suggested { border-color: var(--color-accent); }
+  .ev-actions { display: flex; gap: var(--space-2); }
 </style>

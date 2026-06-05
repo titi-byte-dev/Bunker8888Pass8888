@@ -1,109 +1,49 @@
 <script lang="ts">
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import ShiftStatusCard from "$lib/work/ShiftStatusCard.svelte";
+  import { HubLinks, PageShell } from "$lib/ui";
+  import type { HubLinkItem } from "$lib/ui";
+  import { routeChildren } from "$lib/shell/routes";
+
+  const descriptions: Record<string, string> = {
+    "/work/shifts": "Estado horário, countdown, desvio NTP e zona GPS (VAULT-010 / VAULT-011).",
+    "/work/sandbox": "Injeção de credenciais sem revelar a password no painel (VAULT-013).",
+    "/work/cli": "Registo de dispositivo, listagem e injecção em scripts (VAULT-017).",
+    "/work/inventory": "Stock operacional, alertas e ordens de compra sugeridas (AGENT-008).",
+    "/work/google": "Estado do provider OAuth / Service Account (GOOGLE-001).",
+    "/work/google-dev": "Drive cifrado + mascaramento Sheets sem OAuth real (DoD Fase 2).",
+  };
+
+  const items: HubLinkItem[] = [
+    ...routeChildren("/work").map((c) => ({
+      href: c.href,
+      title: c.label,
+      description: descriptions[c.href],
+      taskId: c.taskId,
+      comingSoon: c.comingSoon,
+    })),
+    {
+      href: "/security/devices",
+      title: "Dispositivos CLI activos",
+      description: "Revogar certificados mTLS registados na conta.",
+      taskId: "SEC-003",
+    },
+  ];
 </script>
 
 <svelte:head>
   <title>Trabalho — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <h1>Trabalho</h1>
-  <p class="lead">Turnos, sandbox browser, CLI e ferramentas operacionais BYOD.</p>
-  <DocHelpLink />
+<PageShell
+  title="Trabalho"
+  description="Turnos, sandbox browser, CLI e ferramentas operacionais BYOD."
+  width="narrow"
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   <ShiftStatusCard />
-
-  <ul class="links">
-    <li>
-      <a href="/work/shifts">
-        <strong>Turnos e geofence</strong>
-        <span>Estado horário, countdown, desvio NTP e zona GPS (VAULT-010 / VAULT-011)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/work/sandbox">
-        <strong>Browser sandbox</strong>
-        <span>Injeção de credenciais sem revelar a password no painel (VAULT-013)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/work/cli">
-        <strong>CLI mTLS</strong>
-        <span>Registo de dispositivo, listagem e injecção em scripts (VAULT-017)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/work/inventory">
-        <strong>Inventário</strong>
-        <span>Stock operacional, alertas e ordens de compra sugeridas (AGENT-008)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/work/google">
-        <strong>Google Workspace</strong>
-        <span>Estado do provider OAuth / Service Account (GOOGLE-001)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/work/google-dev">
-        <strong>Google proxy (simulação dev)</strong>
-        <span>Drive cifrado + mascaramento Sheets sem OAuth real (DoD Fase 2)</span>
-      </a>
-    </li>
-    <li>
-      <a href="/security/devices">
-        <strong>Dispositivos CLI activos</strong>
-        <span>Revogar certificados mTLS registados na conta</span>
-      </a>
-    </li>
-  </ul>
-</section>
-
-<style>
-  .page {
-    max-width: 36rem;
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-  }
-
-  .links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .links a {
-    display: block;
-    padding: var(--space-4);
-    margin-bottom: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: inherit;
-    background: var(--color-bg-surface);
-  }
-
-  .links a:hover {
-    border-color: var(--color-accent);
-  }
-
-  .links strong {
-    display: block;
-    margin-bottom: var(--space-1);
-  }
-
-  .links span {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-  }
-</style>
+  <HubLinks {items} />
+</PageShell>

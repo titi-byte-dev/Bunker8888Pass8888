@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { getMasterKey } from "$lib/vault/masterKeyStore";
@@ -16,7 +17,17 @@
   import { reportDealClosed } from "$lib/crm/dealClosedService";
   import { isDealClosed, proformaFromLead } from "$lib/crm/dealClosed";
   import { issueInvoice } from "$lib/fin/invoicesService";
-  import { confirmDialog, toast } from "$lib/ui";
+  import {
+    Button,
+    confirmDialog,
+    EmptyState,
+    MetricCard,
+    PageShell,
+    Panel,
+    Skeleton,
+    StatusBanner,
+    toast,
+  } from "$lib/ui";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -94,6 +105,7 @@
       fNotes = "";
       fStage = "new";
       await refresh();
+      toast.success("Lead adicionado ao funil.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao criar lead";
     } finally {
@@ -139,7 +151,7 @@
           proformaHint = true;
         }
       } else if (result.action === "generate_rgpd_report") {
-        window.location.href = "/hr/compliance";
+        await goto("/hr/compliance");
       }
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao aprovar";
@@ -181,6 +193,7 @@
       await importDraft(draft);
       drafts = drafts.filter((d) => d.message_id !== draft.message_id);
       await refresh();
+      toast.success("Lead importado do rascunho.");
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao importar";
     } finally {
@@ -226,29 +239,26 @@
   <title>CRM — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <header class="page-head">
-    <div>
-      <p class="eyebrow">CRM-001/002 · AGENT-009 · Funil de vendas</p>
-      <h1>Leads</h1>
-      <DocHelpLink slug="journey-erp-flow-dev" label="Como funciona o fluxo ERP em dev?" />
-    </div>
-    <p class="lead">
-      Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Arrasta
-      mentalmente pelas colunas do funil (estágio no payload decifrado no cliente).
-    </p>
-  </header>
+<PageShell
+  title="Leads"
+  taskId="CRM-001/002 · AGENT-009"
+  description="Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Move leads pelas colunas do funil (estágio decifrado no cliente)."
+  width="wide"
+>
+  {#snippet actions()}
+    <DocHelpLink slug="journey-erp-flow-dev" label="Como funciona o fluxo ERP em dev?" />
+  {/snippet}
 
   {#if locked}
-    <section class="panel">
-      <p class="muted">🔒 Desbloqueia o cofre para gerir leads.</p>
-      <a class="btn primary" href="/auth/unlock">Desbloquear</a>
-    </section>
+    <EmptyState title="Cofre bloqueado" description="Desbloqueia a Master Key para gerir leads.">
+      {#snippet action()}
+        <Button href="/auth/unlock">Desbloquear</Button>
+      {/snippet}
+    </EmptyState>
   {:else}
-    {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+    {#if error}<StatusBanner variant="error">{error}</StatusBanner>{/if}
 
-    <section class="panel events">
-      <h2>Actividade dos agentes</h2>
+    <Panel title="Actividade dos agentes">
       <p class="muted small">
         Event Bus AGENT-004 — aprova ou rejeita sugestões (AGENT-009) antes de correr tools ZK.
       </p>
@@ -266,22 +276,23 @@
                 <span class="ev-label">{ev.label}</span>
                 {#if isPendingSuggestion(ev)}
                   <div class="ev-actions">
-                    <button
-                      type="button"
-                      class="btn approve"
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      loading={decidingId === ev.id}
                       disabled={decidingId !== null || prospectionBusy}
                       onclick={() => handleApproveSuggestion(ev)}
                     >
-                      {decidingId === ev.id ? "…" : "Aprovar"}
-                    </button>
-                    <button
-                      type="button"
-                      class="btn reject"
+                      Aprovar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       disabled={decidingId !== null}
                       onclick={() => handleRejectSuggestion(ev)}
                     >
                       Rejeitar
-                    </button>
+                    </Button>
                   </div>
                 {/if}
               </div>
@@ -290,10 +301,9 @@
           {/each}
         </ul>
       {/if}
-    </section>
+    </Panel>
 
-    <section class="panel prospection">
-      <h2>Prospeção automática</h2>
+    <Panel title="Prospeção automática">
       <p class="muted small">
         O agente lê e-mails pendentes (stub até MAIL-002), gera rascunhos e tu
         importas com cifragem local — Zero-Knowledge mantido.
@@ -314,38 +324,32 @@
           Corpo
           <textarea bind:value={seedBody} rows="2" disabled={prospectionBusy}></textarea>
         </label>
-        <button type="submit" class="btn secondary" disabled={prospectionBusy}>Simular</button>
+        <Button type="submit" variant="secondary" disabled={prospectionBusy}>Simular</Button>
       </form>
-      <button
-        type="button"
-        class="btn primary"
+      <Button
         disabled={prospectionBusy || busy}
+        loading={prospectionBusy}
         onclick={handleProspection}
       >
-        {prospectionBusy ? "A processar…" : "Correr prospeção"}
-      </button>
+        Correr prospeção
+      </Button>
       {#if drafts.length > 0}
         <ul class="draft-list">
           {#each drafts as draft (draft.message_id)}
             <li class="draft-card">
               <strong>{draft.email}</strong>
               <span class="email">{draft.subject}</span>
-              <button
-                type="button"
-                class="btn secondary"
-                disabled={busy}
-                onclick={() => handleImportDraft(draft)}
-              >
+              <Button variant="secondary" size="sm" disabled={busy} onclick={() => handleImportDraft(draft)}>
                 Importar para o funil
-              </button>
+              </Button>
             </li>
           {/each}
         </ul>
       {/if}
-    </section>
+    </Panel>
 
-    <form class="panel form" onsubmit={handleCreate}>
-      <h2>Novo lead</h2>
+    <Panel title="Novo lead">
+    <form class="form" onsubmit={handleCreate}>
       <div class="grid">
         <label>
           Nome
@@ -372,24 +376,27 @@
         Notas
         <textarea bind:value={fNotes} rows="2" disabled={busy}></textarea>
       </label>
-      <button type="submit" class="btn primary" disabled={busy}>Adicionar</button>
+      <Button type="submit" disabled={busy} loading={busy}>Adicionar</Button>
     </form>
+    </Panel>
 
     {#if proformaHint}
-      <p class="hint" role="status">Pro-forma emitida — converte em fatura em <a href="/fin/invoices">/fin/invoices</a>.</p>
+      <StatusBanner variant="info">
+        Pro-forma emitida — converte em fatura em <a href="/fin/invoices">/fin/invoices</a>.
+      </StatusBanner>
     {/if}
 
     {#if !loading && leads.length > 0}
       <section class="metrics">
-        <div class="metric"><span class="n">{metrics.total}</span> leads</div>
-        <div class="metric"><span class="n">{metrics.open}</span> em aberto</div>
-        <div class="metric"><span class="n">{metrics.won}</span> ganhos</div>
-        <div class="metric"><span class="n">{metrics.conversionPct}%</span> conversão</div>
+        <MetricCard label="leads" value={String(metrics.total)} />
+        <MetricCard label="em aberto" value={String(metrics.open)} />
+        <MetricCard label="ganhos" value={String(metrics.won)} variant="success" />
+        <MetricCard label="conversão" value="{metrics.conversionPct}%" trend={{ direction: metrics.conversionPct > 0 ? "up" : "flat", label: "funil" }} />
       </section>
     {/if}
 
     {#if loading}
-      <p class="muted">A carregar funil…</p>
+      <Skeleton variant="block" height="12rem" />
     {:else}
       <div class="board">
         {#each byStage as col (col.id)}
@@ -423,44 +430,13 @@
       </div>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 72rem;
-  }
-  .page-head {
-    margin-bottom: var(--space-5);
-  }
-  .eyebrow {
-    margin: 0 0 var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-  .lead {
-    margin: var(--space-3) 0 0;
-    max-width: 42rem;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-  }
-  .panel {
-    padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    margin-bottom: var(--space-4);
-  }
-  .form h2 {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-base);
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
   .grid {
     display: grid;
@@ -546,45 +522,10 @@
     cursor: pointer;
     padding: 0;
   }
-  .inline-error {
-    color: var(--color-danger, #c44);
-    font-size: var(--text-sm);
-  }
   .muted {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
-  }
-  .btn.primary {
-    display: inline-block;
-    margin-top: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    background: var(--color-accent);
-    color: var(--color-bg-base);
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    font-size: var(--text-sm);
-  }
-  .btn.primary:disabled,
-  .btn.secondary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  .btn.secondary {
-    display: inline-block;
-    margin-top: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--color-accent);
-    border: 1px solid var(--color-accent);
-    cursor: pointer;
-    font-size: var(--text-sm);
-  }
-  .events h2 {
-    margin: 0 0 var(--space-2);
-    font-size: var(--text-base);
+    margin: 0;
   }
   .event-list {
     list-style: none;
@@ -615,27 +556,6 @@
     gap: var(--space-1);
     flex-wrap: wrap;
   }
-  .ev-actions .btn {
-    margin: 0;
-    padding: 2px var(--space-2);
-    font-size: var(--text-xs);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    border: 1px solid transparent;
-  }
-  .ev-actions .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  .ev-actions .approve {
-    background: var(--color-accent);
-    color: var(--color-bg-base);
-  }
-  .ev-actions .reject {
-    background: transparent;
-    color: var(--color-text-muted);
-    border-color: var(--color-border);
-  }
   .ev-label {
     font-weight: 500;
   }
@@ -654,10 +574,6 @@
     opacity: 0.6;
     text-decoration: line-through;
     text-decoration-color: var(--color-border);
-  }
-  .prospection h2 {
-    margin: 0 0 var(--space-2);
-    font-size: var(--text-base);
   }
   .small {
     margin: 0 0 var(--space-3);
@@ -693,23 +609,5 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
     gap: var(--space-3);
-    margin-bottom: var(--space-4);
-  }
-  .metric {
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-surface);
-    font-size: var(--text-sm);
-  }
-  .metric .n {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-  }
-  .hint {
-    font-size: var(--text-sm);
-    color: var(--color-accent);
-    margin-bottom: var(--space-4);
   }
 </style>
