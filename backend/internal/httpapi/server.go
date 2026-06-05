@@ -21,6 +21,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sharekeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
@@ -42,6 +43,7 @@ type Deps struct {
 	Passkeys   *passkeys.Service
 	Emergency  *emergency.Service
 	Sentinel   *sentinel.Service
+	ShareKeys  *sharekeys.Repo // nil desactiva endpoints /api/share/*
 	AdminKey string // vazio desactiva endpoints /api/admin/*
 	Pool     *pgxpool.Pool
 }
@@ -122,6 +124,12 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.Sentinel != nil && deps.Passkeys != nil && deps.Users != nil && deps.Auth != nil {
 		mux.HandleFunc("POST /api/auth/sentinel/step-up/begin", handleSentinelStepUpBegin(deps.Passkeys, deps.Sentinel, deps.Users))
 		mux.HandleFunc("POST /api/auth/sentinel/step-up/finish", handleSentinelStepUpFinish(deps.Auth, deps.Passkeys, deps.Sentinel, deps.Users, ap))
+	}
+	if deps.ShareKeys != nil && deps.Auth != nil {
+		mux.Handle("PUT /api/share/keypair", requireAuth(deps.Auth, handlePutShareKeypair(deps.ShareKeys)))
+		mux.Handle("GET /api/share/keypair", requireAuth(deps.Auth, handleGetShareKeypair(deps.ShareKeys)))
+		mux.Handle("GET /api/share/keypair/status", requireAuth(deps.Auth, handleShareKeypairStatus(deps.ShareKeys)))
+		mux.Handle("GET /api/share/public-key", requireAuth(deps.Auth, handleGetSharePublicKey(deps.ShareKeys)))
 	}
 
 	return mux
