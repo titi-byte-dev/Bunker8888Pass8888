@@ -42,6 +42,8 @@ func mapSharedVaultError(w http.ResponseWriter, err error) bool {
 		writeError(w, http.StatusBadRequest, "papel inválido (admin, member ou viewer)")
 	case errors.Is(err, sharedvaults.ErrOwnerImmutable):
 		writeError(w, http.StatusForbidden, "o dono do cofre não pode ser alterado por aqui")
+	case errors.Is(err, sharedvaults.ErrTooLarge):
+		writeError(w, http.StatusRequestEntityTooLarge, "anexo demasiado grande")
 	default:
 		writeError(w, http.StatusInternalServerError, "falha na operação do cofre partilhado")
 	}

@@ -149,6 +149,11 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleListSharedVaultItems(deps.SharedVaults)))
 		mux.Handle("POST /api/share/vaults/{id}/items", requireAuth(deps.Auth, handleCreateSharedVaultItem(deps.SharedVaults)))
 		mux.Handle("DELETE /api/share/vaults/{id}/items/{itemId}", requireAuth(deps.Auth, handleDeleteSharedVaultItem(deps.SharedVaults)))
+		// Anexos cifrados por ficheiro (SHARE-004)
+		mux.Handle("GET /api/share/vaults/{id}/attachments", requireAuth(deps.Auth, handleListVaultAttachments(deps.SharedVaults)))
+		mux.Handle("POST /api/share/vaults/{id}/attachments", requireAuth(deps.Auth, handleAddVaultAttachment(deps.SharedVaults)))
+		mux.Handle("GET /api/share/vaults/{id}/attachments/{attId}", requireAuth(deps.Auth, handleGetVaultAttachment(deps.SharedVaults)))
+		mux.Handle("DELETE /api/share/vaults/{id}/attachments/{attId}", requireAuth(deps.Auth, handleDeleteVaultAttachment(deps.SharedVaults)))
 	}
 	if deps.SecretLinks != nil {
 		// Criar exige sessão (só utilizadores criam links).

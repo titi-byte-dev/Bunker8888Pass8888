@@ -31,6 +31,13 @@ export interface VaultItemPayload {
   secret: string;
 }
 
+/** Metadados de um anexo (SHARE-004) — também cifrados com a chave do cofre. */
+export interface AttachmentMeta {
+  name: string;
+  mime: string;
+  size: number; // tamanho do ficheiro original, em bytes
+}
+
 /** Gera uma nova chave de cofre (bytes aleatórios). */
 export function generateVaultKey(): Bytes {
   return randomBytes(VAULT_KEY_BYTES);
@@ -66,6 +73,30 @@ export async function encryptVaultItem(vaultKey: Bytes, payload: VaultItemPayloa
 export async function decryptVaultItem(vaultKey: Bytes, b64: string): Promise<VaultItemPayload> {
   const key = await importVaultKey(vaultKey);
   return JSON.parse(fromBytes(await decrypt(key, base64ToBytes(b64)))) as VaultItemPayload;
+}
+
+/** Cifra os metadados de um anexo (JSON) com a chave do cofre. base64 (nonce||ct). */
+export async function encryptAttachmentMeta(vaultKey: Bytes, meta: AttachmentMeta): Promise<string> {
+  const key = await importVaultKey(vaultKey);
+  return bytesToBase64(await encrypt(key, toBytes(JSON.stringify(meta))));
+}
+
+/** Reverte encryptAttachmentMeta. */
+export async function decryptAttachmentMeta(vaultKey: Bytes, b64: string): Promise<AttachmentMeta> {
+  const key = await importVaultKey(vaultKey);
+  return JSON.parse(fromBytes(await decrypt(key, base64ToBytes(b64)))) as AttachmentMeta;
+}
+
+/** Cifra os bytes de um ficheiro com a chave do cofre. base64 (nonce||ct). */
+export async function encryptFileBytes(vaultKey: Bytes, bytes: Bytes): Promise<string> {
+  const key = await importVaultKey(vaultKey);
+  return bytesToBase64(await encrypt(key, bytes));
+}
+
+/** Reverte encryptFileBytes. Devolve os bytes originais do ficheiro. */
+export async function decryptFileBytes(vaultKey: Bytes, b64: string): Promise<Bytes> {
+  const key = await importVaultKey(vaultKey);
+  return decrypt(key, base64ToBytes(b64));
 }
 
 /**

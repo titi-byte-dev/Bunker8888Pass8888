@@ -99,7 +99,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | SHARE-001 | Chaves assimétricas por utilizador | 2 | M | 🟢 | VAULT-002 |
 | SHARE-002 | Cofres partilhados (Shared Vaults) + permissões | 2 | L | 🟢 | SHARE-001 |
 | SHARE-003 | Secret links efémeros (servidos via RAM) | 2 | L | 🟢 | SHARE-001 |
-| SHARE-004 | Anexos cifrados por ficheiro | 2 | M | ⚪ | VAULT-002 |
+| SHARE-004 | Anexos cifrados por ficheiro | 2 | M | 🟢 | VAULT-002 |
 | SHARE-005 | Notas temporárias auto-destrutivas | 2 | M | ⚪ | SHARE-003 |
 
 ## DW — Dark Web & Auditoria
