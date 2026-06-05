@@ -42,6 +42,10 @@ type Config struct {
 	MailWebhookSecret string
 	// MAIL-004: host:port do relay SMTP (ex.: mailpit:1025 em dev).
 	SMTPRelayHost string
+	// MAIL-005: limites por hora (0 = omissões seguras no RateLimiter).
+	MailRateInboundPerHour int
+	MailRateRelayPerHour   int
+	MailRateComposePerHour int
 }
 
 // Load lê a configuração do ambiente, aplicando valores por omissão.
@@ -63,6 +67,9 @@ func Load() Config {
 		MailpitURL:            getenv("AEGIS_MAILPIT_URL", ""),
 		MailWebhookSecret:     getenv("AEGIS_MAIL_WEBHOOK_SECRET", ""),
 		SMTPRelayHost:         getenv("AEGIS_SMTP_RELAY_HOST", ""),
+		MailRateInboundPerHour: getenvInt("AEGIS_MAIL_RATE_INBOUND_HOUR", 0),
+		MailRateRelayPerHour:   getenvInt("AEGIS_MAIL_RATE_RELAY_HOUR", 0),
+		MailRateComposePerHour: getenvInt("AEGIS_MAIL_RATE_COMPOSE_HOUR", 0),
 	}
 }
 
@@ -89,6 +96,18 @@ func getenvDuration(key string, fallback time.Duration) time.Duration {
 		return time.Duration(secs) * time.Second
 	}
 	return fallback
+}
+
+func getenvInt(key string, fallback int) int {
+	v, ok := os.LookupEnv(key)
+	if !ok || v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return fallback
+	}
+	return n
 }
 
 func getenvBool(key string, fallback bool) bool {

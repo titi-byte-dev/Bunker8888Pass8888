@@ -28,6 +28,9 @@ func handleMailpitWebhook(svc *mail.IngestService, secret string) http.HandlerFu
 			writeError(w, http.StatusBadRequest, "payload inválido")
 			return
 		}
+		if mapMailRateError(w, err) {
+			return
+		}
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "falha ao ingerir e-mail")
 			return

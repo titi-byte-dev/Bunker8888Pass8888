@@ -18,6 +18,7 @@ type IngestService struct {
 	Inbox   *InboxRepo
 	Mailpit *MailpitClient
 	Relay   *RelayService // MAIL-004: reencaminha para destination (opcional)
+	Limiter *RateLimiter  // MAIL-005: anti-abuso
 }
 
 // IngestResult resume o que aconteceu com uma mensagem recebida.
@@ -54,6 +55,11 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 	if alias == nil {
 		return &IngestResult{MessageID: summary.ID, Status: "ignored"}, ErrWebhookIgnored
 	}
+	if s.Limiter != nil {
+		if err := s.Limiter.AllowInbound(ctx, alias.OwnerID); err != nil {
+			return nil, err
+		}
+	}
 	body, err := s.fetchBody(ctx, summary)
 	if err != nil {
 		return nil, err
@@ -77,10 +83,22 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 		OwnerID:   alias.OwnerID,
 		Status:    "ingested",
 	}
+	if s.Limiter != nil {
+		_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirInbound, from, alias.AliasAddress)
+	}
 	if s.Relay != nil {
-		if relayOut, err := s.Relay.ForwardInbound(ctx, alias, from, subject, body); err == nil && relayOut != nil {
-			result.Relayed = true
-			result.RelayTo = relayOut.To
+		relayOK := s.Limiter == nil
+		if s.Limiter != nil {
+			relayOK = s.Limiter.AllowRelay(ctx, alias.ID) == nil
+		}
+		if relayOK {
+			if relayOut, err := s.Relay.ForwardInbound(ctx, alias, from, subject, body); err == nil && relayOut != nil {
+				result.Relayed = true
+				result.RelayTo = relayOut.To
+				if s.Limiter != nil {
+					_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirOutboundRelay, alias.AliasAddress, relayOut.To)
+				}
+			}
 		}
 		// Falha de relay não bloqueia ingestão na inbox — registo local primeiro.
 	}

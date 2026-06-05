@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import {
+    composeFromAlias,
     createAlias,
     deleteAlias,
     listAliases,
@@ -18,6 +19,10 @@
   let destination = $state("");
   let label = $state("");
   let copied = $state("");
+  let composeAliasId = $state("");
+  let composeTo = $state("");
+  let composeSubject = $state("");
+  let composeBody = $state("");
 
   async function refresh() {
     loading = true;
@@ -83,6 +88,28 @@
       await refresh();
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar alias";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onCompose(e: SubmitEvent) {
+    e.preventDefault();
+    if (!composeAliasId || !composeTo.trim()) return;
+    busy = true;
+    error = "";
+    try {
+      await composeFromAlias(
+        composeAliasId,
+        composeTo.trim(),
+        composeSubject.trim(),
+        composeBody.trim(),
+      );
+      composeTo = "";
+      composeSubject = "";
+      composeBody = "";
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao enviar";
     } finally {
       busy = false;
     }
@@ -162,6 +189,34 @@
         {/each}
       </ul>
     {/if}
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><p class="eyebrow">Compor e-mail (MAIL-004)</p></div>
+    <form class="compose-form" onsubmit={onCompose}>
+      <label>
+        Alias (remetente)
+        <select bind:value={composeAliasId} disabled={busy || aliases.length === 0}>
+          <option value="">— escolhe —</option>
+          {#each aliases.filter((a) => a.active) as a (a.id)}
+            <option value={a.id}>{a.aliasAddress}</option>
+          {/each}
+        </select>
+      </label>
+      <label>
+        Para
+        <input type="email" bind:value={composeTo} required disabled={busy} />
+      </label>
+      <label>
+        Assunto
+        <input bind:value={composeSubject} required disabled={busy} />
+      </label>
+      <label>
+        Mensagem
+        <textarea bind:value={composeBody} rows="3" required disabled={busy}></textarea>
+      </label>
+      <button type="submit" class="btn primary" disabled={busy || !composeAliasId}>Enviar</button>
+    </form>
   </section>
 
   <section class="panel">
@@ -266,9 +321,30 @@
   .mono {
     font-family: var(--font-mono);
   }
-  .row-form {
+  .row-form,
+  .compose-form {
     display: flex;
+    flex-direction: column;
     gap: var(--space-2);
+  }
+  .row-form {
+    flex-direction: row;
+  }
+  .compose-form label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+  }
+  .compose-form select,
+  .compose-form textarea {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
   }
   @media (max-width: 560px) {
     .row-form {

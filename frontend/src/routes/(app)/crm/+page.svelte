@@ -156,7 +156,7 @@
     <div>
       <p class="eyebrow">CRM-001/002 · AGENT-003 · Funil de vendas</p>
       <h1>Leads</h1>
-      <DocHelpLink slug="journey-admin-onboarding" label="Como funciona o onboarding?" />
+      <DocHelpLink slug="journey-crm-prospection" label="Como funciona a prospeção?" />
     </div>
     <p class="lead">
       Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Arrasta

@@ -63,3 +63,41 @@ func (r *RelayService) ForwardInbound(_ context.Context, alias *Alias, originalF
 	}
 	return &RelayResult{From: alias.AliasAddress, To: alias.Destination}, nil
 }
+
+// SendFromAlias compõe e envia e-mail com remetente = alias (MAIL-004 compose).
+func (r *RelayService) SendFromAlias(_ context.Context, alias *Alias, to, subject, body string) (*RelayResult, error) {
+	if r == nil || strings.TrimSpace(r.SMTPHost) == "" {
+		return nil, fmt.Errorf("mail: relay SMTP não configurado")
+	}
+	if alias == nil || !alias.Active {
+		return nil, fmt.Errorf("mail: alias inactivo")
+	}
+	to = strings.TrimSpace(to)
+	if !looksLikeEmail(to) {
+		return nil, ErrInvalidDest
+	}
+	subject = strings.TrimSpace(subject)
+	body = strings.TrimSpace(body)
+	if subject == "" || body == "" {
+		return nil, fmt.Errorf("mail: assunto e corpo obrigatórios")
+	}
+
+	var msg bytes.Buffer
+	fmt.Fprintf(&msg, "From: %s\r\n", alias.AliasAddress)
+	fmt.Fprintf(&msg, "To: %s\r\n", to)
+	fmt.Fprintf(&msg, "Subject: %s\r\n", subject)
+	msg.WriteString("MIME-Version: 1.0\r\n")
+	msg.WriteString("Content-Type: text/plain; charset=utf-8\r\n\r\n")
+	msg.WriteString(body)
+
+	host, port, err := net.SplitHostPort(r.SMTPHost)
+	if err != nil {
+		host = r.SMTPHost
+		port = "25"
+	}
+	addr := net.JoinHostPort(host, port)
+	if err := smtp.SendMail(addr, nil, alias.AliasAddress, []string{to}, msg.Bytes()); err != nil {
+		return nil, fmt.Errorf("mail: compose SMTP: %w", err)
+	}
+	return &RelayResult{From: alias.AliasAddress, To: to}, nil
+}

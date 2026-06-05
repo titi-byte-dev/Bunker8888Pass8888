@@ -59,8 +59,10 @@ type Deps struct {
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
 	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/aliases*
 	MailInbox    *mail.InboxRepo       // nil desactiva endpoints /api/mail/inbox*
-	MailIngest   *mail.IngestService   // nil desactiva webhook Mailpit
-	MailWebhookSecret string           // vazio desactiva webhook
+	MailIngest        *mail.IngestService // nil desactiva webhook Mailpit
+	MailRelay         *mail.RelayService  // nil desactiva compose/relay SMTP
+	MailRateLimiter   *mail.RateLimiter   // nil desactiva quotas MAIL-005
+	MailWebhookSecret string              // vazio desactiva webhook
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
@@ -231,6 +233,9 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/mail/aliases", requireAuth(deps.Auth, handleCreateAlias(deps.Mail)))
 		mux.Handle("PATCH /api/mail/aliases/{id}", requireAuth(deps.Auth, handleSetAliasActive(deps.Mail)))
 		mux.Handle("DELETE /api/mail/aliases/{id}", requireAuth(deps.Auth, handleDeleteAlias(deps.Mail)))
+		if deps.MailRelay != nil {
+			mux.Handle("POST /api/mail/compose", requireAuth(deps.Auth, handleComposeMail(deps.Mail, deps.MailRelay, deps.MailRateLimiter)))
+		}
 	}
 	if deps.MailInbox != nil && deps.Auth != nil {
 		// Caixa de entrada simulada (AGENT-003 stub até MAIL-002).

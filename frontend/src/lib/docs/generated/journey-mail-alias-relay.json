@@ -1,0 +1,291 @@
+{
+  "slug": "journey-mail-alias-relay",
+  "title": "Journey: Alias de e-mail com relay e inbox (MAIL-001/002/004)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "mail_alias_relay",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Alias de e-mail com relay e inbox (MAIL-001/002/004)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Utilizador BYOD · <strong>Epics:</strong> <code>MAIL</code>, <code>AGENT</code></p>\n</blockquote>\n<p>Protege o e-mail real com aliases <code>@aegis.email</code>: mensagens recebidas entram na\ninbox da app, reencaminham para o destino configurado e alimentam o agente de\nprospeção no CRM.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Conta AegisPass com sessão activa.</li>\n<li>Alias criado em <code>/mail</code> com destino real (ex.: Gmail corporativo).</li>\n<li>Em dev: Mailpit a correr (<code>docker compose up</code>).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal (sequence)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant Ext as Remetente externo\r\n    participant SMTP as Mailpit / Postfix\r\n    participant API as Go API\r\n    participant DB as PostgreSQL\r\n    participant U as Utilizador\r\n    participant App as App /mail\r\n\r\n    Ext->>SMTP: SMTP TO alias@aegis.email\r\n    SMTP->>API: webhook POST (MessageSummary)\r\n    API->>SMTP: GET corpo completo (API Mailpit)\r\n    API->>DB: resolve alias activo → owner_id\r\n    API->>DB: INSERT mail_inbox_messages\r\n    API->>SMTP: relay SMTP → destination (MAIL-004)\r\n    API-->>SMTP: 201 ingested\r\n\r\n    U->>App: abre /mail → Caixa de entrada\r\n    App->>API: GET /api/mail/inbox\r\n    API-->>App: mensagens pendentes / processadas",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "Ext",
+              "to": "SMTP",
+              "arrow": "->>",
+              "label": "SMTP TO alias@aegis.email"
+            },
+            {
+              "kind": "message",
+              "from": "SMTP",
+              "to": "API",
+              "arrow": "->>",
+              "label": "webhook POST (MessageSummary)"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "SMTP",
+              "arrow": "->>",
+              "label": "GET corpo completo (API Mailpit)"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "DB",
+              "arrow": "->>",
+              "label": "resolve alias activo → owner_id"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "DB",
+              "arrow": "->>",
+              "label": "INSERT mail_inbox_messages"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "SMTP",
+              "arrow": "->>",
+              "label": "relay SMTP → destination (MAIL-004)"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "SMTP",
+              "arrow": "-->>",
+              "label": "201 ingested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "abre /mail → Caixa de entrada"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/mail/inbox"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "App",
+              "arrow": "-->>",
+              "label": "mensagens pendentes / processadas"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "Ext",
+                "label": "Remetente externo",
+                "x": 0
+              },
+              {
+                "id": "SMTP",
+                "label": "Mailpit / Postfix",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "DB",
+                "label": "PostgreSQL",
+                "x": 600
+              },
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 800
+              },
+              {
+                "id": "App",
+                "label": "App /mail",
+                "x": 1000
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "Ext",
+                "target": "SMTP",
+                "label": "SMTP TO alias@aegis.email",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "SMTP",
+                "target": "API",
+                "label": "webhook POST (MessageSummary)",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "API",
+                "target": "SMTP",
+                "label": "GET corpo completo (API Mailpit)",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "API",
+                "target": "DB",
+                "label": "resolve alias activo → owner_id",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "API",
+                "target": "DB",
+                "label": "INSERT mail_inbox_messages",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "API",
+                "target": "SMTP",
+                "label": "relay SMTP → destination (MAIL-004)",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "API",
+                "target": "SMTP",
+                "label": "201 ingested",
+                "dashed": true
+              },
+              {
+                "id": "step-7",
+                "source": "U",
+                "target": "App",
+                "label": "abre /mail → Caixa de entrada",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "App",
+                "target": "API",
+                "label": "GET /api/mail/inbox",
+                "dashed": false
+              },
+              {
+                "id": "step-9",
+                "source": "API",
+                "target": "App",
+                "label": "mensagens pendentes / processadas",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxograma de decisão (ingestão)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart TD\r\n    A[Webhook Mailpit] --> B{Segredo válido?}\r\n    B -->|não| Z1[401 Unauthorized]\r\n    B -->|sim| C{To: contém @aegis.email?}\r\n    C -->|não| Z2[200 ignored]\r\n    C -->|sim| D{Alias activo na BD?}\r\n    D -->|não| Z2\r\n    D -->|sim| E[Gravar inbox]\r\n    E --> F{Relay SMTP configurado?}\r\n    F -->|sim| G[Forward → destination]\r\n    F -->|não| H[201 ingested]\r\n    G --> H",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Diagrama de estados (mensagem na inbox)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "diagram",
+          "source": "stateDiagram-v2\r\n    [*] --> Pendente: SMTP recebido + ingest\r\n    Pendente --> Processada: prospeção CRM importa lead\r\n    Pendente --> Pendente: utilizador ignora\r\n    Processada --> [*]",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Em <code>/mail</code>, gera um alias e copia <code>xxxx@aegis.email</code>.</li>\n<li>Configura o <strong>destino</strong> (e-mail real) — visível ao servidor para relay.</li>\n<li>Envia e-mail para o alias (SMTP dev: <code>localhost:1025</code>).</li>\n<li>O backend <strong>ingere</strong> na inbox e <strong>reencaminha</strong> cópia para o destino.</li>\n<li>Em <code>/mail</code> vês a mensagem como <strong>pendente</strong>.</li>\n<li>Em <code>/crm</code>, corre <strong>prospeção</strong> e importa o lead (cifragem local).</li>\n<li>A mensagem passa a <strong>processada</strong>.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Alias:</strong> endereço descartável que esconde o e-mail real perante terceiros.\nSe o alias vazar, desligas só esse endereço.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> o corpo do e-mail no relay é excepção consciente ao\nZero-Knowledge (como o destino do alias). Leads no CRM permanecem sempre\ncifrados com a Master Key no cliente.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Alias desligado:</strong> ingest ignora; relay não corre.</li>\n<li><strong>Relay falha:</strong> inbox grava na mesma — o utilizador não perde a mensagem na app.</li>\n<li><strong>MAIL-005:</strong> rate limit bloqueia abuso antes de ingest/relay.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Cópia na inbox do tenant + cópia no e-mail real (se relay activo).</li>\n<li>Mensagem pronta para AGENT-003 (prospeção → lead cifrado).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Utilizador BYOD",
+  "order": 99
+}
