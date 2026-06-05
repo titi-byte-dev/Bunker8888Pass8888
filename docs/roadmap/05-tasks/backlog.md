@@ -135,7 +135,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | AGENT-001 | Interface `Tool` + validação (reimplementada de raiz) | 2 | M | 🟢 | INFRA-006 |
 | AGENT-002 | Guardião (decifra só o necessário, menor privilégio) | 2 | L | 🟢 | VAULT-002 |
 | AGENT-003 | Primeiro agente: prospeção (lê e-mails → leads) | 2 | L | 🟢 | AGENT-001, MAIL-001 |
-| AGENT-004 | Event Bus (channels Go / NATS) | 3 | L | ⚪ | INFRA-003 |
+| AGENT-004 | Event Bus (channels Go / NATS) | 3 | L | 🟢 | INFRA-003 |
 | AGENT-005 | Orquestrador multi-agente | 3 | XL | ⚪ | AGENT-004 |
 | AGENT-006 | Agente Financeiro (reconciliação) | 3 | L | ⚪ | AGENT-005, FIN-003 |
 | AGENT-007 | Agente RH (recrutamento às cegas + onboarding) | 3 | L | ⚪ | AGENT-005, HR-007 |

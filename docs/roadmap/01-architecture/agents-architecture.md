@@ -76,3 +76,5 @@ func (g *Guardian) ContextoParaAgente(ctx context.Context, req AgentRequest) (Sc
 | Operações | Compras & Inventário | Prevê stock, gera ordens de compra |
 
 Detalhe e tasks em [`../03-epics/epic-agents.md`](../03-epics/epic-agents.md).
+
+Implementação do bus in-process: [`event-bus.md`](event-bus.md) (AGENT-004).

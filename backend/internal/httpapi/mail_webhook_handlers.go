@@ -5,10 +5,11 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 )
 
-func handleMailpitWebhook(svc *mail.IngestService, secret string) http.HandlerFunc {
+func handleMailpitWebhook(svc *mail.IngestService, secret string, bus *eventbus.Bus) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if secret == "" || r.URL.Query().Get("secret") != secret {
 			writeError(w, http.StatusUnauthorized, "webhook não autorizado")
@@ -34,6 +35,15 @@ func handleMailpitWebhook(svc *mail.IngestService, secret string) http.HandlerFu
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "falha ao ingerir e-mail")
 			return
+		}
+		if result != nil && result.OwnerID != "" {
+			_ = eventbus.PublishJSON(r.Context(), bus, eventbus.MailInboxReceived, result.OwnerID, "mail.ingest", map[string]any{
+				"inbox_id":  result.InboxID,
+				"alias":     result.AliasUsed,
+				"relayed":   result.Relayed,
+				"relay_to":  result.RelayTo,
+				"mailpit_id": result.MessageID,
+			})
 		}
 		writeJSON(w, http.StatusCreated, map[string]any{"status": "ingested", "result": result})
 	}

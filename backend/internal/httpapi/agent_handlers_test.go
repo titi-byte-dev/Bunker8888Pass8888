@@ -42,7 +42,7 @@ func TestHandleRunAgentTool(t *testing.T) {
 	req.SetPathValue("name", "ping")
 	req = req.WithContext(context.WithValue(req.Context(), userIDKey, "user-1"))
 	rec := httptest.NewRecorder()
-	handleRunAgentTool(run, nil)(rec, req)
+	handleRunAgentTool(run, nil, nil)(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
 	}

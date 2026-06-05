@@ -9,6 +9,7 @@
     seedInboxMessage,
     type ProspectionDraft,
   } from "$lib/crm/prospectionService";
+  import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { LEAD_STAGES, type Lead, type LeadStage } from "$lib/crm/leads";
 
   let locked = $state(false);
@@ -28,6 +29,7 @@
   let seedFrom = $state("lead@empresa.pt");
   let seedSubject = $state("Pedido de demonstração");
   let seedBody = $state("Olá, gostávamos de agendar uma demo do produto.");
+  let agentEvents = $state<AgentEvent[]>([]);
 
   const byStage = $derived(
     LEAD_STAGES.map((s) => ({
@@ -48,8 +50,17 @@
     }
   }
 
+  async function refreshEvents() {
+    try {
+      agentEvents = await listAgentEvents();
+    } catch {
+      agentEvents = [];
+    }
+  }
+
   onMount(() => {
     locked = !getMasterKey();
+    refreshEvents();
     if (!locked) refresh();
     else loading = false;
   });
@@ -99,6 +110,7 @@
     error = "";
     try {
       drafts = await runProspection();
+      await refreshEvents();
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha na prospeção";
     } finally {
@@ -171,6 +183,23 @@
     </section>
   {:else}
     {#if error}<p class="inline-error" role="alert">{error}</p>{/if}
+
+    <section class="panel events">
+      <h2>Actividade dos agentes</h2>
+      <p class="muted small">Event Bus AGENT-004 — feed auditável de mail e prospeção.</p>
+      {#if agentEvents.length === 0}
+        <p class="muted">Sem eventos recentes.</p>
+      {:else}
+        <ul class="event-list">
+          {#each agentEvents.slice(0, 8) as ev (ev.id)}
+            <li>
+              <span class="ev-label">{ev.label}</span>
+              <span class="ev-meta">{new Date(ev.createdAt).toLocaleString("pt-PT")}</span>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
 
     <section class="panel prospection">
       <h2>Prospeção automática</h2>
@@ -448,6 +477,33 @@
     border: 1px solid var(--color-accent);
     cursor: pointer;
     font-size: var(--text-sm);
+  }
+  .events h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+  }
+  .event-list {
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .event-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    padding: var(--space-1) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .ev-label {
+    font-weight: 500;
+  }
+  .ev-meta {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
   }
   .prospection h2 {
     margin: 0 0 var(--space-2);

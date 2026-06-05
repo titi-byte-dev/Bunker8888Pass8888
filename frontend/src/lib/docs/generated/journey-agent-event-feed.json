@@ -1,0 +1,214 @@
+{
+  "slug": "journey-agent-event-feed",
+  "title": "Journey: Feed de acções dos agentes (AGENT-004)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "agent_event_feed",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Feed de acções dos agentes (AGENT-004)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Utilizador / supervisor · <strong>Epics:</strong> <code>AGENT</code>, <code>MAIL</code>, <code>CRM</code></p>\n</blockquote>\n<p>Supervisiona o que os agentes e o pipeline de mail fazem — sem formulários\nmonolíticos, através de um <strong>feed de eventos</strong> auditável.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Sessão activa.</li>\n<li>Event Bus ligado (arranque com base de dados).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant M as Mailpit\r\n    participant API as API Go\r\n    participant Bus as Event Bus\r\n    participant CRM as /crm\r\n    participant U as Utilizador\r\n\r\n    M->>API: webhook e-mail\r\n    API->>Bus: mail.inbox.received\r\n    U->>CRM: abre feed de eventos\r\n    CRM->>API: GET /api/agent/events\r\n    API-->>CRM: lista cronológica\r\n    U->>CRM: Correr prospeção\r\n    API->>Bus: crm.prospection.run",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "M",
+              "to": "API",
+              "arrow": "->>",
+              "label": "webhook e-mail"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Bus",
+              "arrow": "->>",
+              "label": "mail.inbox.received"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "abre feed de eventos"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "CRM",
+              "arrow": "-->>",
+              "label": "lista cronológica"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Correr prospeção"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Bus",
+              "arrow": "->>",
+              "label": "crm.prospection.run"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "M",
+                "label": "Mailpit",
+                "x": 0
+              },
+              {
+                "id": "API",
+                "label": "API Go",
+                "x": 200
+              },
+              {
+                "id": "Bus",
+                "label": "Event Bus",
+                "x": 400
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 600
+              },
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 800
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "M",
+                "target": "API",
+                "label": "webhook e-mail",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "API",
+                "target": "Bus",
+                "label": "mail.inbox.received",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "U",
+                "target": "CRM",
+                "label": "abre feed de eventos",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "CRM",
+                "target": "API",
+                "label": "GET /api/agent/events",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "API",
+                "target": "CRM",
+                "label": "lista cronológica",
+                "dashed": true
+              },
+              {
+                "id": "step-5",
+                "source": "U",
+                "target": "CRM",
+                "label": "Correr prospeção",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "API",
+                "target": "Bus",
+                "label": "crm.prospection.run",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Mapa mental do feed (flowchart)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart TD\r\n    E[Evento no feed] --> T{Tipo?}\r\n    T -->|mail.inbox.received| A[Novo e-mail — corre prospeção?]\r\n    T -->|crm.prospection.run| B[Rascunhos gerados — importar?]\r\n    T -->|agent.tool.executed| C[Tool usada — ver auditoria]\r\n    A --> CRM[/crm prospeção/]\r\n    B --> CRM\r\n    C --> AUD[/api/agent/audit/]",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Recebe e-mail no alias → evento <code>mail.inbox.received</code> no feed.</li>\n<li>Abre <code>/crm</code> — painel «Actividade dos agentes» mostra eventos recentes.</li>\n<li>Clica <strong>Correr prospeção</strong> → novo evento <code>crm.prospection.run</code>.</li>\n<li>Importa leads — funil actualiza (cifragem local).</li>\n<li>Opcional: <code>GET /api/agent/audit</code> para detalhe de tools.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Histórico em <code>agent_events</code> (append-only).</li>\n<li>Base para orquestrador AGENT-005 (subscritores automáticos).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Utilizador / supervisor",
+  "order": 99
+}
