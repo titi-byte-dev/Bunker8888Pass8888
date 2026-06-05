@@ -1,0 +1,55 @@
+{
+  "slug": "competitive-landscape",
+  "title": "Panorama competitivo",
+  "category": "competitive",
+  "categoryLabel": "Concorrência",
+  "audience": [
+    "developer",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "level": 2,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Concorrentes, abordagens tecnológicas e ideias validadas para o roadmap.",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 2,
+      "title": "Categorias e players",
+      "html": "<table>\n<thead>\n<tr>\n<th>Categoria</th>\n<th>Exemplos</th>\n<th>O que fazem bem</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Password manager</td>\n<td>1Password, Bitwarden, Proton Pass</td>\n<td>UX de cofre, TOTP, partilha familiar/team</td>\n</tr>\n<tr>\n<td>IAM / SSO</td>\n<td>Okta, Microsoft Entra</td>\n<td>Políticas enterprise, SCIM</td>\n</tr>\n<tr>\n<td>HR BYOD</td>\n<td>Rippling, Deel</td>\n<td>Onboarding 1-clique, payroll</td>\n</tr>\n<tr>\n<td>ZTNA / VPN</td>\n<td>Tailscale, Cloudflare Zero Trust</td>\n<td>Rede zero-trust (nós: WireGuard)</td>\n</tr>\n</tbody></table>\n",
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Matriz de diferenciação (AegisPass)",
+      "html": "<table>\n<thead>\n<tr>\n<th>Capacidade</th>\n<th>AegisPass</th>\n<th>Típico password manager</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Zero-Knowledge E2EE</td>\n<td>✅ core</td>\n<td>✅</td>\n</tr>\n<tr>\n<td>BYOD + wipe selectivo</td>\n<td>✅</td>\n<td>❌ / MDM pesado</td>\n</tr>\n<tr>\n<td>Turnos + geofence</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>RH + RGPD campo-a-campo</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>Browser sandbox inject</td>\n<td>✅ (roadmap)</td>\n<td>Extensão expõe DOM</td>\n</tr>\n<tr>\n<td>ERP/CRM + agentes IA</td>\n<td>🔜 fase 2–3</td>\n<td>❌</td>\n</tr>\n</tbody></table>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Pipeline: observação → backlog",
+      "html": "<ol>\n<li><strong>Observar</strong> feature ou stack num concorrente</li>\n<li><strong>Validar</strong> com utilizador piloto ou spike técnico</li>\n<li><strong>Decidir</strong> incluir / adiar / rejeitar (registar em <code>validated-ideas</code>)</li>\n<li><strong>Criar task</strong> com ID (<code>VAULT-*</code>, <code>HR-*</code>, …) em <code>backlog.md</code></li>\n</ol>\n",
+      "collapsed": true
+    },
+    {
+      "level": 1,
+      "title": "",
+      "html": "<p>concept{id=&quot;validated-example&quot; title=&quot;Exemplo validado&quot; level=3}\n<strong>k-anonymity para breach check</strong> (estilo HIBP) — adoptado em <code>DW-001</code> após confirmar\nque não envia passwords em claro ao serviço externo.\n:::</p>\n",
+      "collapsed": false
+    },
+    {
+      "level": 3,
+      "title": "Ideias em observação (não validadas)",
+      "html": "<table>\n<thead>\n<tr>\n<th>Ideia</th>\n<th>Fonte inspiração</th>\n<th>Estado</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Google proxy ZK (Drive/Sheets)</td>\n<td>Interno + custo storage</td>\n<td>⚪ GOOGLE-*</td>\n</tr>\n<tr>\n<td>Cartões virtuais efémeros</td>\n<td>Brex, Stripe Issuing</td>\n<td>⚪ FIN-004</td>\n</tr>\n<tr>\n<td>Command palette universal</td>\n<td>Linear, Raycast</td>\n<td>🟢 UI-006</td>\n</tr>\n<tr>\n<td>SCIM provisioning</td>\n<td>Okta</td>\n<td>⚪ futuro</td>\n</tr>\n</tbody></table>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "vault",
+    "hr-rgpd"
+  ],
+  "order": 1
+}

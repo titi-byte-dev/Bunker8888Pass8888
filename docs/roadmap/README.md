@@ -24,6 +24,7 @@ A numeração indica a ordem de leitura sugerida (do "porquê" para o "como").
 | 07 | [`07-non-functional/`](07-non-functional/) | Segurança, performance, conformidade |
 | 08 | [`08-ai-tooling/`](08-ai-tooling/README.md) | Configuração de IA + melhorias futuras |
 | 09 | [`09-design/`](09-design/README.md) | Visão UX/UI, design system, referências |
+| — | [`../../docs/`](../..) | **Documentação in-app** (product, concepts, developer, competitive) — ver `DOC-*` no backlog |
 
 ## Convenções
 

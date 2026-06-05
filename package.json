@@ -1,0 +1,11 @@
+{
+  "name": "aegispass",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:build": "node scripts/build-docs.mjs"
+  },
+  "devDependencies": {
+    "marked": "^15.0.12"
+  }
+}

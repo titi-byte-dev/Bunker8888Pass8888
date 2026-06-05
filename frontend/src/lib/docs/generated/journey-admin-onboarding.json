@@ -1,0 +1,54 @@
+{
+  "slug": "journey-admin-onboarding",
+  "title": "Journey: Onboarding de novo funcionário",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "admin_onboarding",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Onboarding de novo funcionário</h1>\n<blockquote>\n<p><strong>Ator:</strong> Admin/RH · <strong>Epics:</strong> <code>HR</code>, <code>VAULT</code>, <code>MAIL</code></p>\n</blockquote>\n<p>O &quot;Dashboard de Integração&quot; promete fazer num clique o que normalmente são horas\nde trabalho manual em vários sistemas.</p>\n",
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<h2>Fluxo principal</h2>\n<pre><code class=\"language-mermaid\">flowchart TB\n    A[&quot;RH aprova contratação&quot;] --&gt; B[&quot;Cria ficha de empregado cifrada&quot;]\n    B --&gt; C[&quot;Gera alias de e-mail corporativo&quot;]\n    C --&gt; D[&quot;Atribui cofre(s) da equipa (Shared Vault)&quot;]\n    D --&gt; E[&quot;Gera chaves de acesso / credenciais iniciais&quot;]\n    E --&gt; F[&quot;Emite contrato p/ assinatura digital&quot;]\n    F --&gt; G[&quot;Envia manual de boas-vindas&quot;]\n    G --&gt; H[&quot;Funcionário define a sua Master Password&quot;]\n</code></pre>\n",
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<h2>Passo-a-passo</h2>\n<ol>\n<li>RH aprova a contratação no painel.</li>\n<li>Sistema cria a ficha cifrada (campos sensíveis cifrados no cliente).</li>\n<li>Gera o alias (<code>nome@empresa.com</code>) — ver <a href=\"../03-epics/epic-aliases-email.md\"><code>MAIL</code></a>.</li>\n<li>Atribui acesso aos cofres partilhados da equipa.</li>\n<li>Emite contrato para assinatura digital (ficheiro com chave própria).</li>\n<li>O funcionário recebe convite, instala a app e <strong>define a sua Master\nPassword</strong> (só aí nasce a Master Key, no dispositivo dele).</li>\n</ol>\n",
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<h2>Conceito didático</h2>\n<blockquote>\n<p>💡 <strong>Porque é o funcionário a definir a Master Password?</strong> No modelo\nZero-Knowledge, se o admin a definisse, o admin conheceria a chave. Ao deixar\no próprio funcionário criá-la no primeiro acesso, garantimos que <strong>ninguém</strong>\nalém dele a conhece — nem o admin, nem o servidor.</p>\n</blockquote>\n",
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Offboarding (o inverso)",
+      "html": "<h2>Offboarding (o inverso)</h2>\n<pre><code class=\"language-mermaid\">flowchart LR\n    X[&quot;Funcionário sai&quot;] --&gt; Y[&quot;Revoga sessões + cofres (&lt; 1s)&quot;]\n    Y --&gt; Z[&quot;Remote wipe de dados corporativos&quot;]\n    Z --&gt; W[&quot;Desativa aliases + revoga cartões SaaS&quot;]\n    W --&gt; V[&quot;Opção: erasure RGPD (Art. 17)&quot;]\n</code></pre>\n<p>Ver <a href=\"journey-remote-wipe.md\"><code>journey-remote-wipe.md</code></a> e\n<a href=\"journey-rgpd-erasure.md\"><code>journey-rgpd-erasure.md</code></a>.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Admin/RH",
+  "order": 99
+}

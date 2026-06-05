@@ -1,0 +1,59 @@
+{
+  "slug": "hr-rgpd",
+  "title": "RH e conformidade RGPD",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "frontend",
+    "backend"
+  ],
+  "feature": "hr",
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Fichas cifradas, contratos, onboarding e direito ao esquecimento.",
+  "concepts": [
+    {
+      "id": "field-encryption",
+      "title": "Cifragem campo-a-campo",
+      "level": 1,
+      "html": "<p>Campos sensíveis (NIF, IBAN, salário, saúde) cifram-se no cliente <strong>antes</strong> de\nchegarem à API. A base de dados guarda ciphertext; só quem tem a chave adequada\ndecifra no browser autorizado.</p>\n"
+    },
+    {
+      "id": "crypto-shredding",
+      "title": "Crypto-shredding (Art. 17)",
+      "level": 2,
+      "html": "<p>Para o <strong>direito ao esquecimento</strong>, destruímos a chave do titular. Os blobs tornam-se\nirrecuperáveis sem reescrever backups históricos — gera-se um <strong>certificado\ncriptográfico</strong> de eliminação para auditoria.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Funcionalidades na app",
+      "html": "<ul>\n<li><code>/hr</code> — fichas de empregado</li>\n<li><code>/hr/onboarding</code> — wizard de integração</li>\n<li><code>/hr/compliance</code> — relatório RGPD (PDF)</li>\n</ul>\n",
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Aprofundar: logs imutáveis",
+      "html": "<p>Acessos a dados sensíveis registam-se com <strong>hashing encadeado</strong> — alterar uma linha\nquebra a cadeia e é detectável. Os logs nunca contêm o dado em si, só metadados.</p>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Técnico",
+      "html": "<p><code>backend/internal/hr/</code>, migrações <code>employees</code>, <code>audit_logs</code>. Testes RGPD em\n<code>docs/roadmap/06-testing/rgpd-compliance-tests.md</code>.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "glossary",
+    "journey-rgpd-erasure",
+    "journey-admin-onboarding"
+  ],
+  "order": 5
+}

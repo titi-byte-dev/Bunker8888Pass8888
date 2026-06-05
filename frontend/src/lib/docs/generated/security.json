@@ -1,0 +1,57 @@
+{
+  "slug": "security",
+  "title": "Segurança e confiança",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "vault",
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Higiene, dispositivos, turnos, geofencing, Sentinel e emergência.",
+  "concepts": [
+    {
+      "id": "hygiene-score",
+      "title": "Score de higiene",
+      "level": 1,
+      "html": "<p>Pontuação calculada <strong>no teu browser</strong> a partir dos logins decifrados: passwords\nfracas, reutilizadas ou com aparência em fugas públicas (via k-anonymity). O servidor\nnão precisa de ver as passwords para te dar recomendações.</p>\n"
+    },
+    {
+      "id": "sentinel",
+      "title": "Sentinel Mode",
+      "level": 2,
+      "html": "<p>Deteta logins <strong>geograficamente impossíveis</strong> (ex.: Lisboa e Tokyo em minutos). Pode\nexigir <em>step-up</em> (passkey ou confirmação) antes de permitir acesso sensível.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Páginas principais",
+      "html": "<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/security/hygiene</code></td>\n<td>Score, passwords fracas, acções</td>\n</tr>\n<tr>\n<td><code>/security/devices</code></td>\n<td>Sessões, passkeys, revogação</td>\n</tr>\n<tr>\n<td><code>/security/sentinel</code></td>\n<td>Alertas de viagem impossível</td>\n</tr>\n<tr>\n<td><code>/security/emergency</code></td>\n<td>Acesso de emergência (herdeiro digital)</td>\n</tr>\n<tr>\n<td><code>/work/shifts</code></td>\n<td>Turnos e geofence</td>\n</tr>\n</tbody></table>\n",
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Aprofundar: turnos e geofencing",
+      "html": "<p>Fora do <strong>horário de turno</strong> a Master Key é expurgada da memória — mesmo com sessão\nHTTP válida, o cofre fica inacessível até novo unlock dentro das regras.</p>\n<p>O <strong>geofencing</strong> valida IP/GPS nos pedidos; combina com WireGuard para Zero-Trust\npor camadas.</p>\n",
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Técnico: remote wipe",
+      "html": "<p>O admin pode acionar <strong>remote wipe</strong> via WebSocket: invalida sessão, revoga chaves\nde desencriptação locais e apaga caches corporativos <strong>sem tocar em dados pessoais</strong>\ndo dispositivo BYOD.</p>\n<p>Ver percurso completo: <strong>Percursos → Remote Wipe</strong>.</p>\n",
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "vault",
+    "glossary",
+    "journey-remote-wipe"
+  ],
+  "order": 3
+}

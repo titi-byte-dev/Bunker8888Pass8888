@@ -90,6 +90,20 @@ export function buildActionCommands(): CommandEntry[] {
       href: "/settings",
     },
     {
+      id: "action-docs",
+      label: "Documentação",
+      group: "action",
+      keywords: "ajuda help guia conceitos glossary aprender",
+      href: "/settings/docs",
+    },
+    {
+      id: "action-docs-glossary",
+      label: "Glossário de conceitos",
+      group: "action",
+      keywords: "zero-knowledge nonce tenant totp conceito",
+      href: "/settings/docs/glossary",
+    },
+    {
       id: "action-sentinel",
       label: "Sentinel Mode",
       group: "action",
