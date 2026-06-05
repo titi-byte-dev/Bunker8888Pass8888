@@ -84,6 +84,7 @@ func main() {
 		sharedVaultsRepo := sharedvaults.NewRepo(pool)
 		hrRepo := hr.NewRepo(pool)
 		mailRepo := mail.NewRepo(pool)
+		mailInbox := mail.NewInboxRepo(pool)
 		finRepo := fin.NewRepo(pool)
 		crmRepo := crm.NewRepo(pool)
 		agentAudit := guardian.NewAuditRepo(pool)
@@ -126,6 +127,7 @@ func main() {
 		}
 
 		agentReg := agent.NewDefaultRegistry()
+		agentReg.MustRegister(agent.NewListMailInboxTool(mailInbox))
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 
 		deps = httpapi.Deps{
@@ -148,6 +150,7 @@ func main() {
 			BurnNotes:    burnNotesStore,
 			HR:           hrRepo,
 			Mail:         mailRepo,
+			MailInbox:    mailInbox,
 			Fin:          finRepo,
 			Agent:        agentReg,
 			AgentRunner:  agentRun,

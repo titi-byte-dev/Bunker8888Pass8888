@@ -57,7 +57,8 @@ type Deps struct {
 	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
-	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/*
+	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/aliases*
+	MailInbox    *mail.InboxRepo    // nil desactiva endpoints /api/mail/inbox*
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner      // executor de tools (AGENT-001)
@@ -223,6 +224,12 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/mail/aliases", requireAuth(deps.Auth, handleCreateAlias(deps.Mail)))
 		mux.Handle("PATCH /api/mail/aliases/{id}", requireAuth(deps.Auth, handleSetAliasActive(deps.Mail)))
 		mux.Handle("DELETE /api/mail/aliases/{id}", requireAuth(deps.Auth, handleDeleteAlias(deps.Mail)))
+	}
+	if deps.MailInbox != nil && deps.Auth != nil {
+		// Caixa de entrada simulada (AGENT-003 stub até MAIL-002).
+		mux.Handle("GET /api/mail/inbox", requireAuth(deps.Auth, handleListInbox(deps.MailInbox)))
+		mux.Handle("POST /api/mail/inbox", requireAuth(deps.Auth, handleCreateInboxMessage(deps.MailInbox)))
+		mux.Handle("POST /api/mail/inbox/{id}/processed", requireAuth(deps.Auth, handleMarkInboxProcessed(deps.MailInbox)))
 	}
 	if deps.Fin != nil && deps.Auth != nil {
 		// Monitorizacao de custos SaaS (FIN-001).
