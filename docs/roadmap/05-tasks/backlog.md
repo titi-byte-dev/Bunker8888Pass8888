@@ -67,7 +67,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | UI-007 | Painel higiene + preview Dark Web (score cliente) | 2 | M | 🟢 | UI-004, VAULT-008, DW-001 |
 | UI-008 | Admin: utilizadores, políticas, audit, remote wipe | 1 | L | 🟢 | UI-002, VAULT-010, VAULT-012 |
 | UI-009 | Shell mobile Capacitor + biometria | 1 | L | ⚪ | UI-004 |
-| UI-010 | Catálogo componentes (Storybook ou página dev) | 1 | M | ⚪ | UI-001 |
+| UI-010 | Catálogo componentes (Storybook ou página dev) | 1 | M | 🟢 | UI-001 |
 
 ## HR — Recursos Humanos & RGPD
 

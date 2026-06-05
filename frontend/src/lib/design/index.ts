@@ -9,3 +9,4 @@ export {
   type ThemeMode,
   type ResolvedTheme,
 } from "./theme";
+export { CATALOG_SECTIONS, type CatalogSection } from "./catalog";
