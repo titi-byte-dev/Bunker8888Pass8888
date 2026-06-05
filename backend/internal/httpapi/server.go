@@ -20,6 +20,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/vault"
@@ -40,6 +41,7 @@ type Deps struct {
 	CLICertTTL time.Duration
 	Passkeys   *passkeys.Service
 	Emergency  *emergency.Service
+	Sentinel   *sentinel.Service
 	AdminKey string // vazio desactiva endpoints /api/admin/*
 	Pool     *pgxpool.Pool
 }
@@ -59,7 +61,7 @@ func NewRouter(deps Deps) http.Handler {
 
 	if deps.Auth != nil {
 		mux.HandleFunc("POST /api/auth/register", handleRegister(deps.Auth))
-		mux.HandleFunc("POST /api/auth/login", handleLoginWithAccessPolicy(deps.Auth, ap))
+		mux.HandleFunc("POST /api/auth/login", handleLoginWithAccessPolicy(deps.Auth, ap, deps.Sentinel, deps.Users))
 		mux.HandleFunc("GET /api/auth/kdf", handleKDFParams(deps.Auth))
 	}
 	if deps.Auth != nil && deps.Users != nil {
@@ -114,6 +116,13 @@ func NewRouter(deps Deps) http.Handler {
 	}
 	registerCLIRoutes(mux, deps)
 	registerPasskeyRoutes(mux, deps, ap)
+	if deps.Sentinel != nil && deps.Auth != nil {
+		mux.Handle("GET /api/security/sentinel/events", requireAuth(deps.Auth, handleListSentinelEvents(deps.Sentinel)))
+	}
+	if deps.Sentinel != nil && deps.Passkeys != nil && deps.Users != nil && deps.Auth != nil {
+		mux.HandleFunc("POST /api/auth/sentinel/step-up/begin", handleSentinelStepUpBegin(deps.Passkeys, deps.Sentinel, deps.Users))
+		mux.HandleFunc("POST /api/auth/sentinel/step-up/finish", handleSentinelStepUpFinish(deps.Auth, deps.Passkeys, deps.Sentinel, deps.Users, ap))
+	}
 
 	return mux
 }

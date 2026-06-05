@@ -10,6 +10,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 )
 
@@ -96,8 +97,8 @@ func handleAdminSetAccessGeofence(userRepo *users.Repo, geoRepo *geofence.Repo) 
 	}
 }
 
-func handleLoginWithAccessPolicy(svc *auth.Service, ap accessPolicyDeps) http.HandlerFunc {
-	if ap.Shifts == nil && ap.Geofence == nil {
+func handleLoginWithAccessPolicy(svc *auth.Service, ap accessPolicyDeps, sent *sentinel.Service, userRepo *users.Repo) http.HandlerFunc {
+	if ap.Shifts == nil && ap.Geofence == nil && sent == nil {
 		return handleLogin(svc)
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +115,14 @@ func handleLoginWithAccessPolicy(svc *auth.Service, ap accessPolicyDeps) http.Ha
 
 		userID, err := svc.ValidateCredentials(r.Context(), req.Email, authHash)
 		if errors.Is(err, auth.ErrInvalidCredentials) {
+			if sent != nil && userRepo != nil {
+				lc := loginContextFromRequest(r, "", req.Email)
+				if u, e := userRepo.ByEmail(r.Context(), req.Email); e == nil {
+					lc.UserID = u.ID
+					lc.Email = u.Email
+				}
+				_ = sent.RecordFailure(r.Context(), lc)
+			}
 			writeError(w, http.StatusUnauthorized, "credenciais inválidas")
 			return
 		}
@@ -126,12 +135,7 @@ func handleLoginWithAccessPolicy(svc *auth.Service, ap accessPolicyDeps) http.Ha
 			return
 		}
 
-		token, err := svc.CreateSessionForUser(r.Context(), userID)
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, "falha no login")
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"token": token})
+		finishLoginWithSentinel(w, r, userID, req.Email, svc, sent)
 	}
 }
 

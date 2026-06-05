@@ -9,6 +9,8 @@
 import { argon2id } from "hash-wasm";
 import { randomBytes, type Bytes } from "./crypto";
 import { normalizeEmail, wrapNetworkError } from "./auth/http";
+import { loginGeoHeaders, mergeHeaders } from "./auth/loginGeo";
+import { parseSentinelResponse } from "./sentinel/api";
 
 /** Parâmetros KDF do cliente (guardados na BD no registo). */
 export interface ClientKdfParams {
@@ -151,17 +153,21 @@ export async function loginUser(
   const kdf = await fetchKdfParams(baseURL, email);
   const mk = await deriveMasterKeyBytes(masterPassword, kdf.salt, kdf);
   const authHash = await deriveAuthHashBytes(mk, masterPassword, kdf);
+  const geo = await loginGeoHeaders();
   try {
     const res = await fetch(`${baseURL}/api/auth/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: mergeHeaders({ "Content-Type": "application/json" }, geo),
       body: JSON.stringify({
         email: normalizeEmail(email),
         auth_hash: bytesToBase64(authHash),
       }),
     });
     if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      const errBody = await res.json().catch(() => ({}));
+      const sentinel = parseSentinelResponse(res.status, errBody);
+      if (sentinel) throw sentinel;
+      const err = errBody as { error?: string };
       throw new Error(err.error ?? `Login falhou (${res.status})`);
     }
     const { token } = (await res.json()) as { token: string };

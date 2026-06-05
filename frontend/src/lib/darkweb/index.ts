@@ -13,3 +13,4 @@ export {
   remediationEditUrl,
   type RemediationItem,
 } from "./remediation";
+export { listSentinelEvents, reasonLabel, type LoginEvent } from "$lib/sentinel/api";

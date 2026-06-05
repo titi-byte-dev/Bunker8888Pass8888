@@ -23,6 +23,12 @@
       </a>
     </li>
     <li>
+      <a href="/security/sentinel">
+        <strong>Sentinel Mode</strong>
+        <span>Logins impossíveis, step-up passkey e histórico (DW-004)</span>
+      </a>
+    </li>
+    <li>
       <a href="/security/emergency">
         <strong>Acesso de emergência</strong>
         <span>Herdeiro digital, countdown, aprovar/rejeitar (VAULT-016)</span>

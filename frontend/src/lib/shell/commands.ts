@@ -90,6 +90,13 @@ export function buildActionCommands(): CommandEntry[] {
       href: "/settings",
     },
     {
+      id: "action-sentinel",
+      label: "Sentinel Mode",
+      group: "action",
+      keywords: "segurança login impossível viagem step-up",
+      href: "/security/sentinel",
+    },
+    {
       id: "action-admin",
       label: "Administração",
       group: "action",
