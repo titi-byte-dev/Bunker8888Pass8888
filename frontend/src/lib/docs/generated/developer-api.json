@@ -25,7 +25,7 @@
     {
       "level": 3,
       "title": "Módulos internos",
-      "html": "<table>\n<thead>\n<tr>\n<th>Pacote</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>internal/auth</code></td>\n<td>Sessões, JWT, passkeys</td>\n</tr>\n<tr>\n<td><code>internal/vault</code></td>\n<td>CRUD blobs, WebSocket sync</td>\n</tr>\n<tr>\n<td><code>internal/users</code></td>\n<td>Perfis por tenant</td>\n</tr>\n<tr>\n<td><code>internal/shifts</code></td>\n<td>Turnos + NTP</td>\n</tr>\n<tr>\n<td><code>internal/hr</code></td>\n<td>RH cifrado</td>\n</tr>\n<tr>\n<td><code>internal/sharing</code></td>\n<td>Cofres partilhados</td>\n</tr>\n<tr>\n<td><code>pkg/crypto</code></td>\n<td>AEAD, helpers servidor</td>\n</tr>\n</tbody></table>\n<p>Entrypoint: <code>backend/cmd/server/main.go</code>.</p>\n",
+      "html": "<table>\n<thead>\n<tr>\n<th>Pacote</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>internal/auth</code></td>\n<td>Sessões, JWT, passkeys</td>\n</tr>\n<tr>\n<td><code>internal/vault</code></td>\n<td>CRUD blobs, WebSocket sync</td>\n</tr>\n<tr>\n<td><code>internal/fin</code></td>\n<td>Subscrições SaaS (blobs ZK)</td>\n</tr>\n<tr>\n<td><code>internal/openbanking</code></td>\n<td>PSD2 mock / mTLS</td>\n</tr>\n<tr>\n<td><code>internal/invoicing</code></td>\n<td>Faturas, numeração legal</td>\n</tr>\n<tr>\n<td><code>internal/commissions</code></td>\n<td>Comissões ligadas a faturas</td>\n</tr>\n<tr>\n<td><code>internal/googleworkspace</code></td>\n<td>Provider Google (mock / SA)</td>\n</tr>\n<tr>\n<td><code>internal/mail</code></td>\n<td>Aliases, inbox, ingest SMTP</td>\n</tr>\n<tr>\n<td><code>internal/orchestrator</code></td>\n<td>Workers multi-agente</td>\n</tr>\n<tr>\n<td><code>internal/agent</code></td>\n<td>Tools, prospeção, Guardião</td>\n</tr>\n<tr>\n<td><code>internal/crm</code></td>\n<td>Leads cifrados</td>\n</tr>\n<tr>\n<td><code>internal/hr</code></td>\n<td>RH + RGPD</td>\n</tr>\n</tbody></table>\n<p>Entrypoint: <code>backend/cmd/server/main.go</code>.</p>\n",
       "flows": [],
       "collapsed": true
     },
@@ -38,15 +38,23 @@
     },
     {
       "level": 3,
-      "title": "Endpoints de referência",
-      "html": "<ul>\n<li><code>POST /api/auth/register</code>, <code>POST /api/auth/login</code></li>\n<li><code>GET/POST /api/vault</code>, <code>GET/PUT/DELETE /api/vault/:id</code></li>\n<li><code>GET /healthz</code> — health check</li>\n<li>WebSocket em <code>/api/vault/ws</code> (sync)</li>\n</ul>\n",
+      "title": "Endpoints principais",
+      "html": "<p><strong>Auth &amp; vault</strong></p>\n<ul>\n<li><code>POST /api/auth/register</code>, <code>POST /api/auth/login</code></li>\n<li><code>GET/POST /api/vault</code>, <code>GET/PUT/DELETE /api/vault/{id}</code></li>\n<li><code>GET /healthz</code></li>\n</ul>\n<p><strong>Finanças</strong></p>\n<ul>\n<li><code>GET/POST/PUT/DELETE /api/fin/subscriptions</code></li>\n<li><code>GET/POST /api/fin/invoices</code>, <code>PUT /api/fin/invoices/{id}/status</code></li>\n<li><code>GET/POST /api/fin/commissions</code>, <code>PUT /api/fin/commissions/{id}/status</code></li>\n<li><code>GET/POST /api/fin/banking/{status,connect,sync}</code></li>\n</ul>\n<p><strong>Mail (webhooks sem Bearer — segredo na query)</strong></p>\n<ul>\n<li><code>POST /api/mail/webhook/mailpit</code> — dev Mailpit</li>\n<li><code>POST /api/mail/ingest</code> — Postfix produção (JSON pipe)</li>\n</ul>\n<p><strong>Google &amp; agentes</strong></p>\n<ul>\n<li><code>GET /api/work/google/status</code></li>\n<li><code>GET /api/agent/events</code>, <code>POST /api/agent/prospection/run</code></li>\n<li><code>GET /api/agent/audit</code>, <code>GET /api/agent/orchestrator/status</code></li>\n</ul>\n<p><strong>CRM</strong></p>\n<ul>\n<li><code>GET/POST/PATCH/DELETE /api/crm/leads</code></li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Variáveis de ambiente (produção)",
+      "html": "<p>Ver <code>.env.production.example</code> e <code>docs/roadmap/10-production/</code>. Destaques:\n<code>AEGIS_OB_*</code> (Open Banking), <code>AEGIS_GOOGLE_*</code> (Workspace),\n<code>AEGIS_MAIL_WEBHOOK_SECRET</code>, <code>AEGIS_SMTP_RELAY_HOST</code>.</p>\n",
       "flows": [],
       "collapsed": true
     }
   ],
   "related": [
     "developer-crypto",
-    "glossary"
+    "glossary",
+    "production-path"
   ],
   "order": 3
 }

@@ -167,6 +167,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | DOC-011 | POC Svelte Flow (`@xyflow/svelte`) com highlight por passo | 2 | M | 🟢 | DOC-009 |
 | DOC-012 | Converter sequenceDiagram → graph no build-docs | 2 | S | 🟢 | DOC-011 |
 | DOC-013 | Links contextuais «Como funciona?» nas rotas da app | 2 | S | 🟢 | DOC-002 |
+| DOC-014 | Docs produção + matriz dev/prod + índice journeys | 2 | S | 🟢 | DOC-001 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 

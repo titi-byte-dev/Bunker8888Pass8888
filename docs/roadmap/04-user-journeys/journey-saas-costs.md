@@ -61,3 +61,11 @@ sequenceDiagram
 
 - Visibilidade do gasto recorrente e licenças candidatas a corte.
 - Acções de revogação alinhadas com auditoria e offboarding.
+
+## Extensão: fiscal (FIN-005)
+
+1. Em `/fin`, define **código fiscal** por subscrição (ou usa «sugerir»).
+2. Em `/fin/fiscal`, revê totais **dedutíveis estimados** por mês.
+3. Classificação fica no blob ZK — servidor não vê IRC em claro.
+
+Ver [`journey-fiscal-categorization.md`](journey-fiscal-categorization.md).

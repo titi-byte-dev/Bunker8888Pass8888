@@ -47,6 +47,16 @@ código e IDs em **inglês** (`goroutine`, `nonce`, `VAULT-001`).
 - Código novo traz testes (ver [`docs/roadmap/06-testing/`](docs/roadmap/06-testing/)).
 - Notas pessoais vão para `docs/roadmap/_private/` (fora do git).
 
+## Dev local vs produção
+
+| Ambiente | Guia |
+|---|---|
+| Sem VPS (stubs) | [`docs/roadmap/08-dev-environment/development-without-vps.md`](docs/roadmap/08-dev-environment/development-without-vps.md) |
+| VPS + integrações reais | [`docs/roadmap/10-production/README.md`](docs/roadmap/10-production/README.md) |
+| Matriz dev/prod por task | [`implementation-status.md`](docs/roadmap/10-production/implementation-status.md) |
+
+Documentação in-app: `docs/product/` + `docs/developer/` → `npm run docs:build`.
+
 ## Configuração de IA neste repositório
 
 Ver [`docs/roadmap/08-ai-tooling/`](docs/roadmap/08-ai-tooling/README.md) para a

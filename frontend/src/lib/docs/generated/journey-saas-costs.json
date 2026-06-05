@@ -227,6 +227,13 @@
       "html": "<ul>\n<li>Visibilidade do gasto recorrente e licenças candidatas a corte.</li>\n<li>Acções de revogação alinhadas com auditoria e offboarding.</li>\n</ul>\n",
       "flows": [],
       "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Extensão: fiscal (FIN-005)",
+      "html": "<ol>\n<li>Em <code>/fin</code>, define <strong>código fiscal</strong> por subscrição (ou usa «sugerir»).</li>\n<li>Em <code>/fin/fiscal</code>, revê totais <strong>dedutíveis estimados</strong> por mês.</li>\n<li>Classificação fica no blob ZK — servidor não vê IRC em claro.</li>\n</ol>\n<p>Ver <a href=\"journey-fiscal-categorization.md\"><code>journey-fiscal-categorization.md</code></a>.</p>\n",
+      "flows": [],
+      "collapsed": true
     }
   ],
   "related": [],

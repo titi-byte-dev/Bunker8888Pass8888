@@ -20,7 +20,7 @@
     {
       "level": 1,
       "title": "Visão geral",
-      "html": "<h1>Journey: Google proxy em desenvolvimento (DoD Fase 2)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Administrador · <strong>Substitui:</strong> GOOGLE-001–003 até haver VPS + OAuth</p>\n</blockquote>\n<p>Simula Drive cifrado e mascaramento Sheets <strong>sem</strong> ligar à Google.</p>\n",
+      "html": "<h1>Journey: Google proxy em desenvolvimento (DoD Fase 2)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Administrador · <strong>Substitui:</strong> GOOGLE-002–003 até APIs reais · Estado OAuth: <code>/work/google</code></p>\n</blockquote>\n<p>Simula Drive cifrado e mascaramento Sheets <strong>sem</strong> ligar à Google.</p>\n",
       "flows": [],
       "collapsed": false
     },

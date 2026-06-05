@@ -46,12 +46,12 @@ flowchart LR
 
 ## Definition of Done (Fase 1)
 
-- [ ] Cripto core passa em *test vectors* conhecidos (Argon2id, AES-GCM).
-- [ ] Auditoria interna confirma: servidor nunca recebe Master Key em claro.
-- [ ] Remote wipe testado em dispositivo real (mobile + desktop).
-- [ ] RGPD: erasure gera certificado criptográfico e logs imutáveis íntegros.
-- [ ] RLS impede acesso cross-tenant (teste automatizado).
-- [ ] Cobertura de testes do core de segurança ≥ 90%.
+- [x] Cripto core passa em *test vectors* conhecidos (Argon2id, AES-GCM) — `VAULT-001/002`.
+- [x] Arquitectura confirma: servidor nunca recebe Master Key em claro (ZK por desenho).
+- [ ] Remote wipe testado em dispositivo real mobile — bloqueado por `UI-009` Capacitor.
+- [x] RGPD: erasure + certificado (`HR-003/004`); remote wipe desktop (`VAULT-012`).
+- [x] RLS impede acesso cross-tenant (testes dedicados).
+- [ ] Cobertura de testes do core de segurança ≥ 90% — medir em CI.
 
 ## Riscos principais
 

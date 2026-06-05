@@ -70,3 +70,15 @@ Ver [`../03-epics/epic-aliases-email.md`](../03-epics/epic-aliases-email.md).
   já paga à Google).
 - **Conformidade RGPD instantânea:** "use o Google que já tem, mas a Google deixa
   de ver os dados reais".
+
+## Estado de implementação (2026)
+
+| Componente | Dev local | Produção | Código / rota |
+|---|---|---|---|
+| GOOGLE-001 OAuth/SA | 🟢 `mock` provider | 🟡 guia VPS | `internal/googleworkspace/`, `/work/google` |
+| GOOGLE-002 Drive ZK | 🟢 stub | ⚪ API Drive | `/work/google-dev`, `driveDevStore.ts` |
+| GOOGLE-003 Sheets mask | 🟢 stub | ⚪ API Sheets | `masking.ts` |
+| GOOGLE-004 Gmail relay | ⚪ | ⚪ | depende MAIL-004 |
+
+Journeys: [`journey-google-dev-stub.md`](../04-user-journeys/journey-google-dev-stub.md) ·
+Produção: [`10-production/google-001-oauth.md`](../10-production/google-001-oauth.md)

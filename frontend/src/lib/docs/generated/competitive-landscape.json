@@ -26,7 +26,7 @@
     {
       "level": 2,
       "title": "Matriz de diferenciação (AegisPass)",
-      "html": "<table>\n<thead>\n<tr>\n<th>Capacidade</th>\n<th>AegisPass</th>\n<th>Típico password manager</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Zero-Knowledge E2EE</td>\n<td>✅ core</td>\n<td>✅</td>\n</tr>\n<tr>\n<td>BYOD + wipe selectivo</td>\n<td>✅</td>\n<td>❌ / MDM pesado</td>\n</tr>\n<tr>\n<td>Turnos + geofence</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>RH + RGPD campo-a-campo</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>Browser sandbox inject</td>\n<td>✅ (roadmap)</td>\n<td>Extensão expõe DOM</td>\n</tr>\n<tr>\n<td>ERP/CRM + agentes IA</td>\n<td>🔜 fase 2–3</td>\n<td>❌</td>\n</tr>\n</tbody></table>\n",
+      "html": "<table>\n<thead>\n<tr>\n<th>Capacidade</th>\n<th>AegisPass</th>\n<th>Típico password manager</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Zero-Knowledge E2EE</td>\n<td>✅ core</td>\n<td>✅</td>\n</tr>\n<tr>\n<td>BYOD + wipe selectivo</td>\n<td>✅</td>\n<td>❌ / MDM pesado</td>\n</tr>\n<tr>\n<td>Turnos + geofence</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>RH + RGPD campo-a-campo</td>\n<td>✅</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>Browser sandbox inject</td>\n<td>✅ (roadmap)</td>\n<td>Extensão expõe DOM</td>\n</tr>\n<tr>\n<td>ERP/CRM + agentes IA</td>\n<td>🟢 dev (orquestrador)</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>Google proxy ZK</td>\n<td>🟡 stub dev</td>\n<td>❌</td>\n</tr>\n<tr>\n<td>Open Banking + fiscal</td>\n<td>🟡 mock / FIN-005</td>\n<td>❌</td>\n</tr>\n</tbody></table>\n",
       "flows": [],
       "collapsed": true
     },
@@ -47,7 +47,7 @@
     {
       "level": 3,
       "title": "Ideias em observação (não validadas)",
-      "html": "<table>\n<thead>\n<tr>\n<th>Ideia</th>\n<th>Fonte inspiração</th>\n<th>Estado</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Google proxy ZK (Drive/Sheets)</td>\n<td>Interno + custo storage</td>\n<td>⚪ GOOGLE-*</td>\n</tr>\n<tr>\n<td>Cartões virtuais efémeros</td>\n<td>Brex, Stripe Issuing</td>\n<td>⚪ FIN-004</td>\n</tr>\n<tr>\n<td>Command palette universal</td>\n<td>Linear, Raycast</td>\n<td>🟢 UI-006</td>\n</tr>\n<tr>\n<td>SCIM provisioning</td>\n<td>Okta</td>\n<td>⚪ futuro</td>\n</tr>\n</tbody></table>\n",
+      "html": "<table>\n<thead>\n<tr>\n<th>Ideia</th>\n<th>Fonte inspiração</th>\n<th>Estado</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Google proxy ZK (Drive/Sheets)</td>\n<td>Interno + custo storage</td>\n<td>🟡 GOOGLE-001/002/003 stub</td>\n</tr>\n<tr>\n<td>Categorização fiscal SaaS</td>\n<td>Contabilidade cloud</td>\n<td>🟢 FIN-005 (ZK cliente)</td>\n</tr>\n<tr>\n<td>Cartões virtuais efémeros</td>\n<td>Brex, Stripe Issuing</td>\n<td>⚪ FIN-004</td>\n</tr>\n<tr>\n<td>Command palette universal</td>\n<td>Linear, Raycast</td>\n<td>🟢 UI-006</td>\n</tr>\n<tr>\n<td>SCIM provisioning</td>\n<td>Okta</td>\n<td>⚪ futuro</td>\n</tr>\n</tbody></table>\n",
       "flows": [],
       "collapsed": true
     }

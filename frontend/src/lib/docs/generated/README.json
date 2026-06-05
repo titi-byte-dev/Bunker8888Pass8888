@@ -1,0 +1,44 @@
+{
+  "slug": "README",
+  "title": "User Journeys — índice",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "README",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>User Journeys — índice</h1>\n<blockquote>\n<p>Percursos passo-a-passo para validar funcionalidades. Expostos na app em\n<strong>Definições → Documentação</strong> (<code>npm run docs:build</code> gera JSON em <code>frontend/src/lib/docs/generated/</code>).</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Por módulo",
+      "html": "<table>\n<thead>\n<tr>\n<th>Módulo</th>\n<th>Journey</th>\n<th>Rota na app</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Onboarding</strong></td>\n<td><a href=\"journey-admin-onboarding.md\">admin-onboarding</a></td>\n<td><code>/admin</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-employee-byod.md\">employee-byod</a></td>\n<td><code>/vault</code></td>\n</tr>\n<tr>\n<td><strong>Vault</strong></td>\n<td><a href=\"journey-passkey.md\">passkey</a></td>\n<td><code>/security/devices</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-remote-wipe.md\">remote-wipe</a></td>\n<td><code>/security</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-emergency-access.md\">emergency-access</a></td>\n<td><code>/security/emergency</code></td>\n</tr>\n<tr>\n<td><strong>RH / RGPD</strong></td>\n<td><a href=\"journey-rgpd-erasure.md\">rgpd-erasure</a></td>\n<td><code>/hr</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-hr-agent-recruitment.md\">hr-agent-recruitment</a></td>\n<td><code>/hr/recruitment</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-hr-agent-onboarding.md\">hr-agent-onboarding</a></td>\n<td><code>/hr</code></td>\n</tr>\n<tr>\n<td><strong>Partilha</strong></td>\n<td><a href=\"journey-shared-vault.md\">shared-vault</a></td>\n<td><code>/team/vaults</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-secret-link.md\">secret-link</a></td>\n<td><code>/team/links</code></td>\n</tr>\n<tr>\n<td><strong>Segurança</strong></td>\n<td><a href=\"journey-sentinel.md\">sentinel</a></td>\n<td><code>/security/sentinel</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-guardian-audit.md\">guardian-audit</a></td>\n<td><code>/security/guardian</code></td>\n</tr>\n<tr>\n<td><strong>Mail</strong></td>\n<td><a href=\"journey-mail-alias-relay.md\">mail-alias-relay</a></td>\n<td><code>/mail</code></td>\n</tr>\n<tr>\n<td><strong>CRM</strong></td>\n<td><a href=\"journey-crm-prospection.md\">crm-prospection</a></td>\n<td><code>/crm</code></td>\n</tr>\n<tr>\n<td><strong>Finanças</strong></td>\n<td><a href=\"journey-saas-costs.md\">saas-costs</a></td>\n<td><code>/fin</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-fiscal-categorization.md\">fiscal-categorization</a></td>\n<td><code>/fin/fiscal</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-finance-agent-saas.md\">finance-agent-saas</a></td>\n<td><code>/fin</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-finance-agent-reconcile.md\">finance-agent-reconcile</a></td>\n<td><code>/fin/banking</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-erp-flow-dev.md\">erp-flow-dev</a></td>\n<td><code>/fin/invoices</code></td>\n</tr>\n<tr>\n<td><strong>Google</strong></td>\n<td><a href=\"journey-google-dev-stub.md\">google-dev-stub</a></td>\n<td><code>/work/google-dev</code></td>\n</tr>\n<tr>\n<td><strong>Agentes</strong></td>\n<td><a href=\"journey-orchestrator.md\">orchestrator</a></td>\n<td>feed em <code>/crm</code>, <code>/fin</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-human-in-the-loop.md\">human-in-the-loop</a></td>\n<td>aprovações no feed</td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-agent-event-feed.md\">agent-event-feed</a></td>\n<td><code>/crm</code></td>\n</tr>\n<tr>\n<td></td>\n<td><a href=\"journey-ops-agent-inventory.md\">ops-agent-inventory</a></td>\n<td><code>/work/inventory</code></td>\n</tr>\n<tr>\n<td><strong>Infra</strong></td>\n<td><a href=\"journey-vps-deploy.md\">vps-deploy</a></td>\n<td>— (produção)</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Dev vs produção",
+      "html": "<table>\n<thead>\n<tr>\n<th>Ambiente</th>\n<th>Guia</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Local sem VPS</td>\n<td><a href=\"../08-dev-environment/development-without-vps.md\"><code>08-dev-environment/development-without-vps.md</code></a></td>\n</tr>\n<tr>\n<td>VPS real</td>\n<td><a href=\"../10-production/README.md\"><code>10-production/README.md</code></a></td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "order": 99
+}

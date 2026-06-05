@@ -18,7 +18,7 @@ A numeração indica a ordem de leitura sugerida (do "porquê" para o "como").
 | 01 | [`01-architecture/`](01-architecture/) | Stack, Zero-Knowledge, multi-tenancy, agentes, proxy Google |
 | 02 | [`02-phases/`](02-phases/) | As 3 fases de desenvolvimento e marcos |
 | 03 | [`03-epics/`](03-epics/) | Épicos por módulo (Vault, RH, FinTech, etc.) |
-| 04 | [`04-user-journeys/`](04-user-journeys/) | Fluxos passo-a-passo do utilizador |
+| 04 | [`04-user-journeys/`](04-user-journeys/README.md) | Fluxos passo-a-passo do utilizador (índice) |
 | 05 | [`05-tasks/`](05-tasks/) | Backlog granular com IDs rastreáveis |
 | 06 | [`06-testing/`](06-testing/) | Estratégia de testes, segurança e RGPD |
 | 07 | [`07-non-functional/`](07-non-functional/) | Segurança, performance, conformidade |
@@ -36,12 +36,14 @@ A numeração indica a ordem de leitura sugerida (do "porquê" para o "como").
   linguagem (ver regra em `.cursor/rules/didactic-style.mdc`).
 - **Notas pessoais:** em [`_private/`](_private/) (fora do git por defeito).
 
-## Estado
+## Estado (Jun 2026)
 
-| Fase | Estado |
-|---|---|
-| Fase 1 — Fundação & Identidade | 🟡 Planeamento |
-| Fase 2 — Pipeline de Vendas (CRM) | ⚪ Por iniciar |
-| Fase 3 — Operações (ERP + Agentes) | ⚪ Por iniciar |
+| Fase | Código | DoD dev local | Produção real |
+|---|---|---|---|
+| Fase 1 — Fundação | 🟢 maior parte no backlog | 🟡 parcial | INFRA VPS pendente |
+| Fase 2 — CRM + 1º agente | 🟢 | 🟢 [`development-without-vps`](08-dev-environment/development-without-vps.md) | Google/Mail reais |
+| Fase 3 — ERP + orquestrador | 🟢 | 🟢 idem | Open Banking TPP |
 
-> Legenda: ⚪ por iniciar · 🟡 em planeamento/curso · 🟢 concluído
+Matriz detalhada: [`10-production/implementation-status.md`](10-production/implementation-status.md)
+
+> Legenda: ⚪ por iniciar · 🟡 em curso / stub · 🟢 concluído (no âmbito indicado)

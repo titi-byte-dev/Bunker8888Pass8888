@@ -41,3 +41,7 @@ Na raiz do repositório, pasta [`infra/scripts/`](../../../infra/scripts/):
 
 - [`journey-vps-deploy.md`](../04-user-journeys/journey-vps-deploy.md) — checklist ponta-a-ponta
 - [`journey-mail-alias-relay.md`](../04-user-journeys/journey-mail-alias-relay.md) — pipeline SMTP (dev → prod)
+
+## Estado de implementação
+
+Ver [`implementation-status.md`](implementation-status.md) — matriz dev vs produção por task.

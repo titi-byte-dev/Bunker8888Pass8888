@@ -33,7 +33,9 @@ Esta análise alimenta decisões — cada ideia aceite deve virar task no backlo
 | Turnos + geofence | ✅ | ❌ |
 | RH + RGPD campo-a-campo | ✅ | ❌ |
 | Browser sandbox inject | ✅ (roadmap) | Extensão expõe DOM |
-| ERP/CRM + agentes IA | 🔜 fase 2–3 | ❌ |
+| ERP/CRM + agentes IA | 🟢 dev (orquestrador) | ❌ |
+| Google proxy ZK | 🟡 stub dev | ❌ |
+| Open Banking + fiscal | 🟡 mock / FIN-005 | ❌ |
 :::
 
 :::level{level=3 title="Pipeline: observação → backlog"}
@@ -50,7 +52,8 @@ que não envia passwords em claro ao serviço externo.
 :::level{level=3 title="Ideias em observação (não validadas)"}
 | Ideia | Fonte inspiração | Estado |
 |---|---|---|
-| Google proxy ZK (Drive/Sheets) | Interno + custo storage | ⚪ GOOGLE-* |
+| Google proxy ZK (Drive/Sheets) | Interno + custo storage | 🟡 GOOGLE-001/002/003 stub |
+| Categorização fiscal SaaS | Contabilidade cloud | 🟢 FIN-005 (ZK cliente) |
 | Cartões virtuais efémeros | Brex, Stripe Issuing | ⚪ FIN-004 |
 | Command palette universal | Linear, Raycast | 🟢 UI-006 |
 | SCIM provisioning | Okta | ⚪ futuro |

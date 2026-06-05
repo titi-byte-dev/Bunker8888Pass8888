@@ -23,10 +23,10 @@ permitir revogar acessos/cartões instantaneamente é valor financeiro direto.
 
 ## Critérios de aceitação
 
-- [ ] Painel mostra gasto por licença e sinaliza licenças sem uso.
-- [ ] Cartão efémero respeita limite e expira (uso único ou prazo).
-- [ ] Integração Open Banking via API segura (mTLS), sem guardar credenciais
-      bancárias em claro.
+- [x] Painel mostra gasto por licença e sinaliza licenças sem uso (`FIN-001/002`, `/fin`).
+- [x] Categorização fiscal com códigos IRC no blob ZK (`FIN-005`, `/fin/fiscal`).
+- [ ] Cartão efémero respeita limite e expira (uso único ou prazo) — `FIN-004`.
+- [x] Open Banking scaffold com mock em dev; [ ] mTLS TPP em produção (`FIN-003`).
 
 ## Conceitos didáticos
 

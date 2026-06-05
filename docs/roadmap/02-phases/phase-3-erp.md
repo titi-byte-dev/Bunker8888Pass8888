@@ -35,6 +35,7 @@ flowchart TB
   [`journey-erp-flow-dev.md`](../04-user-journeys/journey-erp-flow-dev.md).
 - [x] Guardião auditável sem Master Key nos logs (`/security/guardian`, `GET /api/agent/audit`).
 - [x] Relatório RGPD — sugestão orquestrador + PDF em `/hr/compliance` (HR-008).
+- [x] Categorização fiscal de subscrições SaaS (`FIN-005`, `/fin/fiscal`) — ZK no cliente.
 
 > Desenvolvimento local sem VPS: [`development-without-vps.md`](../08-dev-environment/development-without-vps.md)
 

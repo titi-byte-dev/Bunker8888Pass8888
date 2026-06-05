@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T18:20:39.343Z",
+  "generatedAt": "2026-06-05T18:34:33.627Z",
   "categories": [
     {
       "id": "concepts",
@@ -135,7 +135,8 @@
       "summary": "Servidor Go, autenticação, multi-tenancy e módulos internos.",
       "related": [
         "developer-crypto",
-        "glossary"
+        "glossary",
+        "production-path"
       ],
       "order": 3
     },
@@ -665,6 +666,26 @@
       "order": 99
     },
     {
+      "slug": "README",
+      "title": "User Journeys — índice",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "README",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "order": 99
+    },
+    {
       "slug": "start",
       "title": "Começar no AegisPass",
       "category": "product",
@@ -780,10 +801,12 @@
       "level": 1,
       "maxLevel": 3,
       "in_app": true,
-      "summary": "Monitorização de subscrições, custos mensais e alertas de licenças sem uso.",
+      "summary": "Monitorização de subscrições, custos, alertas, fiscal, faturação e Open Banking.",
       "related": [
         "vault",
-        "journey-saas-costs"
+        "journey-saas-costs",
+        "journey-fiscal-categorization",
+        "production-path"
       ],
       "order": 5
     },
@@ -811,6 +834,53 @@
         "journey-admin-onboarding"
       ],
       "order": 5
+    },
+    {
+      "slug": "google-workspace",
+      "title": "Google Workspace (proxy)",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "frontend",
+        "backend"
+      ],
+      "feature": "google_workspace",
+      "level": 1,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Layer de controlo sobre Drive, Sheets e Gmail — cifragem ZK e mascaramento sem expor PII à Google.",
+      "related": [
+        "journey-google-dev-stub",
+        "vault"
+      ],
+      "order": 6
+    },
+    {
+      "slug": "production-path",
+      "title": "Caminho para produção",
+      "category": "product",
+      "categoryLabel": "Funcionalidades",
+      "audience": [
+        "admin",
+        "developer"
+      ],
+      "layer": [
+        "infra"
+      ],
+      "feature": "production",
+      "level": 2,
+      "maxLevel": 3,
+      "in_app": true,
+      "summary": "Do docker compose local à VPS com WireGuard, e-mail real e integrações externas.",
+      "related": [
+        "journey-vps-deploy",
+        "fin"
+      ],
+      "order": 7
     }
   ]
 }

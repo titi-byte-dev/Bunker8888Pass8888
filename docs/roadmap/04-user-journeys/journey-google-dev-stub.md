@@ -1,6 +1,6 @@
 # Journey: Google proxy em desenvolvimento (DoD Fase 2)
 
-> **Ator:** Administrador · **Substitui:** GOOGLE-001–003 até haver VPS + OAuth
+> **Ator:** Administrador · **Substitui:** GOOGLE-002–003 até APIs reais · Estado OAuth: `/work/google`
 
 Simula Drive cifrado e mascaramento Sheets **sem** ligar à Google.
 

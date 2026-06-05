@@ -17,7 +17,8 @@ cd frontend && npm run dev
 | Mailpit SMTP | `localhost:1025` | E-mail real (MAIL-002) |
 | Mailpit UI | `http://localhost:8025` | Inbox de teste |
 | Open Banking | mock provider | FIN-003 / TPP real |
-| Google Workspace | `/work/google-dev` | GOOGLE-001–003 |
+| Google Workspace | `/work/google` + `/work/google-dev` | GOOGLE-001–003 |
+| Categorização fiscal | `/fin/fiscal` | FIN-005 (ZK no cliente) |
 
 > ⚠️ **Segurança:** credenciais de dev estão em `.env.example` — nunca usar em produção.
 
@@ -41,9 +42,20 @@ cd frontend && npm run dev
 
 Ver [`journey-crm-prospection.md`](../04-user-journeys/journey-crm-prospection.md).
 
-### Google (stub)
+### Google
+
+- `/work/google` — estado do provider (`mock` em dev; `GET /api/work/google/status`)
+- `/work/google-dev` — Drive ZK + Sheets masking sem OAuth
 
 Ver [`journey-google-dev-stub.md`](../04-user-journeys/journey-google-dev-stub.md).
+
+### Fiscal (FIN-005)
+
+1. Regista subscrições em `/fin` com categoria opcional.
+2. Em `/fin/fiscal`, usa **Sugerir automaticamente** ou classifica manualmente.
+3. Totais dedutíveis calculam-se no cliente — servidor só vê blobs.
+
+Ver [`journey-fiscal-categorization.md`](../04-user-journeys/journey-fiscal-categorization.md).
 
 ---
 

@@ -1,0 +1,54 @@
+{
+  "slug": "production-path",
+  "title": "Caminho para produção",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "admin",
+    "developer"
+  ],
+  "layer": [
+    "infra"
+  ],
+  "feature": "production",
+  "level": 2,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Do docker compose local à VPS com WireGuard, e-mail real e integrações externas.",
+  "concepts": [
+    {
+      "id": "dev-stub",
+      "title": "Stub de desenvolvimento",
+      "level": 1,
+      "html": "<p>Componente que imita o comportamento de um serviço externo (banco, Google, SMTP)\npara testar fluxos sem custos nem credenciais de produção.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 2,
+      "title": "Ordem recomendada",
+      "html": "<ol>\n<li><strong>INFRA-001</strong> — VPS + SSH só chaves (<code>infra/scripts/01-ssh-hardening.sh</code>)</li>\n<li><strong>INFRA-002</strong> — WireGuard + UFW (<code>02-</code>, <code>03-</code>)</li>\n<li><strong>Deploy</strong> — <code>docker-compose.prod.yml</code> + <code>.env.production.example</code></li>\n<li><strong>MAIL-002/003</strong> — Postfix + SPF/DKIM/DMARC</li>\n<li><strong>FIN-003</strong> — <code>AEGIS_OB_*</code> mTLS</li>\n<li><strong>GOOGLE-001</strong> — Service Account Workspace</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Checklist",
+      "html": "<p>Seguir o journey <a href=\"../roadmap/04-user-journeys/journey-vps-deploy.md\"><code>journey-vps-deploy</code></a>\nou a pasta <a href=\"../roadmap/10-production/README.md\"><code>docs/roadmap/10-production/</code></a>.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Backups",
+      "html": "<p><code>scripts/backup-postgres.sh</code> na VPS com <code>AEGIS_BACKUP_KEY</code> — ficheiros <code>.enc</code>\nirrecuperáveis sem a chave offline (INFRA-004).</p>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "journey-vps-deploy",
+    "fin"
+  ],
+  "order": 7
+}

@@ -1,0 +1,62 @@
+{
+  "slug": "google-workspace",
+  "title": "Google Workspace (proxy)",
+  "category": "product",
+  "categoryLabel": "Funcionalidades",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "frontend",
+    "backend"
+  ],
+  "feature": "google_workspace",
+  "level": 1,
+  "maxLevel": 3,
+  "in_app": true,
+  "summary": "Layer de controlo sobre Drive, Sheets e Gmail — cifragem ZK e mascaramento sem expor PII à Google.",
+  "concepts": [
+    {
+      "id": "google-proxy",
+      "title": "Proxy de ofuscação",
+      "level": 1,
+      "html": "<p>A app intercepta dados <strong>antes</strong> de irem para a Google. A Google fica como\narmazenamento/transporte; a inteligência e a cifragem são do AegisPass.</p>\n"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Onde na app",
+      "html": "<table>\n<thead>\n<tr>\n<th>Rota</th>\n<th>Modo</th>\n<th>Task</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/work/google</code></td>\n<td>Estado do provider (mock ou Service Account)</td>\n<td>GOOGLE-001</td>\n</tr>\n<tr>\n<td><code>/work/google-dev</code></td>\n<td>Simulação local sem OAuth</td>\n<td>DoD Fase 2 dev</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Drive & Docs (GOOGLE-002)",
+      "html": "<p>Ficheiros são cifrados no browser com a Master Key antes do upload. Na Drive da\nempresa só existem blobs opacos. Abrir no AegisPass decifra em memória.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Sheets (GOOGLE-003)",
+      "html": "<p>NIF, IBAN e campos sensíveis são substituídos por tokens (<code>TOKEN_NIF_*</code>). O mapa\ntoken→valor fica cifrado (em dev: cliente; em prod: PostgreSQL ZK).</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 3,
+      "title": "Produção",
+      "html": "<p>Configura Service Account e domain-wide delegation — ver\n<code>docs/roadmap/10-production/google-001-oauth.md</code>. Variáveis: <code>AEGIS_GOOGLE_SA_JSON</code>,\n<code>AEGIS_GOOGLE_DELEGATED_USER</code>, <code>AEGIS_GOOGLE_ENABLED=true</code>.</p>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [
+    "journey-google-dev-stub",
+    "vault"
+  ],
+  "order": 6
+}
