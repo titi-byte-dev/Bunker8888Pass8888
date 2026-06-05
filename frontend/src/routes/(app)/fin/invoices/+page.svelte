@@ -15,6 +15,7 @@
     type InvoiceDocument,
     type InvoiceLine,
   } from "$lib/fin/invoices";
+  import { canConvertToInvoice, invoiceFromProforma } from "$lib/crm/proformaToInvoice";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -102,6 +103,20 @@
       fClientTaxId = "";
       fClientEmail = "";
       fLines = [{ description: "", quantity: 1, unitPrice: 0, vatRate: 23 }];
+      await refresh();
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      busy = false;
+    }
+  }
+
+  // CRM-004: converte uma pro-forma emitida na fatura definitiva (FT).
+  async function convertToInvoice(d: InvoiceDocument) {
+    busy = true;
+    error = "";
+    try {
+      await issueInvoice("invoice", invoiceFromProforma(d));
       await refresh();
     } catch (err) {
       error = (err as Error).message;
@@ -207,6 +222,9 @@
                 <td>{money(t.gross, d.currency)}</td>
                 <td><span class="badge {d.status}">{d.status}</span></td>
                 <td class="actions">
+                  {#if canConvertToInvoice(d)}
+                    <button class="mini" onclick={() => convertToInvoice(d)} disabled={busy}>Converter em fatura</button>
+                  {/if}
                   {#if d.status === "issued"}
                     <button class="mini" onclick={() => setStatus(d.id, "paid")} disabled={busy}>Marcar pago</button>
                     <button class="mini" onclick={() => setStatus(d.id, "void")} disabled={busy}>Anular</button>

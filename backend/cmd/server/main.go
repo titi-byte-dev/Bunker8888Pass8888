@@ -26,6 +26,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/commissions"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/invoicing"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/openbanking"
@@ -92,6 +93,7 @@ func main() {
 		mailInbox := mail.NewInboxRepo(pool)
 		finRepo := fin.NewRepo(pool)
 		invoicingRepo := invoicing.NewRepo(pool)
+		commissionsRepo := commissions.NewRepo(pool)
 		openBankingSvc := openbanking.NewService(openbanking.NewRepo(pool), openbanking.MockProvider{})
 		opsRepo := ops.NewRepo(pool)
 		crmRepo := crm.NewRepo(pool)
@@ -197,6 +199,7 @@ func main() {
 			MailWebhookSecret: cfg.MailWebhookSecret,
 			Fin:               finRepo,
 			Invoicing:         invoicingRepo,
+			Commissions:       commissionsRepo,
 			OpenBanking:       openBankingSvc,
 			Ops:               opsRepo,
 			Agent:             agentReg,

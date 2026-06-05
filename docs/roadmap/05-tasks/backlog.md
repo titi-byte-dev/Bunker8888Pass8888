@@ -121,6 +121,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
 | FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
 | FIN-006 | Faturação (pro-forma/fatura/recibo + numeração legal) | 3 | M | 🟢 | CRM-001 |
+| FIN-007 | Comissões de vendas sobre faturas pagas | 3 | M | 🟢 | FIN-006 |
 
 ## CRM — Pipeline de vendas
 
@@ -129,6 +130,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | CRM-001 | Modelo leads cifrados + API CRUD | 2 | M | 🟢 | VAULT-005 |
 | CRM-002 | UI funil básico (`/crm`) | 2 | M | 🟢 | CRM-001, UI-002 |
 | CRM-003 | Fluxo `deal_closed` → pro-forma a partir de lead ganho | 3 | S | 🟢 | CRM-001, FIN-006 |
+| CRM-004 | Conversão pro-forma → fatura definitiva | 3 | S | 🟢 | FIN-006, CRM-003 |
 
 ## AGENT — Agentes de IA
 
