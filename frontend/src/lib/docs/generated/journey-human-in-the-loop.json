@@ -1,0 +1,165 @@
+{
+  "slug": "journey-human-in-the-loop",
+  "title": "Journey: Aprovar sugestão do orquestrador (AGENT-009)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "human_in_the_loop",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Aprovar sugestão do orquestrador (AGENT-009)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Utilizador comercial · <strong>Epics:</strong> <code>AGENT</code>, <code>CRM</code></p>\n</blockquote>\n<p>O feed em <code>/crm</code> mostra sugestões com botões <strong>Aprovar</strong> / <strong>Rejeitar</strong>. Só após\naprovação é que a prospeção corre no cliente (Master Key necessária).</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador activo (AGENT-005).</li>\n<li>E-mail ingerido ou simulado → sugestão <code>run_prospection</code> no feed.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant CRM as /crm\r\n    participant API as API\r\n    participant Bus as Event Bus\r\n\r\n    CRM->>API: GET events (sugestão pending)\r\n    U->>CRM: Aprovar\r\n    CRM->>API: POST .../approve\r\n    API->>Bus: orchestrator.action.approved\r\n    CRM->>API: POST prospection/run\r\n    Note over CRM: rascunhos + import ZK",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET events (sugestão pending)"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Aprovar"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST .../approve"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Bus",
+              "arrow": "->>",
+              "label": "orchestrator.action.approved"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST prospection/run"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 400
+              },
+              {
+                "id": "Bus",
+                "label": "Event Bus",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "CRM",
+                "target": "API",
+                "label": "GET events (sugestão pending)",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "U",
+                "target": "CRM",
+                "label": "Aprovar",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST .../approve",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "API",
+                "target": "Bus",
+                "label": "orchestrator.action.approved",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST prospection/run",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Simula ou recebe e-mail no alias.</li>\n<li>Abre <code>/crm</code> — vês <strong>Sugestão: correr prospeção</strong> com botões.</li>\n<li>Clica <strong>Aprovar</strong> — decisão fica auditada.</li>\n<li>A prospeção corre automaticamente (precisas do cofre desbloqueado).</li>\n<li>Importa rascunhos para o funil.</li>\n</ol>\n<p>Alternativa: <strong>Rejeitar</strong> — sugestão fica marcada como rejeitada, sem prospeção.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Eventos <code>approved</code> / <code>rejected</code> em <code>agent_events</code>.</li>\n<li>Nenhuma tool ZK executada sem clique humano.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Utilizador comercial",
+  "order": 99
+}

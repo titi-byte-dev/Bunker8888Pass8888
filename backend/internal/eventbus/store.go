@@ -2,6 +2,7 @@ package eventbus
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -65,6 +66,62 @@ func (s *PGStore) ListRecent(ctx context.Context, userID string, limit int) ([]R
 			return nil, err
 		}
 		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// GetByID devolve um evento do utilizador (isolamento multi-tenant).
+func (s *PGStore) GetByID(ctx context.Context, userID, id string) (Record, error) {
+	if s == nil || s.pool == nil {
+		return Record{}, ErrSuggestionNotFound
+	}
+	var r Record
+	err := s.pool.QueryRow(ctx, `
+		SELECT id::text, user_id::text, event_type, source, payload, created_at
+		FROM agent_events WHERE id = $1 AND user_id = $2`, id, userID,
+	).Scan(&r.ID, &r.UserID, &r.Type, &r.Source, &r.Payload, &r.CreatedAt)
+	if err != nil {
+		return Record{}, ErrSuggestionNotFound
+	}
+	return r, nil
+}
+
+// DecisionMap mapeia suggestion_id → approved|rejected a partir do feed recente.
+func (s *PGStore) DecisionMap(ctx context.Context, userID string) (map[string]string, error) {
+	if s == nil || s.pool == nil {
+		return map[string]string{}, nil
+	}
+	rows, err := s.pool.Query(ctx, `
+		SELECT event_type, payload
+		FROM agent_events
+		WHERE user_id = $1
+		  AND event_type IN ($2, $3)
+		ORDER BY created_at DESC
+		LIMIT 200`, userID, OrchestratorActionApproved, OrchestratorActionRejected)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make(map[string]string)
+	for rows.Next() {
+		var eventType string
+		var payload []byte
+		if err := rows.Scan(&eventType, &payload); err != nil {
+			return nil, err
+		}
+		var dp struct {
+			SuggestionID string `json:"suggestion_id"`
+		}
+		_ = json.Unmarshal(payload, &dp)
+		if dp.SuggestionID == "" || out[dp.SuggestionID] != "" {
+			continue
+		}
+		switch eventType {
+		case OrchestratorActionApproved:
+			out[dp.SuggestionID] = "approved"
+		case OrchestratorActionRejected:
+			out[dp.SuggestionID] = "rejected"
+		}
 	}
 	return out, rows.Err()
 }

@@ -271,6 +271,10 @@ func NewRouter(deps Deps) http.Handler {
 		if deps.Orchestrator != nil {
 			mux.Handle("GET /api/agent/orchestrator/status", requireAuth(deps.Auth, handleOrchestratorStatus(deps.Orchestrator)))
 		}
+		if deps.AgentEvents != nil {
+			mux.Handle("POST /api/agent/orchestrator/actions/{id}/approve", requireAuth(deps.Auth, handleDecideOrchestratorAction(deps.AgentEvents, deps.AgentBus, eventbus.DecisionApprove)))
+			mux.Handle("POST /api/agent/orchestrator/actions/{id}/reject", requireAuth(deps.Auth, handleDecideOrchestratorAction(deps.AgentEvents, deps.AgentBus, eventbus.DecisionReject)))
+		}
 	}
 	if deps.CRM != nil && deps.Auth != nil {
 		mux.Handle("GET /api/crm/leads", requireAuth(deps.Auth, handleListLeads(deps.CRM)))

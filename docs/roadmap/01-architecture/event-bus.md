@@ -11,6 +11,9 @@
 | `mail.inbox.received` | Webhook Mailpit | `inbox_id`, `alias`, `relayed` |
 | `crm.prospection.run` | POST prospection | `draft_count` |
 | `agent.tool.executed` | POST tool/run | `tool`, `agent_id`, `success` |
+| `orchestrator.action.suggested` | Worker orquestrador | `action`, `auto_run: false` |
+| `orchestrator.action.approved` | POST approve | `suggestion_id`, `action` |
+| `orchestrator.action.rejected` | POST reject | `suggestion_id`, `action` |
 
 > ⚠️ **Segurança:** payloads sem PII de leads — blobs CRM nunca no bus.
 

@@ -3,6 +3,8 @@
  */
 import { loadSessionToken } from "$lib/session";
 
+import type { ApprovalStatus } from "./approvalService";
+
 export interface AgentEvent {
   id: string;
   type: string;
@@ -10,6 +12,8 @@ export interface AgentEvent {
   payload: Record<string, unknown>;
   createdAt: string;
   label: string;
+  /** AGENT-009 — pending até o utilizador decidir. */
+  approvalStatus?: ApprovalStatus;
 }
 
 interface AgentEventDTO {
@@ -18,6 +22,7 @@ interface AgentEventDTO {
   source: string;
   payload: Record<string, unknown>;
   created_at: string;
+  approval_status?: ApprovalStatus;
 }
 
 function labelForType(type: string, payload?: Record<string, unknown>): string {
@@ -33,19 +38,31 @@ function labelForType(type: string, payload?: Record<string, unknown>): string {
       if (action === "run_prospection") return "Sugestão: correr prospeção";
       return "Sugestão do orquestrador";
     }
+    case "orchestrator.action.approved":
+      return "Sugestão aprovada";
+    case "orchestrator.action.rejected":
+      return "Sugestão rejeitada";
     default:
       return type;
   }
 }
 
 function mapEvent(d: AgentEventDTO): AgentEvent {
+  const approvalStatus = d.approval_status;
+  let label = labelForType(d.type, d.payload);
+  if (d.type === "orchestrator.action.suggested" && approvalStatus === "approved") {
+    label = "Sugestão aprovada";
+  } else if (d.type === "orchestrator.action.suggested" && approvalStatus === "rejected") {
+    label = "Sugestão rejeitada";
+  }
   return {
     id: d.id,
     type: d.type,
     source: d.source,
     payload: d.payload ?? {},
     createdAt: d.created_at,
-    label: labelForType(d.type, d.payload),
+    label,
+    approvalStatus,
   };
 }
 

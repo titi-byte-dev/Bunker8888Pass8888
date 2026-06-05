@@ -24,6 +24,7 @@ sequenceDiagram
     Orq->>API: orchestrator.action.suggested
     CRM->>API: GET /api/agent/events
     Note over CRM: «Sugestão: correr prospeção»
+    CRM->>API: POST approve (AGENT-009)
     CRM->>API: POST prospection/run (utilizador)
 ```
 
@@ -31,7 +32,7 @@ sequenceDiagram
 
 1. Recebe e-mail no alias (SMTP ou simulação).
 2. Abre `/crm` — feed mostra **Sugestão: correr prospeção**.
-3. Clica **Correr prospeção** (acção humana).
+3. Clica **Aprovar** na sugestão (AGENT-009) — ou **Correr prospeção** manualmente.
 4. Importa rascunhos com cifragem local.
 
 ## Pós-condições
