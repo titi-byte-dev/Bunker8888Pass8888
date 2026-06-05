@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/agent"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
@@ -56,6 +57,8 @@ type Deps struct {
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
 	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/*
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
+	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
+	AgentRunner  *agent.Runner      // executor de tools (AGENT-001)
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -223,6 +226,11 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/fin/subscriptions", requireAuth(deps.Auth, handleCreateSubscription(deps.Fin)))
 		mux.Handle("PUT /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleUpdateSubscription(deps.Fin)))
 		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
+	}
+	if deps.Agent != nil && deps.AgentRunner != nil && deps.Auth != nil {
+		// Sistema de tools para agentes (AGENT-001).
+		mux.Handle("GET /api/agent/tools", requireAuth(deps.Auth, handleListAgentTools(deps.Agent)))
+		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner)))
 	}
 
 	return mux
