@@ -131,6 +131,15 @@ func main() {
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
 
+		var mailIngest *mail.IngestService
+		if cfg.MailWebhookSecret != "" {
+			var mp *mail.MailpitClient
+			if cfg.MailpitURL != "" {
+				mp = mail.NewMailpitClient(cfg.MailpitURL)
+			}
+			mailIngest = &mail.IngestService{Aliases: mailRepo, Inbox: mailInbox, Mailpit: mp}
+		}
+
 		deps = httpapi.Deps{
 			Auth:         auth.NewService(userRepo, sessionRepo, sessionTTL),
 			Vault:        vault.NewRepo(pool),
@@ -151,7 +160,9 @@ func main() {
 			BurnNotes:    burnNotesStore,
 			HR:           hrRepo,
 			Mail:         mailRepo,
-			MailInbox:    mailInbox,
+			MailInbox:         mailInbox,
+			MailIngest:        mailIngest,
+			MailWebhookSecret: cfg.MailWebhookSecret,
 			Fin:          finRepo,
 			Agent:        agentReg,
 			AgentRunner:  agentRun,

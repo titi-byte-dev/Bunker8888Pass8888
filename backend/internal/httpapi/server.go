@@ -58,7 +58,9 @@ type Deps struct {
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
 	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/aliases*
-	MailInbox    *mail.InboxRepo    // nil desactiva endpoints /api/mail/inbox*
+	MailInbox    *mail.InboxRepo       // nil desactiva endpoints /api/mail/inbox*
+	MailIngest   *mail.IngestService   // nil desactiva webhook Mailpit
+	MailWebhookSecret string           // vazio desactiva webhook
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
@@ -81,6 +83,10 @@ func NewRouter(deps Deps) http.Handler {
 
 	mux.HandleFunc("GET /healthz", handleHealth)
 	mux.HandleFunc("GET /api/time", handleServerTime)
+	if deps.MailIngest != nil && deps.MailWebhookSecret != "" {
+		// Webhook Mailpit (MAIL-002) — sem auth; protegido por segredo na query string.
+		mux.HandleFunc("POST /api/mail/webhook/mailpit", handleMailpitWebhook(deps.MailIngest, deps.MailWebhookSecret))
+	}
 
 	if deps.Auth != nil {
 		mux.HandleFunc("POST /api/auth/register", handleRegister(deps.Auth))

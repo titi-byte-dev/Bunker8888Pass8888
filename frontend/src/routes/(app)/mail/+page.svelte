@@ -7,11 +7,14 @@
     setAliasActive,
     type EmailAlias,
   } from "$lib/mail/aliases";
+  import { listInbox, type InboxMessage } from "$lib/mail/inbox";
 
   let loading = $state(true);
+  let inboxLoading = $state(true);
   let busy = $state(false);
   let error = $state("");
   let aliases = $state<EmailAlias[]>([]);
+  let inbox = $state<InboxMessage[]>([]);
   let destination = $state("");
   let label = $state("");
   let copied = $state("");
@@ -28,7 +31,21 @@
     }
   }
 
-  onMount(refresh);
+  async function refreshInbox() {
+    inboxLoading = true;
+    try {
+      inbox = await listInbox(false);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao carregar inbox";
+    } finally {
+      inboxLoading = false;
+    }
+  }
+
+  onMount(() => {
+    refresh();
+    refreshInbox();
+  });
 
   async function onCreate(e: SubmitEvent) {
     e.preventDefault();
@@ -89,13 +106,15 @@
 <section class="page">
   <header class="page-head">
     <div>
-      <p class="eyebrow">MAIL-001 · Aliases descartáveis</p>
+      <p class="eyebrow">MAIL-001/002 · Aliases + SMTP dev (Mailpit)</p>
       <h1>Aliases de E-mail</h1>
     </div>
     <p class="lead">
       Endereços descartáveis que reencaminham para o teu e-mail real. Dá um alias
       a cada serviço; se vazar ou fizer spam, desligas só esse alias. O envio
-      efectivo chega com o servidor de e-mail (MAIL-002) — aqui geres a config.
+      efectivo em dev usa Mailpit (SMTP <code>localhost:1025</code>). Envia para o teu
+      alias <code>@aegis.email</code> e a mensagem aparece na inbox abaixo — depois
+      corre a prospeção em <a href="/crm">CRM</a>.
     </p>
   </header>
 
@@ -144,6 +163,36 @@
       </ul>
     {/if}
   </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <p class="eyebrow">Caixa de entrada (MAIL-002)</p>
+      <a class="crm-link" href="/crm">Prospeção no CRM →</a>
+    </div>
+    {#if inboxLoading}
+      <p class="muted">A carregar inbox…</p>
+    {:else if inbox.length === 0}
+      <p class="muted">
+        Sem mensagens. Envia SMTP para um alias activo (ex.: via Mailpit UI ou
+        <code>swaks --to TEU_ALIAS@aegis.email --server localhost:1025</code>).
+      </p>
+    {:else}
+      <ul class="list inbox-list">
+        {#each inbox as m (m.id)}
+          <li class="inbox-item" class:done={!!m.processedAt}>
+            <div>
+              <strong>{m.fromEmail}</strong>
+              <span class="muted sm">{m.subject}</span>
+              <p class="snippet">{m.body.slice(0, 120)}{m.body.length > 120 ? "…" : ""}</p>
+            </div>
+            <span class="state" class:on={!m.processedAt}>
+              {m.processedAt ? "processada" : "pendente"}
+            </span>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  </section>
 </section>
 
 <style>
@@ -181,6 +230,28 @@
   }
   .panel-head {
     margin-bottom: var(--space-3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .crm-link {
+    font-size: var(--text-xs);
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .inbox-list .inbox-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+  .inbox-item.done {
+    opacity: 0.65;
+  }
+  .snippet {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
   }
   .panel-head .eyebrow {
     margin: 0;

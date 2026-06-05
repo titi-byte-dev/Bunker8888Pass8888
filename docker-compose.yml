@@ -43,10 +43,33 @@ services:
       AEGIS_DATABASE_URL: "postgres://${POSTGRES_USER:-aegis}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-aegis}?sslmode=disable"
       # Chave admin para /api/admin/* (dev). Em produção: valor longo e aleatório no .env.
       AEGIS_ADMIN_KEY: ${AEGIS_ADMIN_KEY:-dev-admin-change-me}
+      # MAIL-002 (dev): URL interna do Mailpit para buscar corpo completo das mensagens.
+      AEGIS_MAILPIT_URL: "http://mailpit:8025"
+      AEGIS_MAIL_WEBHOOK_SECRET: ${AEGIS_MAIL_WEBHOOK_SECRET:-dev-mail-webhook-secret}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
       - "${BACKEND_MTLS_PORT:-8443}:8443"
     depends_on:
       db:
-        # So arranca o backend depois de a BD estar "healthy".
         condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # --- Mailpit (SMTP de desenvolvimento — MAIL-002) ------------------------
+  # Didático: Mailpit apanha e-mail SMTP sem enviar para a Internet real.
+  # UI: http://localhost:8025  ·  SMTP: localhost:1025
+  # Webhook notifica o backend quando chega mensagem para um alias @aegis.email.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    command:
+      - --smtp=0.0.0.0:1025
+      - --listen=0.0.0.0:8025
+      - --webhook-url=http://backend:8080/api/mail/webhook/mailpit?secret=${AEGIS_MAIL_WEBHOOK_SECRET:-dev-mail-webhook-secret}
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
