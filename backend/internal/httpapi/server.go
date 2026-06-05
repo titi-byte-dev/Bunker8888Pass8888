@@ -57,11 +57,13 @@ type Deps struct {
 	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
-	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/*
+	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/aliases*
+	MailInbox    *mail.InboxRepo    // nil desactiva endpoints /api/mail/inbox*
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
-	AgentRunner  *agent.Runner      // executor de tools (AGENT-001)
+	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
+	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
 	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
@@ -224,6 +226,12 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("PATCH /api/mail/aliases/{id}", requireAuth(deps.Auth, handleSetAliasActive(deps.Mail)))
 		mux.Handle("DELETE /api/mail/aliases/{id}", requireAuth(deps.Auth, handleDeleteAlias(deps.Mail)))
 	}
+	if deps.MailInbox != nil && deps.Auth != nil {
+		// Caixa de entrada simulada (AGENT-003 stub até MAIL-002).
+		mux.Handle("GET /api/mail/inbox", requireAuth(deps.Auth, handleListInbox(deps.MailInbox)))
+		mux.Handle("POST /api/mail/inbox", requireAuth(deps.Auth, handleCreateInboxMessage(deps.MailInbox)))
+		mux.Handle("POST /api/mail/inbox/{id}/processed", requireAuth(deps.Auth, handleMarkInboxProcessed(deps.MailInbox)))
+	}
 	if deps.Fin != nil && deps.Auth != nil {
 		// Monitorizacao de custos SaaS (FIN-001).
 		mux.Handle("GET /api/fin/subscriptions", requireAuth(deps.Auth, handleListSubscriptions(deps.Fin)))
@@ -237,6 +245,9 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner, deps.AgentAudit)))
 		if deps.AgentAudit != nil {
 			mux.Handle("GET /api/agent/audit", requireAuth(deps.Auth, handleListAgentAudit(deps.AgentAudit)))
+		}
+		if deps.Prospection != nil {
+			mux.Handle("POST /api/agent/prospection/run", requireAuth(deps.Auth, handleRunProspection(deps.Prospection, deps.AgentAudit)))
 		}
 	}
 	if deps.CRM != nil && deps.Auth != nil {

@@ -16,6 +16,9 @@ func TestMailAliasRoutesGuarded(t *testing.T) {
 		{http.MethodPost, "/api/mail/aliases"},
 		{http.MethodPatch, "/api/mail/aliases/a1"},
 		{http.MethodDelete, "/api/mail/aliases/a1"},
+		{http.MethodGet, "/api/mail/inbox"},
+		{http.MethodPost, "/api/mail/inbox"},
+		{http.MethodPost, "/api/mail/inbox/x/processed"},
 	}
 	for _, rt := range routes {
 		req := httptest.NewRequest(rt.method, rt.path, nil)
