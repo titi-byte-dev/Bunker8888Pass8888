@@ -22,6 +22,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -133,6 +134,7 @@ func main() {
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
 		agentEventStore := eventbus.NewPGStore(pool)
 		agentBus := eventbus.New(agentEventStore, logger, 256)
+		agentOrchestrator := orchestrator.New(agentBus, logger, orchestrator.NewProspectionWorker(agentBus))
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
 			InboundPerHour:  cfg.MailRateInboundPerHour,
@@ -187,6 +189,7 @@ func main() {
 			Prospection:  prospectionSvc,
 			AgentBus:     agentBus,
 			AgentEvents:  agentEventStore,
+			Orchestrator: agentOrchestrator,
 			CRM:          crmRepo,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
@@ -229,6 +232,9 @@ func main() {
 
 	if deps.AgentBus != nil {
 		deps.AgentBus.Run(ctx)
+	}
+	if deps.Orchestrator != nil {
+		deps.Orchestrator.Start()
 	}
 
 	<-ctx.Done()

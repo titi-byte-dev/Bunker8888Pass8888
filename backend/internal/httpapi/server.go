@@ -20,6 +20,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
@@ -70,7 +71,8 @@ type Deps struct {
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
 	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
 	AgentBus     *eventbus.Bus       // nil desactiva publicação de eventos
-	AgentEvents  *eventbus.PGStore   // nil desactiva GET /api/agent/events
+	AgentEvents  *eventbus.PGStore      // nil desactiva GET /api/agent/events
+	Orchestrator *orchestrator.Orchestrator // nil desactiva GET /api/agent/orchestrator/status
 	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
@@ -265,6 +267,9 @@ func NewRouter(deps Deps) http.Handler {
 		}
 		if deps.AgentEvents != nil {
 			mux.Handle("GET /api/agent/events", requireAuth(deps.Auth, handleListAgentEvents(deps.AgentEvents)))
+		}
+		if deps.Orchestrator != nil {
+			mux.Handle("GET /api/agent/orchestrator/status", requireAuth(deps.Auth, handleOrchestratorStatus(deps.Orchestrator)))
 		}
 	}
 	if deps.CRM != nil && deps.Auth != nil {

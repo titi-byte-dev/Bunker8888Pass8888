@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T14:22:40.566Z",
+  "generatedAt": "2026-06-05T14:41:20.358Z",
   "categories": [
     {
       "id": "concepts",
@@ -263,6 +263,27 @@
       "summary": "",
       "related": [],
       "actor": "Utilizador BYOD",
+      "order": 99
+    },
+    {
+      "slug": "journey-orchestrator",
+      "title": "Journey: Orquestrador sugere próximo passo (AGENT-005)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "orchestrator",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Utilizador comercial",
       "order": 99
     },
     {

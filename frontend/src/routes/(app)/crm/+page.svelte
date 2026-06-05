@@ -192,7 +192,7 @@
       {:else}
         <ul class="event-list">
           {#each agentEvents.slice(0, 8) as ev (ev.id)}
-            <li>
+            <li class:suggested={ev.type === "orchestrator.action.suggested"}>
               <span class="ev-label">{ev.label}</span>
               <span class="ev-meta">{new Date(ev.createdAt).toLocaleString("pt-PT")}</span>
             </li>
@@ -504,6 +504,11 @@
   .ev-meta {
     color: var(--color-text-muted);
     flex-shrink: 0;
+  }
+  .event-list li.suggested {
+    background: var(--color-accent-muted, rgba(99, 102, 241, 0.08));
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
   }
   .prospection h2 {
     margin: 0 0 var(--space-2);
