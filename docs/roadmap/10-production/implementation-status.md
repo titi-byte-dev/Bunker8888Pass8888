@@ -14,9 +14,10 @@
 
 | Task | Dev | Produção | Notas |
 |---|---|---|---|
-| INFRA-003/004 | 🟢 | 🟡 | `docker-compose.prod.yml`, `backup-postgres.sh` |
-| INFRA-001 | — | 🟡 | Scripts em `infra/scripts/` |
-| INFRA-002 | — | 🟡 | WireGuard + UFW documentados |
+| INFRA-003/004 | 🟢 | 🟡 | `docker-compose.prod.yml`, `05-deploy-stack.sh`, backups |
+| INFRA-001 | — | 🟡 | `infra/scripts/01-ssh-hardening.sh` |
+| INFRA-002 | — | 🟡 | `02-wireguard` + `03-ufw` |
+| MAIL-002 scripts | 🟢 ingest API + smoke PS1 | 🟡 | `04-postfix-install.sh` na VPS |
 
 ## E-mail
 

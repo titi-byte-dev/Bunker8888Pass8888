@@ -21,7 +21,8 @@ Branch de trabalho sugerida: `feat/ui-doc-infra-mail`.
 | A2 | Executar `infra/scripts/01-ssh-hardening.sh` | idem | Password SSH desactivado |
 | A3 | Executar `02-wireguard-server.sh` | [`infra-002-wireguard-firewall.md`](infra-002-wireguard-firewall.md) | Cliente WG liga |
 | A4 | Executar `03-ufw-firewall.sh` | idem | Só 22/tcp (ou WG) + UDP WG |
-| A5 | Deploy `docker-compose.prod.yml` | [`production-deploy.md`](production-deploy.md) | `curl /health` OK |
+| A5 | Copiar `.env.production.example` → `.env` e preencher segredos | [`production-deploy.md`](production-deploy.md) | Sem campos vazios |
+| A6 | Executar `infra/scripts/05-deploy-stack.sh` | idem | `curl /healthz` OK |
 
 > ⚠️ **Segurança:** confirma acesso SSH **antes** de A2. Guarda backup da config WG.
 
@@ -29,8 +30,8 @@ Branch de trabalho sugerida: `feat/ui-doc-infra-mail`.
 
 | # | Acção | Guia | Verificação |
 |---|---|---|---|
-| B1 | Instalar Postfix + transport pipe | [`mail-002-003-production.md`](mail-002-003-production.md) | `postfix status` active |
-| B2 | Copiar `infra/postfix/aegis-ingest.*` | idem | Pipe chama `/api/mail/ingest` |
+| B1 | Executar `infra/scripts/04-postfix-install.sh` | [`mail-002-003-production.md`](mail-002-003-production.md) | `postfix status` active |
+| B2 | (alternativa manual) Copiar `infra/postfix/aegis-ingest.*` | idem | Pipe chama `/api/mail/ingest` |
 | B3 | Definir `AEGIS_MAIL_WEBHOOK_SECRET` (prod) | `.env.production.example` | Ingest 401 sem secret |
 | B4 | Registar SPF no DNS | mail-002-003 § DNS | `dig TXT dominio` |
 | B5 | Configurar DKIM (OpenDKIM ou rspamd) | idem | selector `_domainkey` |
@@ -52,6 +53,12 @@ Se a demo falhar, volta a Mailpit:
 
 ```bash
 docker compose up   # dev — MAIL-001/004 sem Postfix
+```
+
+Simular ingest Postfix em dev (alias já criado em `/mail`):
+
+```powershell
+.\scripts\smoke-mail-ingest.ps1 -AliasAddress "SEU_ALIAS@aegis.email"
 ```
 
 ## Próximo após MAIL
