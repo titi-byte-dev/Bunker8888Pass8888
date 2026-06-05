@@ -195,6 +195,16 @@ func NewRouter(deps Deps) http.Handler {
 		// Logs imutáveis (HR-002) + relatório de conformidade RGPD (HR-008).
 		mux.Handle("GET /api/hr/audit", requireAuth(deps.Auth, handleListAuditLog(deps.HR)))
 		mux.Handle("GET /api/hr/compliance-report", requireAuth(deps.Auth, handleComplianceReport(deps.HR)))
+		// Identidade de assinatura (HR-006).
+		mux.Handle("PUT /api/hr/signing-identity", requireAuth(deps.Auth, handlePutSigningIdentity(deps.HR)))
+		mux.Handle("GET /api/hr/signing-identity", requireAuth(deps.Auth, handleGetSigningIdentity(deps.HR)))
+		mux.Handle("GET /api/hr/signers/{userId}/public-key", requireAuth(deps.Auth, handleGetSignerPublicKey(deps.HR)))
+		// Contratos cifrados (HR-005) + assinatura (HR-006).
+		mux.Handle("GET /api/hr/employees/{id}/contracts", requireAuth(deps.Auth, handleListContracts(deps.HR)))
+		mux.Handle("POST /api/hr/employees/{id}/contracts", requireAuth(deps.Auth, handleAddContract(deps.HR)))
+		mux.Handle("GET /api/hr/employees/{id}/contracts/{cid}", requireAuth(deps.Auth, handleGetContract(deps.HR)))
+		mux.Handle("POST /api/hr/employees/{id}/contracts/{cid}/sign", requireAuth(deps.Auth, handleSignContract(deps.HR)))
+		mux.Handle("DELETE /api/hr/employees/{id}/contracts/{cid}", requireAuth(deps.Auth, handleDeleteContract(deps.HR)))
 	}
 
 	return mux

@@ -17,6 +17,15 @@
     type VerifiedCertificate,
   } from "$lib/hr/employeesService";
   import { certificateToJSON } from "$lib/hr/erasure";
+  import {
+    downloadContract,
+    listContracts,
+    removeContract,
+    signContract,
+    uploadContract,
+    verifyContract,
+    type DecryptedContract,
+  } from "$lib/hr/contractsService";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -31,6 +40,95 @@
 
   // Certificados de eliminação (HR-004).
   let certs = $state<VerifiedCertificate[]>([]);
+
+  // Contratos (HR-005/006).
+  let contracts = $state<DecryptedContract[]>([]);
+  let contractInput = $state<HTMLInputElement | null>(null);
+  let verifyMsg = $state<Record<string, string>>({});
+
+  async function refreshContracts() {
+    if (!open) return;
+    try {
+      contracts = await listContracts(open.id);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao carregar contratos";
+    }
+  }
+
+  async function onUploadContract(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !open) return;
+    busy = true;
+    error = "";
+    try {
+      await uploadContract(open.id, file);
+      await refreshContracts();
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Falha ao carregar contrato";
+    } finally {
+      busy = false;
+      if (contractInput) contractInput.value = "";
+    }
+  }
+
+  async function onDownloadContract(id: string) {
+    if (!open) return;
+    try {
+      const { blob, name } = await downloadContract(open.id, id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao descarregar contrato";
+    }
+  }
+
+  async function onSignContract(id: string) {
+    if (!open) return;
+    busy = true;
+    error = "";
+    try {
+      await signContract(open.id, id);
+      await refreshContracts();
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao assinar contrato";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onVerifyContract(id: string) {
+    if (!open) return;
+    try {
+      const res = await verifyContract(open.id, id);
+      verifyMsg = { ...verifyMsg, [id]: res.reason };
+    } catch (e) {
+      verifyMsg = { ...verifyMsg, [id]: e instanceof Error ? e.message : "Falha" };
+    }
+  }
+
+  async function onRemoveContract(id: string) {
+    if (!open) return;
+    busy = true;
+    try {
+      await removeContract(open.id, id);
+      await refreshContracts();
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao remover contrato";
+    } finally {
+      busy = false;
+    }
+  }
+
+  function fmtBytes(n: number): string {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
   async function refreshCerts() {
     try {
@@ -77,8 +175,10 @@
   async function onOpen(id: string) {
     busy = true;
     error = "";
+    verifyMsg = {};
     try {
       open = await openRecord(id);
+      await refreshContracts();
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao abrir ficha";
     } finally {
@@ -330,6 +430,65 @@
                 Gravar
               </button>
             </div>
+          </div>
+
+          <!-- Contratos cifrados (HR-005) + assinatura digital (HR-006) -->
+          <div class="contracts">
+            <div class="contracts-head">
+              <p class="eyebrow">Contratos cifrados</p>
+              <label class="btn primary sm upload">
+                + Carregar
+                <input
+                  type="file"
+                  bind:this={contractInput}
+                  onchange={onUploadContract}
+                  disabled={busy}
+                  hidden
+                />
+              </label>
+            </div>
+            {#if contracts.length === 0}
+              <p class="muted sm">Sem contratos. Carrega um ficheiro (máx. ~5 MiB).</p>
+            {:else}
+              <ul class="contract-list">
+                {#each contracts as c (c.id)}
+                  <li class="contract">
+                    <div class="c-main">
+                      <span class="c-name">{c.name}</span>
+                      <span class="muted sm">{fmtBytes(c.size)}</span>
+                      {#if c.signed}
+                        <span class="c-badge">✍ assinado</span>
+                      {/if}
+                    </div>
+                    <div class="c-actions">
+                      <button type="button" class="link-btn" onclick={() => onDownloadContract(c.id)}>
+                        descarregar
+                      </button>
+                      {#if c.signed}
+                        <button type="button" class="link-btn" onclick={() => onVerifyContract(c.id)}>
+                          verificar
+                        </button>
+                      {:else}
+                        <button
+                          type="button"
+                          class="link-btn sign"
+                          onclick={() => onSignContract(c.id)}
+                          disabled={busy}
+                        >
+                          assinar
+                        </button>
+                      {/if}
+                      <button type="button" class="link-btn" onclick={() => onRemoveContract(c.id)} disabled={busy}>
+                        remover
+                      </button>
+                    </div>
+                    {#if verifyMsg[c.id]}
+                      <p class="c-verify" role="status">{verifyMsg[c.id]}</p>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
           </div>
         {/if}
       </section>
@@ -656,5 +815,68 @@
     margin: 0 0 var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-danger);
+  }
+
+  .contracts {
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+  }
+  .contracts-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+  .contracts-head .eyebrow {
+    margin: 0;
+  }
+  .upload {
+    cursor: pointer;
+  }
+  .contract-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .contract {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    padding: var(--space-2) var(--space-3);
+  }
+  .c-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .c-name {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    word-break: break-word;
+  }
+  .c-badge {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-success-fg);
+    background: var(--color-success-bg);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+  .c-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+  }
+  .link-btn.sign:hover {
+    color: var(--color-accent);
+  }
+  .c-verify {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
   }
 </style>

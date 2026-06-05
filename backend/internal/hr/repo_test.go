@@ -160,6 +160,56 @@ func TestEmployeeRecords_Integration(t *testing.T) {
 		t.Fatalf("após ShredRecord esperava 2 certificados, got %d", len(certs2))
 	}
 
+	// --- Contratos (HR-005) + assinatura digital (HR-006) -------------------
+	// Identidade de assinatura: ausente -> ErrNoSigningIdentity; depois grava/le.
+	if _, err := repo.GetSigningIdentity(ctx, ownerID); err != ErrNoSigningIdentity {
+		t.Fatalf("GetSigningIdentity vazio: esperado ErrNoSigningIdentity, got %v", err)
+	}
+	if err := repo.PutSigningIdentity(ctx, ownerID, []byte("pub-spki"), []byte("wrapped-priv")); err != nil {
+		t.Fatal(err)
+	}
+	si, err := repo.GetSigningIdentity(ctx, ownerID)
+	if err != nil || !bytes.Equal(si.PublicKey, []byte("pub-spki")) {
+		t.Fatalf("GetSigningIdentity: si=%+v err=%v", si, err)
+	}
+	if pk, err := repo.GetSignerPublicKey(ctx, ownerID); err != nil || !bytes.Equal(pk, []byte("pub-spki")) {
+		t.Fatalf("GetSignerPublicKey: pk=%s err=%v", pk, err)
+	}
+
+	// Adicionar um contrato cifrado (estranho nao consegue).
+	if _, err := repo.AddContract(ctx, strangerID, rec.ID, []byte("m"), []byte("d"), []byte("k")); err != ErrNotFound {
+		t.Fatalf("AddContract estranho: esperado ErrNotFound, got %v", err)
+	}
+	ct, err := repo.AddContract(ctx, ownerID, rec.ID, []byte("meta"), []byte("ciphertext-bytes"), []byte("wrapped"))
+	if err != nil || ct.ID == "" || ct.ByteSize != int64(len("ciphertext-bytes")) {
+		t.Fatalf("AddContract: ct=%+v err=%v", ct, err)
+	}
+	// Listagem traz metadados sem os bytes; ainda sem assinatura.
+	cs, err := repo.ListContracts(ctx, ownerID, rec.ID)
+	if err != nil || len(cs) != 1 || len(cs[0].DataBlob) != 0 || len(cs[0].Signature) != 0 {
+		t.Fatalf("ListContracts: cs=%+v err=%v", cs, err)
+	}
+	// GET individual traz os bytes.
+	full, err := repo.GetContract(ctx, ownerID, rec.ID, ct.ID)
+	if err != nil || !bytes.Equal(full.DataBlob, []byte("ciphertext-bytes")) {
+		t.Fatalf("GetContract: full=%+v err=%v", full, err)
+	}
+	// Assinar: grava digest + signature; passa a signed.
+	signed, err := repo.SignContract(ctx, ownerID, rec.ID, ct.ID, "deadbeefdigest", []byte("ecdsa-sig"))
+	if err != nil || signed.SignedAt == nil || signed.ContentDigest != "deadbeefdigest" {
+		t.Fatalf("SignContract: signed=%+v err=%v", signed, err)
+	}
+	if cs2, _ := repo.ListContracts(ctx, ownerID, rec.ID); len(cs2) != 1 || len(cs2[0].Signature) == 0 {
+		t.Fatalf("contrato deveria aparecer assinado: %+v", cs2)
+	}
+	// Apagar contrato.
+	if err := repo.DeleteContract(ctx, ownerID, rec.ID, ct.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.DeleteContract(ctx, ownerID, rec.ID, ct.ID); err != ErrNotFound {
+		t.Fatalf("DeleteContract repetido: esperado ErrNotFound, got %v", err)
+	}
+
 	// --- Logs imutaveis encadeados (HR-002) ---------------------------------
 	// As accoes acima (create, puts, shred, shred-record) ja escreveram na cadeia.
 	ok, broken, err := repo.VerifyAudit(ctx, ownerID)
