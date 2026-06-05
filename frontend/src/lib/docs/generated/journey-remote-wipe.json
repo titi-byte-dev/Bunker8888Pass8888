@@ -21,36 +21,100 @@
       "level": 1,
       "title": "Visão geral",
       "html": "<h1>Journey: Remote Wipe de dados corporativos</h1>\n<blockquote>\n<p><strong>Ator:</strong> Admin/RH · <strong>Epics:</strong> <code>VAULT</code>, <code>HR</code></p>\n</blockquote>\n<p>Apagar os dados da empresa do dispositivo pessoal do funcionário <strong>sem tocar nas\nfotos/apps pessoais</strong> — o isolamento total sem MDM do telemóvel inteiro.</p>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Gatilhos",
-      "html": "<h2>Gatilhos</h2>\n<ul>\n<li>Funcionário sai da empresa.</li>\n<li>Dispositivo perdido/roubado.</li>\n<li>Geofencing deteta saída de zona segura ou Wi-Fi suspeito (automático).</li>\n</ul>\n",
+      "html": "<ul>\n<li>Funcionário sai da empresa.</li>\n<li>Dispositivo perdido/roubado.</li>\n<li>Geofencing deteta saída de zona segura ou Wi-Fi suspeito (automático).</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Fluxo principal",
-      "html": "<h2>Fluxo principal</h2>\n<pre><code class=\"language-mermaid\">sequenceDiagram\n    participant Adm as Admin\n    participant G as Go API\n    participant WS as WebSocket\n    participant App as App do funcionário\n\n    Adm-&gt;&gt;G: aciona Remote Wipe (userID)\n    G-&gt;&gt;G: invalida sessão + revoga chave de desencriptação\n    G-&gt;&gt;WS: push &quot;wipe&quot; para o dispositivo\n    WS-&gt;&gt;App: comando wipe\n    App-&gt;&gt;App: apaga cache local cifrada + descarta Master Key\n    App--&gt;&gt;G: confirma wipe\n    G-&gt;&gt;G: regista no log imutável\n</code></pre>\n",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant Adm as Admin\r\n    participant G as Go API\r\n    participant WS as WebSocket\r\n    participant App as App do funcionário\r\n\r\n    Adm->>G: aciona Remote Wipe (userID)\r\n    G->>G: invalida sessão + revoga chave de desencriptação\r\n    G->>WS: push \"wipe\" para o dispositivo\r\n    WS->>App: comando wipe\r\n    App->>App: apaga cache local cifrada + descarta Master Key\r\n    App-->>G: confirma wipe\r\n    G->>G: regista no log imutável",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "Adm",
+              "to": "G",
+              "arrow": "->>",
+              "label": "aciona Remote Wipe (userID)"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "invalida sessão + revoga chave de desencriptação"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "WS",
+              "arrow": "->>",
+              "label": "push \"wipe\" para o dispositivo"
+            },
+            {
+              "kind": "message",
+              "from": "WS",
+              "to": "App",
+              "arrow": "->>",
+              "label": "comando wipe"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "apaga cache local cifrada + descarta Master Key"
+            },
+            {
+              "kind": "message",
+              "from": "App-",
+              "to": "G",
+              "arrow": "->>",
+              "label": "confirma wipe"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "regista no log imutável"
+            }
+          ]
+        }
+      ],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Passo-a-passo",
-      "html": "<h2>Passo-a-passo</h2>\n<ol>\n<li>Admin aciona o wipe (ou o geofencing dispara automaticamente).</li>\n<li>A API <strong>invalida a sessão e revoga a chave</strong> — mesmo que o wipe físico\nfalhe, os dados em cache ficam inúteis (estão cifrados).</li>\n<li>Via WebSocket, o dispositivo recebe a ordem e limpa o armazenamento local da\napp + descarta a Master Key.</li>\n<li>A ação fica registada no log imutável de auditoria.</li>\n</ol>\n",
+      "html": "<ol>\n<li>Admin aciona o wipe (ou o geofencing dispara automaticamente).</li>\n<li>A API <strong>invalida a sessão e revoga a chave</strong> — mesmo que o wipe físico\nfalhe, os dados em cache ficam inúteis (estão cifrados).</li>\n<li>Via WebSocket, o dispositivo recebe a ordem e limpa o armazenamento local da\napp + descarta a Master Key.</li>\n<li>A ação fica registada no log imutável de auditoria.</li>\n</ol>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Conceito didático",
-      "html": "<h2>Conceito didático</h2>\n<blockquote>\n<p>💡 <strong>WebSocket:</strong> ao contrário do HTTP normal (cliente pergunta, servidor\nresponde), o WebSocket mantém um canal <strong>bidirecional aberto</strong>. Isto permite ao\nservidor &quot;empurrar&quot; (push) a ordem de wipe para o dispositivo em &lt; 1s, sem o\ndispositivo ter de andar a perguntar.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança — defesa em profundidade:</strong> não confiamos só no wipe físico\n(o dispositivo pode estar offline). A revogação da <strong>chave</strong> no servidor é a\ngarantia real: sem chave, a cache cifrada é lixo.</p>\n</blockquote>\n",
+      "html": "<blockquote>\n<p>💡 <strong>WebSocket:</strong> ao contrário do HTTP normal (cliente pergunta, servidor\nresponde), o WebSocket mantém um canal <strong>bidirecional aberto</strong>. Isto permite ao\nservidor &quot;empurrar&quot; (push) a ordem de wipe para o dispositivo em &lt; 1s, sem o\ndispositivo ter de andar a perguntar.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança — defesa em profundidade:</strong> não confiamos só no wipe físico\n(o dispositivo pode estar offline). A revogação da <strong>chave</strong> no servidor é a\ngarantia real: sem chave, a cache cifrada é lixo.</p>\n</blockquote>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Pós-condições",
-      "html": "<h2>Pós-condições</h2>\n<ul>\n<li>Dados pessoais do funcionário intactos.</li>\n<li>Dados corporativos inacessíveis no dispositivo.</li>\n<li>Evento auditável.</li>\n</ul>\n",
+      "html": "<ul>\n<li>Dados pessoais do funcionário intactos.</li>\n<li>Dados corporativos inacessíveis no dispositivo.</li>\n<li>Evento auditável.</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

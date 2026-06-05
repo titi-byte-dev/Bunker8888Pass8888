@@ -16,12 +16,29 @@ export type DocConcept = {
   html: string;
 };
 
+export type DocFlowStep =
+  | { kind: "message"; from: string; to: string; arrow: string; label: string }
+  | { kind: "branch"; label: string };
+
+export type DocFlow = {
+  id: string;
+  title: string;
+  type: "sequence" | "flowchart" | "diagram";
+  source: string;
+  steps: DocFlowStep[];
+};
+
 export type DocSection = {
   level: number;
   title: string;
   html: string;
+  flows?: DocFlow[];
   collapsed: boolean;
 };
+
+export type DocSectionPart =
+  | { kind: "html"; content: string }
+  | { kind: "flow"; flow: DocFlow };
 
 export type DocMeta = {
   slug: string;

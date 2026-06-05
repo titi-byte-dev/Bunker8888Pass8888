@@ -26,18 +26,21 @@
       "level": 3,
       "title": "Módulos internos",
       "html": "<table>\n<thead>\n<tr>\n<th>Pacote</th>\n<th>Função</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>internal/auth</code></td>\n<td>Sessões, JWT, passkeys</td>\n</tr>\n<tr>\n<td><code>internal/vault</code></td>\n<td>CRUD blobs, WebSocket sync</td>\n</tr>\n<tr>\n<td><code>internal/users</code></td>\n<td>Perfis por tenant</td>\n</tr>\n<tr>\n<td><code>internal/shifts</code></td>\n<td>Turnos + NTP</td>\n</tr>\n<tr>\n<td><code>internal/hr</code></td>\n<td>RH cifrado</td>\n</tr>\n<tr>\n<td><code>internal/sharing</code></td>\n<td>Cofres partilhados</td>\n</tr>\n<tr>\n<td><code>pkg/crypto</code></td>\n<td>AEAD, helpers servidor</td>\n</tr>\n</tbody></table>\n<p>Entrypoint: <code>backend/cmd/server/main.go</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Multi-tenancy",
       "html": "<p>Cada request autenticado define <code>app.tenant_id</code> na sessão SQL (ver\n<code>docs/roadmap/01-architecture/multi-tenancy.md</code>). Queries sem filtro de tenant são\nbug de segurança — escrever testes negativos de isolamento.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Endpoints de referência",
       "html": "<ul>\n<li><code>POST /api/auth/register</code>, <code>POST /api/auth/login</code></li>\n<li><code>GET/POST /api/vault</code>, <code>GET/PUT/DELETE /api/vault/:id</code></li>\n<li><code>GET /healthz</code> — health check</li>\n<li>WebSocket em <code>/api/vault/ws</code> (sync)</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     }
   ],
