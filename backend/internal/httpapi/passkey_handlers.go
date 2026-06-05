@@ -7,6 +7,7 @@ import (
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
 )
 
@@ -86,7 +87,7 @@ func handlePasskeyLoginBegin(pk *passkeys.Service) http.HandlerFunc {
 	}
 }
 
-func handlePasskeyLoginFinish(authSvc *auth.Service, pk *passkeys.Service, ap accessPolicyDeps) http.HandlerFunc {
+func handlePasskeyLoginFinish(authSvc *auth.Service, pk *passkeys.Service, ap accessPolicyDeps, sent *sentinel.Service, userRepo *users.Repo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req passkeyFinishRequest
 		if err := decodeJSON(r, &req); err != nil {
@@ -109,12 +110,13 @@ func handlePasskeyLoginFinish(authSvc *auth.Service, pk *passkeys.Service, ap ac
 		if err := writeAccessPolicyError(w, assertUserAccessPolicy(r.Context(), r, userID, ap)); err != nil {
 			return
 		}
-		token, err := authSvc.CreateSessionForUser(r.Context(), userID)
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, "falha ao criar sessão")
-			return
+		email := ""
+		if userRepo != nil {
+			if u, e := userRepo.ByID(r.Context(), userID); e == nil {
+				email = u.Email
+			}
 		}
-		writeJSON(w, http.StatusOK, map[string]string{"token": token})
+		finishLoginWithSentinel(w, r, userID, email, authSvc, sent)
 	}
 }
 
@@ -145,6 +147,6 @@ func registerPasskeyRoutes(mux *http.ServeMux, deps Deps, ap accessPolicyDeps) {
 	mux.Handle("POST /api/auth/passkey/register/begin", requireAuth(deps.Auth, handlePasskeyRegisterBegin(deps.Passkeys)))
 	mux.Handle("POST /api/auth/passkey/register/finish", requireAuth(deps.Auth, handlePasskeyRegisterFinish(deps.Passkeys)))
 	mux.HandleFunc("POST /api/auth/passkey/login/begin", handlePasskeyLoginBegin(deps.Passkeys))
-	mux.HandleFunc("POST /api/auth/passkey/login/finish", handlePasskeyLoginFinish(deps.Auth, deps.Passkeys, ap))
+	mux.HandleFunc("POST /api/auth/passkey/login/finish", handlePasskeyLoginFinish(deps.Auth, deps.Passkeys, ap, deps.Sentinel, deps.Users))
 	mux.Handle("GET /api/auth/passkey", requireAuth(deps.Auth, handlePasskeyList(deps.Passkeys)))
 }

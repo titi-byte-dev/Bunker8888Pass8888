@@ -15,6 +15,7 @@ describe("command palette (UI-006)", () => {
     expect(groups.get("action")?.length).toBe(cmds.length);
     expect(cmds.some((c) => c.id === "action-settings")).toBe(true);
     expect(cmds.some((c) => c.id === "action-admin")).toBe(true);
+    expect(cmds.some((c) => c.id === "action-sentinel")).toBe(true);
     expect(cmds.some((c) => c.id === "action-shifts")).toBe(true);
   });
 });

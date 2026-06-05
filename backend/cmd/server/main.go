@@ -22,6 +22,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/shifts"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/users"
@@ -68,6 +69,7 @@ func main() {
 		emergencyRepo := emergency.NewRepo(pool)
 		deviceRepo := clidevices.NewRepo(pool)
 		passkeyRepo := passkeys.NewRepo(pool)
+		sentinelRepo := sentinel.NewRepo(pool)
 
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
@@ -111,6 +113,7 @@ func main() {
 			Devices:  deviceRepo,
 			CLIca:    cliCA,
 			Passkeys: passkeySvc,
+			Sentinel: sentinel.NewService(sentinelRepo),
 			AdminKey: cfg.AdminKey,
 			Pool:     pool,
 		}
