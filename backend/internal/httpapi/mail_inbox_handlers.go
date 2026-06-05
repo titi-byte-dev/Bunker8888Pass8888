@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 )
 
@@ -60,7 +61,7 @@ func handleListInbox(inbox *mail.InboxRepo) http.HandlerFunc {
 	}
 }
 
-func handleCreateInboxMessage(inbox *mail.InboxRepo) http.HandlerFunc {
+func handleCreateInboxMessage(inbox *mail.InboxRepo, bus *eventbus.Bus) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, _ := r.Context().Value(userIDKey).(string)
 		var req inboxCreateRequest
@@ -71,6 +72,18 @@ func handleCreateInboxMessage(inbox *mail.InboxRepo) http.HandlerFunc {
 		m, err := inbox.CreateInboxMessage(r.Context(), userID, req.FromEmail, req.Subject, req.Body)
 		if mapInboxError(w, err) {
 			return
+		}
+		if bus != nil {
+			preview := req.Body
+			if len(preview) > 200 {
+				preview = preview[:200]
+			}
+			_ = eventbus.PublishJSON(r.Context(), bus, eventbus.MailInboxReceived, userID, "mail.inbox.simulate", map[string]any{
+				"inbox_id":     m.ID,
+				"from_email":   m.FromEmail,
+				"subject":      m.Subject,
+				"body_preview": preview,
+			})
 		}
 		writeJSON(w, http.StatusCreated, inboxMessageJSON(m))
 	}

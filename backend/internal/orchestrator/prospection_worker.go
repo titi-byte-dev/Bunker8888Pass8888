@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/agent"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 )
 
@@ -27,10 +28,16 @@ func (ProspectionWorker) Descriptor() Descriptor {
 
 func (w *ProspectionWorker) Handle(ctx context.Context, ev eventbus.Event) error {
 	var meta struct {
-		InboxID string `json:"inbox_id"`
-		Alias   string `json:"alias"`
+		InboxID   string `json:"inbox_id"`
+		Alias     string `json:"alias"`
+		Subject   string `json:"subject"`
+		FromEmail string `json:"from_email"`
+		Body      string `json:"body_preview"`
 	}
 	_ = json.Unmarshal(ev.Payload, &meta)
+	if agent.IsRecruitmentEmail(meta.Subject, meta.Body) {
+		return nil
+	}
 	return eventbus.PublishJSON(ctx, w.Bus, eventbus.OrchestratorActionSuggested, ev.UserID, "orchestrator.prospection", map[string]any{
 		"action":    "run_prospection",
 		"reason":    "mail.inbox.received",

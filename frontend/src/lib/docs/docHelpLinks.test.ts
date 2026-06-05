@@ -26,6 +26,10 @@ describe("doc help links (DOC-013)", () => {
     expect(resolveDocHelp("/work/inventory")?.slug).toBe("journey-ops-agent-inventory");
   });
 
+  it("resolve recrutamento RH com journey de triagem às cegas", () => {
+    expect(resolveDocHelp("/hr/recruitment")?.slug).toBe("journey-hr-agent-recruitment");
+  });
+
   it("devolve null para rotas sem doc", () => {
     expect(resolveDocHelp("/settings")).toBeNull();
   });

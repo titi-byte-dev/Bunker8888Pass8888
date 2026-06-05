@@ -297,6 +297,7 @@
     </div>
     <span class="report-link">
       <a class="btn ghost" href="/hr/onboarding">Onboarding →</a>
+      <a class="btn ghost" href="/hr/recruitment">Recrutamento →</a>
       <a class="btn ghost" href="/hr/compliance">Relatório RGPD →</a>
     </span>
     <p class="lead">

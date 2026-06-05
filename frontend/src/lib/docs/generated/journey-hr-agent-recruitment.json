@@ -1,0 +1,179 @@
+{
+  "slug": "journey-hr-agent-recruitment",
+  "title": "Journey: Agente RH — triagem às cegas (AGENT-007)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "hr_agent_recruitment",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Agente RH — triagem às cegas (AGENT-007)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Recrutador · <strong>Epics:</strong> <code>AGENT</code>, <code>HR</code>, <code>MAIL</code></p>\n</blockquote>\n<p>Candidaturas por e-mail passam por triagem às cegas: género, etnia e idade\nsão ocultados antes do resumo chegar ao recrutador (CT-RGPD-04).</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador com worker <code>recruitment</code> (AGENT-005).</li>\n<li>E-mail de candidatura na inbox (simulado ou MAIL-002).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Recrutador\r\n    participant RH as /hr/recruitment\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n\r\n    U->>RH: simula candidatura\r\n    RH->>API: POST /api/mail/inbox\r\n    API->>Orq: mail.inbox.received\r\n    Orq->>API: orchestrator.action.suggested\r\n    U->>RH: Aprovar (AGENT-009)\r\n    RH->>API: POST /api/agent/recruitment/run\r\n    Note over RH: resumo sem género/etnia",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "RH",
+              "arrow": "->>",
+              "label": "simula candidatura"
+            },
+            {
+              "kind": "message",
+              "from": "RH",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/mail/inbox"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "mail.inbox.received"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "RH",
+              "arrow": "->>",
+              "label": "Aprovar (AGENT-009)"
+            },
+            {
+              "kind": "message",
+              "from": "RH",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/agent/recruitment/run"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Recrutador",
+                "x": 0
+              },
+              {
+                "id": "RH",
+                "label": "/hr/recruitment",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 400
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "RH",
+                "label": "simula candidatura",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "RH",
+                "target": "API",
+                "label": "POST /api/mail/inbox",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "API",
+                "target": "Orq",
+                "label": "mail.inbox.received",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "U",
+                "target": "RH",
+                "label": "Aprovar (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "RH",
+                "target": "API",
+                "label": "POST /api/agent/recruitment/run",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Em <strong>Recrutamento</strong>, simula um e-mail com «Candidatura» no assunto.</li>\n<li>No feed, <strong>Aprovar</strong> a sugestão de triagem às cegas.</li>\n<li>Clica <strong>Correr triagem</strong> — vês rascunhos com campos sensíveis <code>[oculto]</code>.</li>\n<li>Marca como processada quando concluíres a análise.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Nenhum campo de género/etnia visível no resumo apresentado.</li>\n<li>Eventos auditados no feed (AGENT-004).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Recrutador",
+  "order": 99
+}

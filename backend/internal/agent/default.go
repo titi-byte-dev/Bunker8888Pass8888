@@ -5,5 +5,6 @@ func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
 	r.MustRegister(NewPingTool())
 	r.MustRegister(NewDraftLeadTool())
+	r.MustRegister(NewDraftCandidateTool())
 	return r
 }

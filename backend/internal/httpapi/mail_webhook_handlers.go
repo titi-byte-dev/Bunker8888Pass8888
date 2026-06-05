@@ -38,11 +38,14 @@ func handleMailpitWebhook(svc *mail.IngestService, secret string, bus *eventbus.
 		}
 		if result != nil && result.OwnerID != "" {
 			_ = eventbus.PublishJSON(r.Context(), bus, eventbus.MailInboxReceived, result.OwnerID, "mail.ingest", map[string]any{
-				"inbox_id":  result.InboxID,
-				"alias":     result.AliasUsed,
-				"relayed":   result.Relayed,
-				"relay_to":  result.RelayTo,
-				"mailpit_id": result.MessageID,
+				"inbox_id":     result.InboxID,
+				"alias":        result.AliasUsed,
+				"from_email":   result.FromEmail,
+				"subject":      result.Subject,
+				"body_preview": result.BodyPreview,
+				"relayed":      result.Relayed,
+				"relay_to":     result.RelayTo,
+				"mailpit_id":   result.MessageID,
 			})
 		}
 		writeJSON(w, http.StatusCreated, map[string]any{"status": "ingested", "result": result})

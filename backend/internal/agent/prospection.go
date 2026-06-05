@@ -35,6 +35,9 @@ func (p *Prospection) Run(ctx context.Context, userID string) ([]LeadDraft, erro
 	}
 	drafts := make([]LeadDraft, 0, len(msgs))
 	for _, m := range msgs {
+		if IsRecruitmentEmail(m.Subject, m.Body) {
+			continue
+		}
 		inRaw, _ := json.Marshal(map[string]string{
 			"from_email": m.FromEmail,
 			"subject":    m.Subject,

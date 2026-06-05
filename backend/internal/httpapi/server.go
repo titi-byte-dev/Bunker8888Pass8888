@@ -72,6 +72,7 @@ type Deps struct {
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
 	Prospection  *agent.Prospection  // nil desactiva POST /api/agent/prospection/run
+	Recruitment  *agent.Recruitment  // nil desactiva POST /api/agent/recruitment/run
 	AgentBus     *eventbus.Bus       // nil desactiva publicação de eventos
 	AgentEvents  *eventbus.PGStore      // nil desactiva GET /api/agent/events
 	Orchestrator *orchestrator.Orchestrator // nil desactiva GET /api/agent/orchestrator/status
@@ -247,7 +248,7 @@ func NewRouter(deps Deps) http.Handler {
 	if deps.MailInbox != nil && deps.Auth != nil {
 		// Caixa de entrada simulada (AGENT-003 stub até MAIL-002).
 		mux.Handle("GET /api/mail/inbox", requireAuth(deps.Auth, handleListInbox(deps.MailInbox)))
-		mux.Handle("POST /api/mail/inbox", requireAuth(deps.Auth, handleCreateInboxMessage(deps.MailInbox)))
+		mux.Handle("POST /api/mail/inbox", requireAuth(deps.Auth, handleCreateInboxMessage(deps.MailInbox, deps.AgentBus)))
 		mux.Handle("POST /api/mail/inbox/{id}/processed", requireAuth(deps.Auth, handleMarkInboxProcessed(deps.MailInbox)))
 	}
 	if deps.Fin != nil && deps.Auth != nil {
@@ -274,6 +275,9 @@ func NewRouter(deps Deps) http.Handler {
 		}
 		if deps.Prospection != nil {
 			mux.Handle("POST /api/agent/prospection/run", requireAuth(deps.Auth, handleRunProspection(deps.Prospection, deps.AgentAudit, deps.AgentBus)))
+		}
+		if deps.Recruitment != nil {
+			mux.Handle("POST /api/agent/recruitment/run", requireAuth(deps.Auth, handleRunRecruitment(deps.Recruitment, deps.AgentAudit, deps.AgentBus)))
 		}
 		if deps.AgentEvents != nil {
 			mux.Handle("GET /api/agent/events", requireAuth(deps.Auth, handleListAgentEvents(deps.AgentEvents)))

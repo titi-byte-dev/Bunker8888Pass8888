@@ -38,8 +38,11 @@ function labelForType(type: string, payload?: Record<string, unknown>): string {
       if (action === "run_prospection") return "Sugestão: correr prospeção";
       if (action === "run_onboarding") return "Sugestão: completar onboarding";
       if (action === "create_purchase_order") return "Sugestão: ordem de compra";
+      if (action === "screen_candidate") return "Sugestão: triagem às cegas";
       return "Sugestão do orquestrador";
     }
+    case "hr.recruitment.run":
+      return "Triagem de candidatos executada";
     case "hr.employee.created":
       return "Ficha de empregado criada";
     case "ops.stock.low":

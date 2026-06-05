@@ -15,6 +15,8 @@ const (
 	HREmployeeCreated = "hr.employee.created"
 	// OpsStockLow — inventário atingiu nível de reordenação (AGENT-008).
 	OpsStockLow = "ops.stock.low"
+	// HRRecruitmentRun — triagem às cegas executada (AGENT-007).
+	HRRecruitmentRun = "hr.recruitment.run"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).

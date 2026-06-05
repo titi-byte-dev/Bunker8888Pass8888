@@ -16,7 +16,8 @@ type Permission string
 const (
 	PermNone           Permission = "none"
 	PermMailReadMeta   Permission = "mail:read_metadata"
-	PermCRMWriteLead   Permission = "crm:write_lead_draft"
+	PermCRMWriteLead           Permission = "crm:write_lead_draft"
+	PermHRWriteCandidateDraft  Permission = "hr:write_candidate_draft"
 )
 
 // Descriptor expõe metadados para function-calling / auditoria.

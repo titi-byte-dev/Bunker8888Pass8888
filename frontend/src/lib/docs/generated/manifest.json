@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T15:26:53.730Z",
+  "generatedAt": "2026-06-05T15:37:55.293Z",
   "categories": [
     {
       "id": "concepts",
@@ -263,6 +263,27 @@
       "summary": "",
       "related": [],
       "actor": "Administrador RH",
+      "order": 99
+    },
+    {
+      "slug": "journey-hr-agent-recruitment",
+      "title": "Journey: Agente RH — triagem às cegas (AGENT-007)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "hr_agent_recruitment",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Recrutador",
       "order": 99
     },
     {

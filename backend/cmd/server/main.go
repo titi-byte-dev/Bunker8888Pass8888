@@ -134,12 +134,14 @@ func main() {
 		agentReg.MustRegister(agent.NewListMailInboxTool(mailInbox))
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
+		recruitmentSvc := &agent.Recruitment{Runner: agentRun, Inbox: mailInbox}
 		agentEventStore := eventbus.NewPGStore(pool)
 		agentBus := eventbus.New(agentEventStore, logger, 256)
 		agentOrchestrator := orchestrator.New(agentBus, logger,
 			orchestrator.NewProspectionWorker(agentBus),
 			orchestrator.NewOnboardingWorker(agentBus),
 			orchestrator.NewOperationsWorker(agentBus),
+			orchestrator.NewRecruitmentWorker(agentBus),
 		)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
@@ -194,6 +196,7 @@ func main() {
 			AgentRunner:  agentRun,
 			AgentAudit:   agentAudit,
 			Prospection:  prospectionSvc,
+			Recruitment:  recruitmentSvc,
 			AgentBus:     agentBus,
 			AgentEvents:  agentEventStore,
 			Orchestrator: agentOrchestrator,

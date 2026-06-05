@@ -27,6 +27,9 @@ type IngestResult struct {
 	AliasUsed   string `json:"alias_used"`
 	InboxID     string `json:"inbox_id,omitempty"`
 	OwnerID     string `json:"owner_id,omitempty"`
+	FromEmail   string `json:"from_email,omitempty"`
+	Subject     string `json:"subject,omitempty"`
+	BodyPreview string `json:"body_preview,omitempty"`
 	Status      string `json:"status"`
 	Relayed     bool   `json:"relayed,omitempty"`
 	RelayTo     string `json:"relay_to,omitempty"`
@@ -76,12 +79,19 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 	if err != nil {
 		return nil, fmt.Errorf("mail: criar inbox: %w", err)
 	}
+	preview := body
+	if len(preview) > 200 {
+		preview = preview[:200]
+	}
 	result := &IngestResult{
-		MessageID: summary.ID,
-		AliasUsed: alias.AliasAddress,
-		InboxID:   msg.ID,
-		OwnerID:   alias.OwnerID,
-		Status:    "ingested",
+		MessageID:   summary.ID,
+		AliasUsed:   alias.AliasAddress,
+		InboxID:     msg.ID,
+		OwnerID:     alias.OwnerID,
+		FromEmail:   from,
+		Subject:     subject,
+		BodyPreview: preview,
+		Status:      "ingested",
 	}
 	if s.Limiter != nil {
 		_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirInbound, from, alias.AliasAddress)
