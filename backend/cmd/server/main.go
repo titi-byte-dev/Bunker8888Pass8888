@@ -131,13 +131,17 @@ func main() {
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
 
+		var mailRelay *mail.RelayService
+		if cfg.SMTPRelayHost != "" {
+			mailRelay = &mail.RelayService{SMTPHost: cfg.SMTPRelayHost}
+		}
 		var mailIngest *mail.IngestService
 		if cfg.MailWebhookSecret != "" {
 			var mp *mail.MailpitClient
 			if cfg.MailpitURL != "" {
 				mp = mail.NewMailpitClient(cfg.MailpitURL)
 			}
-			mailIngest = &mail.IngestService{Aliases: mailRepo, Inbox: mailInbox, Mailpit: mp}
+			mailIngest = &mail.IngestService{Aliases: mailRepo, Inbox: mailInbox, Mailpit: mp, Relay: mailRelay}
 		}
 
 		deps = httpapi.Deps{

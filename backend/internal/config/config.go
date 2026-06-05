@@ -40,6 +40,8 @@ type Config struct {
 	// MAIL-002 (dev): Mailpit para SMTP de teste e fetch do corpo das mensagens.
 	MailpitURL        string
 	MailWebhookSecret string
+	// MAIL-004: host:port do relay SMTP (ex.: mailpit:1025 em dev).
+	SMTPRelayHost string
 }
 
 // Load lê a configuração do ambiente, aplicando valores por omissão.
@@ -60,6 +62,7 @@ func Load() Config {
 		WebAuthnRPOrigins:     splitCSV(getenv("AEGIS_WEBAUTHN_RP_ORIGINS", "http://localhost:5173,http://localhost:8080")),
 		MailpitURL:            getenv("AEGIS_MAILPIT_URL", ""),
 		MailWebhookSecret:     getenv("AEGIS_MAIL_WEBHOOK_SECRET", ""),
+		SMTPRelayHost:         getenv("AEGIS_SMTP_RELAY_HOST", ""),
 	}
 }
 
