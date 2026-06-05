@@ -188,6 +188,10 @@ func NewRouter(deps Deps) http.Handler {
 		// Campos individuais (upsert/remover por nome de campo).
 		mux.Handle("PUT /api/hr/employees/{id}/fields/{field}", requireAuth(deps.Auth, handlePutEmployeeField(deps.HR)))
 		mux.Handle("DELETE /api/hr/employees/{id}/fields/{field}", requireAuth(deps.Auth, handleDeleteEmployeeField(deps.HR)))
+		// Crypto-shredding RGPD (HR-003) + certificados de eliminação (HR-004).
+		mux.Handle("POST /api/hr/employees/{id}/fields/{field}/shred", requireAuth(deps.Auth, handleShredEmployeeField(deps.HR)))
+		mux.Handle("POST /api/hr/employees/{id}/shred", requireAuth(deps.Auth, handleShredEmployeeRecord(deps.HR)))
+		mux.Handle("GET /api/hr/certificates", requireAuth(deps.Auth, handleListErasureCertificates(deps.HR)))
 	}
 
 	return mux

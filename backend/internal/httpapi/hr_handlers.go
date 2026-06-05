@@ -28,6 +28,8 @@ func mapHRError(w http.ResponseWriter, err error) bool {
 		writeError(w, http.StatusNotFound, "ficha não encontrada")
 	case errors.Is(err, hr.ErrInvalidField):
 		writeError(w, http.StatusBadRequest, "campo inválido (valor ou chave em falta)")
+	case errors.Is(err, hr.ErrAlreadyShredded):
+		writeError(w, http.StatusConflict, "campo já eliminado")
 	default:
 		writeError(w, http.StatusInternalServerError, "falha na operação da ficha")
 	}
@@ -151,5 +153,66 @@ func handleDeleteEmployeeField(repo *hr.Repo) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// --- Crypto-shredding (HR-003) + certificados de eliminação (HR-004) ---------
+
+func certificateJSON(c *hr.Certificate) map[string]any {
+	return map[string]any{
+		"id":           c.ID,
+		"owner_id":     c.OwnerID,
+		"record_id":    c.RecordID,
+		"field_name":   c.FieldName,
+		"value_digest": c.ValueDigest,
+		"shredded_at":  c.ShreddedAt,
+		"cert_hash":    c.CertHash,
+		"issued_at":    c.IssuedAt,
+	}
+}
+
+// handleShredEmployeeField destrói a chave de um campo (crypto-shred) e devolve
+// o certificado de eliminação emitido.
+func handleShredEmployeeField(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		cert, err := repo.ShredField(r.Context(), userID, r.PathValue("id"), r.PathValue("field"))
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusOK, certificateJSON(cert))
+	}
+}
+
+// handleShredEmployeeRecord elimina todos os campos ainda com chave de uma ficha,
+// devolvendo a lista de certificados emitidos.
+func handleShredEmployeeRecord(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		certs, err := repo.ShredRecord(r.Context(), userID, r.PathValue("id"))
+		if mapHRError(w, err) {
+			return
+		}
+		out := make([]map[string]any, 0, len(certs))
+		for i := range certs {
+			out = append(out, certificateJSON(&certs[i]))
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"certificates": out})
+	}
+}
+
+// handleListErasureCertificates lista os certificados de eliminação do utilizador.
+func handleListErasureCertificates(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		certs, err := repo.ListCertificates(r.Context(), userID)
+		if mapHRError(w, err) {
+			return
+		}
+		out := make([]map[string]any, 0, len(certs))
+		for i := range certs {
+			out = append(out, certificateJSON(&certs[i]))
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"certificates": out})
 	}
 }
