@@ -17,6 +17,7 @@ help:
 	@echo "  test              - corre todos os testes"
 	@echo "  backup-gen-key    - gera AEGIS_BACKUP_KEY para o .env"
 	@echo "  db-backup         - pg_dump cifrado para backups/ (docker compose + .env)"
+	@echo "  mailpit-ui        - abre UI Mailpit (http://localhost:8025) apos compose up"
 
 backend-run:
 	cd backend && go run ./cmd/server
@@ -51,5 +52,8 @@ frontend-dev:
 
 frontend-test:
 	cd frontend && npm run test
+
+mailpit-ui:
+	@echo "Mailpit UI: http://localhost:$${MAILPIT_UI_PORT:-8025}  SMTP: localhost:$${MAILPIT_SMTP_PORT:-1025}"
 
 test: backend-test frontend-test
