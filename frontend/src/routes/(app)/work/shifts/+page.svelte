@@ -11,6 +11,7 @@
   import { fetchServerTime, isClockSkewAcceptable } from "$lib/vault/shift";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { getCurrentPosition } from "$lib/vault/geofence";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let shift = $state<ShiftStatus | null>(null);
   let geofence = $state<GeofenceStatus | null>(null);
@@ -83,16 +84,17 @@
   <title>Turnos e geofence — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/work" class="back">← Trabalho</a>
-  <h1>Turnos e geofence</h1>
-  <DocHelpLink />
-  <p class="lead">
-    O servidor valida horário (NTP) e zona geográfica antes de permitir acesso ao cofre.
-  </p>
+<PageShell
+  title="Turnos e geofence"
+  taskId="WORK-001"
+  description="O servidor valida horário (NTP) e zona geográfica antes de permitir acesso ao cofre."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   {#if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {/if}
 
   {#if busy}
@@ -178,29 +180,9 @@
       {/if}
     </section>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-  }
-
   .block {
     margin-bottom: var(--space-8);
   }
@@ -309,15 +291,6 @@
   button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

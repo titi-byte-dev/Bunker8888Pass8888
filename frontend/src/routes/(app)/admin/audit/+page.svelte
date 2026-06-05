@@ -4,6 +4,7 @@
   import AdminGate from "$lib/admin/AdminGate.svelte";
   import { hasAdminKey } from "$lib/admin/adminKey";
   import { listWipeAuditEvents, type WipeAuditEvent } from "$lib/admin/api";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let unlocked = $state(hasAdminKey());
   let events = $state<WipeAuditEvent[]>([]);
@@ -35,17 +36,20 @@
   <title>Auditoria — Admin</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/admin" class="back">← Administração</a>
-  <h1>Auditoria</h1>
-  <DocHelpLink />
-  <p class="lead">Registo append-only de remote wipe (VAULT-012).</p>
+<PageShell
+  title="Auditoria"
+  taskId="HR-002"
+  description="Registo append-only de remote wipe (VAULT-012)."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   <AdminGate onUnlocked={onGateChange} />
 
   {#if unlocked}
     {#if error}
-      <p class="error" role="alert">{error}</p>
+      <StatusBanner variant="error">{error}</StatusBanner>
     {/if}
     {#if busy}
       <p class="muted">A carregar…</p>
@@ -78,33 +82,9 @@
       </div>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 52rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-  }
-
   .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--color-border);
@@ -132,15 +112,6 @@
 
   tr:last-child td {
     border-bottom: none;
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

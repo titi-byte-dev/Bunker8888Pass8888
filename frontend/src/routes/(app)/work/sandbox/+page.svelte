@@ -8,6 +8,7 @@
   } from "$lib/sandbox";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import { loadDecodedLogins, type DecodedLogin } from "$lib/vault/ui";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   type SandboxMode = "demo" | "external";
 
@@ -92,19 +93,19 @@
   <title>Sandbox — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/work" class="back">← Trabalho</a>
-  <h1>Browser sandbox</h1>
-  <DocHelpLink />
-  <p class="lead">
-    Contexto isolado para login. A Master Password <strong>nunca</strong> aparece
-    nem é copiável neste painel — só é enviada ao iframe via postMessage.
-  </p>
+<PageShell
+  title="Browser sandbox"
+  taskId="VAULT-013"
+  description="Contexto isolado para login. A Master Password nunca aparece nem é copiável neste painel — só é enviada ao iframe via postMessage."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   {#if busy}
     <p class="muted">A carregar logins…</p>
   {:else if error && logins.length === 0}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {:else}
     <div class="controls">
       <label>
@@ -152,10 +153,10 @@
       </div>
 
       {#if status}
-        <p class="status">{status}</p>
+        <StatusBanner variant="success">{status}</StatusBanner>
       {/if}
       {#if error}
-        <p class="error" role="alert">{error}</p>
+        <StatusBanner variant="error">{error}</StatusBanner>
       {/if}
     </div>
 
@@ -170,34 +171,9 @@
       ></iframe>
     </div>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 52rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-    line-height: var(--leading-body);
-  }
-
   .controls {
     display: flex;
     flex-direction: column;
@@ -266,12 +242,6 @@
     cursor: not-allowed;
   }
 
-  .status {
-    margin: 0;
-    font-size: var(--text-sm);
-    color: var(--color-success-fg);
-  }
-
   .frame-wrap {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -285,14 +255,6 @@
     height: 22rem;
     border: none;
     display: block;
-  }
-
-  .error {
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

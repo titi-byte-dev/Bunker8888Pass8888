@@ -12,6 +12,7 @@
   } from "$lib/security/api";
   import DocHelpLink from "$lib/docs/DocHelpLink.svelte";
   import type { PasskeyMeta } from "$lib/passkey";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   let sessions = $state<HttpSession[]>([]);
   let passkeys = $state<PasskeyMeta[]>([]);
@@ -75,17 +76,20 @@
   <title>Dispositivos e sessões — AegisPass</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/security" class="back">← Segurança</a>
-  <h1>Dispositivos e sessões</h1>
-  <DocHelpLink />
-  <p class="lead">Sessões HTTP, passkeys WebAuthn e certificados CLI activos na tua conta.</p>
+<PageShell
+  title="Dispositivos e sessões"
+  taskId="SEC-003"
+  description="Sessões HTTP, passkeys WebAuthn e certificados CLI activos na tua conta."
+>
+  {#snippet actions()}
+    <DocHelpLink />
+  {/snippet}
 
   {#if status}
-    <p class="status">{status}</p>
+    <StatusBanner variant="success">{status}</StatusBanner>
   {/if}
   {#if error}
-    <p class="error" role="alert">{error}</p>
+    <StatusBanner variant="error">{error}</StatusBanner>
   {/if}
 
   {#if busy}
@@ -155,33 +159,9 @@
       {/if}
     </section>
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 40rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
-  .lead {
-    color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
-    font-size: var(--text-sm);
-  }
-
   .block {
     margin-bottom: var(--space-8);
   }
@@ -246,24 +226,6 @@
     font-size: var(--text-sm);
     cursor: pointer;
     text-decoration: underline;
-  }
-
-  .status {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: var(--color-success-bg);
-    color: var(--color-success-fg);
-    font-size: var(--text-sm);
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

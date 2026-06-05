@@ -15,6 +15,7 @@
   } from "$lib/admin/api";
   import type { ShiftPolicy } from "$lib/vault/shift";
   import type { GeofencePolicy } from "$lib/vault/geofence";
+  import { PageShell, StatusBanner } from "$lib/ui";
 
   const userId = $derived(page.params.id ?? "");
 
@@ -146,19 +147,21 @@
   <title>{email || "Utilizador"} — Admin</title>
 </svelte:head>
 
-<section class="page">
-  <a href="/admin/users" class="back">← Utilizadores</a>
-  <h1>{email || "Utilizador"}</h1>
+<PageShell
+  title={email || "Utilizador"}
+  leaf={email || undefined}
+  description="Políticas de turno, geofence e remote wipe para este colaborador."
+>
   <p class="id mono">{userId}</p>
 
   <AdminGate onUnlocked={onGateChange} />
 
   {#if unlocked}
     {#if status}
-      <p class="status">{status}</p>
+      <StatusBanner variant="success">{status}</StatusBanner>
     {/if}
     {#if error}
-      <p class="error" role="alert">{error}</p>
+      <StatusBanner variant="error">{error}</StatusBanner>
     {/if}
 
     {#if busy}
@@ -233,31 +236,13 @@
       </section>
     {/if}
   {/if}
-</section>
+</PageShell>
 
 <style>
-  .page {
-    max-width: 44rem;
-  }
-
-  .back {
-    display: inline-block;
-    margin-bottom: var(--space-4);
-    color: var(--color-link);
-    text-decoration: none;
-    font-size: var(--text-sm);
-  }
-
-  h1 {
-    margin: 0 0 var(--space-1);
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-  }
-
   .id {
     font-size: var(--text-xs);
     color: var(--color-text-muted);
-    margin: 0 0 var(--space-6);
+    margin: 0;
     word-break: break-all;
   }
 
@@ -346,24 +331,6 @@
   button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  .status {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: var(--color-success-bg);
-    color: var(--color-success-fg);
-    font-size: var(--text-sm);
-  }
-
-  .error {
-    padding: var(--space-3);
-    margin-bottom: var(--space-4);
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
-    color: var(--color-danger);
-    font-size: var(--text-sm);
   }
 
   .muted {

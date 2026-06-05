@@ -23,6 +23,7 @@ flowchart LR
 | 4 | [`mail-002-003-production.md`](mail-002-003-production.md) | MAIL-002, MAIL-003 | Postfix, SPF/DKIM/DMARC |
 | 5 | [`google-001-oauth.md`](google-001-oauth.md) | GOOGLE-001 | Service Account + OAuth Workspace |
 | 6 | [`fin-003-open-banking.md`](fin-003-open-banking.md) | FIN-003 | Certificados mTLS + `AEGIS_OB_*` |
+| 7 | [`demo-client-checklist.md`](demo-client-checklist.md) | INFRA-001/002 + MAIL-002/003 | Demo aliases + orquestrador em produção |
 
 ## Scripts executáveis
 

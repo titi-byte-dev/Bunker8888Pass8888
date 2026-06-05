@@ -76,6 +76,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | UI-015 | DataTable, MetricCard, ListRow | 2 | M | 🟢 | UI-012 |
 | UI-016 | Migração páginas para `PageShell` + `lib/ui` (módulos principais da app) | 2 | L | 🟢 | UI-011, UI-012, UI-015, UI-017 |
 | UI-017 | Toast, Skeleton, ConfirmDialog | 1 | M | 🟢 | UI-012 |
+| UI-018 | Migração rotas secundárias (admin, security/*, work/*, settings, dev, vault/edit) | 2 | M | 🟢 | UI-016 |
 
 > Plano detalhado: [`../09-design/design-system.md`](../09-design/design-system.md)
 
@@ -177,6 +178,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | DOC-012 | Converter sequenceDiagram → graph no build-docs | 2 | S | 🟢 | DOC-011 |
 | DOC-013 | Links contextuais «Como funciona?» nas rotas da app | 2 | S | 🟢 | DOC-002 |
 | DOC-014 | Docs produção + matriz dev/prod + índice journeys | 2 | S | 🟢 | DOC-001 |
+| DOC-015 | Layout docs: sidebar colapsável, Svelte Flow (sequence ladder), FlowPlayer responsivo, shell fluido | 2 | M | 🟢 | DOC-011, UI-011 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 
