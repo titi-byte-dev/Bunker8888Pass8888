@@ -25,6 +25,10 @@ const (
 	AuditFieldPut     = "field.put"
 	AuditFieldDelete  = "field.delete"
 	AuditFieldShred   = "field.shred"
+	AuditContractAdd  = "contract.add"
+	AuditContractSign = "contract.sign"
+
+	AuditContractDelete = "contract.delete"
 )
 
 // AuditEntry espelha uma linha de "audit_log".

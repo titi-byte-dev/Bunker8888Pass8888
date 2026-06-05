@@ -30,6 +30,10 @@ func mapHRError(w http.ResponseWriter, err error) bool {
 		writeError(w, http.StatusBadRequest, "campo inválido (valor ou chave em falta)")
 	case errors.Is(err, hr.ErrAlreadyShredded):
 		writeError(w, http.StatusConflict, "campo já eliminado")
+	case errors.Is(err, hr.ErrTooLargeContract):
+		writeError(w, http.StatusRequestEntityTooLarge, "contrato demasiado grande")
+	case errors.Is(err, hr.ErrNoSigningIdentity):
+		writeError(w, http.StatusNotFound, "sem identidade de assinatura")
 	default:
 		writeError(w, http.StatusInternalServerError, "falha na operação da ficha")
 	}
@@ -245,6 +249,177 @@ func handleListAuditLog(repo *hr.Repo) http.HandlerFunc {
 			out = append(out, auditEntryJSON(&entries[i]))
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"entries": out})
+	}
+}
+
+// --- Contratos (HR-005) + assinatura digital (HR-006) ------------------------
+
+type signingIdentityRequest struct {
+	PublicKey         string `json:"public_key"`          // SPKI base64
+	WrappedPrivateKey string `json:"wrapped_private_key"` // PKCS8 cifrado base64
+}
+
+type contractRequest struct {
+	MetaBlob   string `json:"meta_blob"`
+	DataBlob   string `json:"data_blob"`
+	WrappedKey string `json:"wrapped_key"`
+}
+
+type signContractRequest struct {
+	ContentDigest string `json:"content_digest"`
+	Signature     string `json:"signature"` // ECDSA base64
+}
+
+func contractMetaJSON(c *hr.Contract) map[string]any {
+	m := map[string]any{
+		"id":          c.ID,
+		"record_id":   c.RecordID,
+		"meta_blob":   base64.StdEncoding.EncodeToString(c.MetaBlob),
+		"wrapped_key": base64.StdEncoding.EncodeToString(c.WrappedKey),
+		"byte_size":   c.ByteSize,
+		"signed":      len(c.Signature) > 0,
+		"created_by":  c.CreatedBy,
+		"created_at":  c.CreatedAt,
+	}
+	if len(c.Signature) > 0 {
+		m["content_digest"] = c.ContentDigest
+		m["signature"] = base64.StdEncoding.EncodeToString(c.Signature)
+		m["signed_by"] = c.SignedBy
+		if c.SignedAt != nil {
+			m["signed_at"] = *c.SignedAt
+		}
+	}
+	return m
+}
+
+func handlePutSigningIdentity(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		var req signingIdentityRequest
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "JSON inválido")
+			return
+		}
+		pub, err1 := base64.StdEncoding.DecodeString(req.PublicKey)
+		priv, err2 := base64.StdEncoding.DecodeString(req.WrappedPrivateKey)
+		if err1 != nil || err2 != nil || len(pub) == 0 || len(priv) == 0 {
+			writeError(w, http.StatusBadRequest, "chaves base64 inválidas")
+			return
+		}
+		if err := repo.PutSigningIdentity(r.Context(), userID, pub, priv); mapHRError(w, err) {
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func handleGetSigningIdentity(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		si, err := repo.GetSigningIdentity(r.Context(), userID)
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"public_key":          base64.StdEncoding.EncodeToString(si.PublicKey),
+			"wrapped_private_key": base64.StdEncoding.EncodeToString(si.WrappedPrivateKey),
+			"created_at":          si.CreatedAt,
+		})
+	}
+}
+
+// handleGetSignerPublicKey devolve só a chave pública de um signatário (verificar).
+func handleGetSignerPublicKey(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pk, err := repo.GetSignerPublicKey(r.Context(), r.PathValue("userId"))
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"public_key": base64.StdEncoding.EncodeToString(pk),
+		})
+	}
+}
+
+func handleListContracts(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		cs, err := repo.ListContracts(r.Context(), userID, r.PathValue("id"))
+		if mapHRError(w, err) {
+			return
+		}
+		out := make([]map[string]any, 0, len(cs))
+		for i := range cs {
+			out = append(out, contractMetaJSON(&cs[i]))
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"contracts": out})
+	}
+}
+
+func handleAddContract(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		var req contractRequest
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "JSON inválido")
+			return
+		}
+		meta, e1 := base64.StdEncoding.DecodeString(req.MetaBlob)
+		data, e2 := base64.StdEncoding.DecodeString(req.DataBlob)
+		wrapped, e3 := base64.StdEncoding.DecodeString(req.WrappedKey)
+		if e1 != nil || e2 != nil || e3 != nil || len(meta) == 0 || len(data) == 0 || len(wrapped) == 0 {
+			writeError(w, http.StatusBadRequest, "blobs base64 inválidos")
+			return
+		}
+		c, err := repo.AddContract(r.Context(), userID, r.PathValue("id"), meta, data, wrapped)
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusCreated, contractMetaJSON(c))
+	}
+}
+
+func handleGetContract(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		c, err := repo.GetContract(r.Context(), userID, r.PathValue("id"), r.PathValue("cid"))
+		if mapHRError(w, err) {
+			return
+		}
+		out := contractMetaJSON(c)
+		out["data_blob"] = base64.StdEncoding.EncodeToString(c.DataBlob)
+		writeJSON(w, http.StatusOK, out)
+	}
+}
+
+func handleSignContract(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		var req signContractRequest
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "JSON inválido")
+			return
+		}
+		sig, err := base64.StdEncoding.DecodeString(req.Signature)
+		if err != nil || len(sig) == 0 || req.ContentDigest == "" {
+			writeError(w, http.StatusBadRequest, "assinatura inválida")
+			return
+		}
+		c, err := repo.SignContract(r.Context(), userID, r.PathValue("id"), r.PathValue("cid"), req.ContentDigest, sig)
+		if mapHRError(w, err) {
+			return
+		}
+		writeJSON(w, http.StatusOK, contractMetaJSON(c))
+	}
+}
+
+func handleDeleteContract(repo *hr.Repo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		if err := repo.DeleteContract(r.Context(), userID, r.PathValue("id"), r.PathValue("cid")); mapHRError(w, err) {
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
