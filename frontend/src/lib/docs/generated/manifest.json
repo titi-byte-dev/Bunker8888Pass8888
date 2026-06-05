@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T17:08:30.940Z",
+  "generatedAt": "2026-06-05T18:10:33.846Z",
   "categories": [
     {
       "id": "concepts",
@@ -245,6 +245,27 @@
       "order": 99
     },
     {
+      "slug": "journey-erp-flow-dev",
+      "title": "Journey: Fluxo ERP em desenvolvimento (DoD Fase 3)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "erp_flow_dev",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Gestor comercial/financeiro",
+      "order": 99
+    },
+    {
       "slug": "journey-finance-agent-reconcile",
       "title": "Journey: Agente financeiro reconcilia pagamentos (FIN-003 / AGENT-006)",
       "category": "journeys",
@@ -284,6 +305,48 @@
       "summary": "",
       "related": [],
       "actor": "Responsável financeiro",
+      "order": 99
+    },
+    {
+      "slug": "journey-google-dev-stub",
+      "title": "Journey: Google proxy em desenvolvimento (DoD Fase 2)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "google_dev_stub",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Administrador",
+      "order": 99
+    },
+    {
+      "slug": "journey-guardian-audit",
+      "title": "Journey: Auditoria do Guardião (DoD Fase 3)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "guardian_audit",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Admin de segurança",
       "order": 99
     },
     {

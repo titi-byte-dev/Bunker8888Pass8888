@@ -36,6 +36,12 @@
         <span>Herdeiro digital, countdown, aprovar/rejeitar (VAULT-016)</span>
       </a>
     </li>
+    <li>
+      <a href="/security/guardian">
+        <strong>Auditoria do Guardião</strong>
+        <span>Tools de agentes sem exposição da Master Key (DoD Fase 3)</span>
+      </a>
+    </li>
   </ul>
 </section>
 

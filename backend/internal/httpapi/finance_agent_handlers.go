@@ -75,3 +75,32 @@ func handleReportTransactionsSynced(bus *eventbus.Bus) http.HandlerFunc {
 		})
 	}
 }
+
+type reportInvoicePaidRequest struct {
+	InvoiceID     string `json:"invoice_id"`
+	InvoiceNumber string `json:"invoice_number"`
+}
+
+func handleReportInvoicePaid(bus *eventbus.Bus) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if bus == nil {
+			writeError(w, http.StatusServiceUnavailable, "event bus indisponível")
+			return
+		}
+		userID, _ := r.Context().Value(userIDKey).(string)
+		var req reportInvoicePaidRequest
+		if err := decodeJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "JSON inválido")
+			return
+		}
+		if req.InvoiceID == "" {
+			writeError(w, http.StatusBadRequest, "invoice_id obrigatório")
+			return
+		}
+		_ = eventbus.PublishJSON(r.Context(), bus, eventbus.FinInvoicePaid, userID, "fin.invoices", map[string]any{
+			"invoice_id":     req.InvoiceID,
+			"invoice_number": req.InvoiceNumber,
+		})
+		writeJSON(w, http.StatusOK, map[string]any{"status": "reported", "invoice_id": req.InvoiceID})
+	}
+}

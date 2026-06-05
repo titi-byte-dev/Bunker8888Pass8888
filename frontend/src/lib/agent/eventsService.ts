@@ -41,12 +41,21 @@ function labelForType(type: string, payload?: Record<string, unknown>): string {
       if (action === "screen_candidate") return "Sugestão: triagem às cegas";
       if (action === "review_saas_licenses") return "Sugestão: rever licenças SaaS";
       if (action === "reconcile_payments") return "Sugestão: reconciliar pagamentos";
+      if (action === "issue_proforma") return "Sugestão: emitir pro-forma";
+      if (action === "calculate_commission") return "Sugestão: calcular comissão";
+      if (action === "generate_rgpd_report") return "Sugestão: relatório RGPD";
       return "Sugestão do orquestrador";
     }
     case "fin.subscription.stale":
       return "Licenças SaaS sem uso reportadas";
     case "fin.transactions.synced":
       return "Movimentos bancários sincronizados";
+    case "crm.deal_closed":
+      return "Negócio fechado no CRM";
+    case "fin.invoice.paid":
+      return "Fatura marcada como paga";
+    case "hr.compliance.requested":
+      return "Pedido de relatório RGPD";
     case "hr.recruitment.run":
       return "Triagem de candidatos executada";
     case "hr.employee.created":

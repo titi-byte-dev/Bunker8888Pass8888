@@ -12,6 +12,10 @@
   import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
   import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
   import { LEAD_STAGES, type Lead, type LeadStage } from "$lib/crm/leads";
+  import { computeFunnelMetrics } from "$lib/crm/funnelMetrics";
+  import { reportDealClosed } from "$lib/crm/dealClosedService";
+  import { isDealClosed, proformaFromLead } from "$lib/crm/dealClosed";
+  import { issueInvoice } from "$lib/fin/invoicesService";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -39,6 +43,8 @@
       items: leads.filter((l) => l.stage === s.id),
     })),
   );
+  const metrics = $derived(computeFunnelMetrics(leads));
+  let proformaHint = $state(false);
 
   async function refresh() {
     loading = true;
@@ -98,7 +104,12 @@
     busy = true;
     error = "";
     try {
+      const wasClosed = isDealClosed(lead);
       await updateLead(lead.id, { ...lead, stage });
+      if (stage === "won" && !wasClosed) {
+        await reportDealClosed(lead.id);
+        await refreshEvents();
+      }
       await refresh();
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao actualizar";
@@ -119,6 +130,15 @@
       await refreshEvents();
       if (result.action === "run_prospection") {
         await handleProspection();
+      } else if (result.action === "issue_proforma") {
+        const leadId = String(ev.payload.lead_id ?? "");
+        const lead = leads.find((l) => l.id === leadId);
+        if (lead && isDealClosed(lead)) {
+          await issueInvoice("proforma", proformaFromLead(lead));
+          proformaHint = true;
+        }
+      } else if (result.action === "generate_rgpd_report") {
+        window.location.href = "/hr/compliance";
       }
     } catch (err) {
       error = err instanceof Error ? err.message : "Falha ao aprovar";
@@ -203,7 +223,7 @@
     <div>
       <p class="eyebrow">CRM-001/002 · AGENT-009 · Funil de vendas</p>
       <h1>Leads</h1>
-      <DocHelpLink slug="journey-human-in-the-loop" label="Como funcionam as aprovações?" />
+      <DocHelpLink slug="journey-erp-flow-dev" label="Como funciona o fluxo ERP em dev?" />
     </div>
     <p class="lead">
       Contactos cifrados com a Master Key — o servidor só vê blobs opacos. Arrasta
@@ -346,6 +366,19 @@
       </label>
       <button type="submit" class="btn primary" disabled={busy}>Adicionar</button>
     </form>
+
+    {#if proformaHint}
+      <p class="hint" role="status">Pro-forma emitida — converte em fatura em <a href="/fin/invoices">/fin/invoices</a>.</p>
+    {/if}
+
+    {#if !loading && leads.length > 0}
+      <section class="metrics">
+        <div class="metric"><span class="n">{metrics.total}</span> leads</div>
+        <div class="metric"><span class="n">{metrics.open}</span> em aberto</div>
+        <div class="metric"><span class="n">{metrics.won}</span> ganhos</div>
+        <div class="metric"><span class="n">{metrics.conversionPct}%</span> conversão</div>
+      </section>
+    {/if}
 
     {#if loading}
       <p class="muted">A carregar funil…</p>
@@ -647,5 +680,28 @@
     flex-direction: column;
     gap: var(--space-1);
     font-size: var(--text-sm);
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .metric {
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    font-size: var(--text-sm);
+  }
+  .metric .n {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+  .hint {
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+    margin-bottom: var(--space-4);
   }
 </style>

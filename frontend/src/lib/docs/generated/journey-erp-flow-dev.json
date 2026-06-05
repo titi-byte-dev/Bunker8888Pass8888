@@ -1,0 +1,315 @@
+{
+  "slug": "journey-erp-flow-dev",
+  "title": "Journey: Fluxo ERP em desenvolvimento (DoD Fase 3)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "erp_flow_dev",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Fluxo ERP em desenvolvimento (DoD Fase 3)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Gestor comercial/financeiro · <strong>Epics:</strong> CRM, FIN, HR, AGENT</p>\n</blockquote>\n<p>Ciclo completo com orquestrador e human-in-the-loop — <strong>sem</strong> banco nem VPS real.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Master Key desbloqueada.</li>\n<li>Backend com orquestrador activo (<code>docker compose</code>).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant CRM as /crm\r\n    participant INV as /fin/invoices\r\n    participant COM as /fin/commissions\r\n    participant HR as /hr/compliance\r\n    participant Orq as Orquestrador\r\n\r\n    U->>CRM: lead → Ganho\r\n    CRM->>Orq: crm.deal_closed\r\n    Orq->>CRM: issue_proforma suggested\r\n    U->>CRM: Aprovar\r\n    CRM->>INV: emite PF (ZK)\r\n\r\n    U->>INV: Converter em fatura + Marcar pago\r\n    INV->>Orq: fin.invoice.paid\r\n    Orq->>INV: calculate_commission suggested\r\n    U->>INV: Aprovar\r\n    INV->>COM: cria comissão\r\n\r\n    COM->>Orq: hr.compliance.requested\r\n    Orq->>COM: generate_rgpd_report suggested\r\n    U->>COM: Aprovar\r\n    U->>HR: PDF conformidade",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "lead → Ganho"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "crm.deal_closed"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "issue_proforma suggested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Aprovar"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "emite PF (ZK)"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "Converter em fatura + Marcar pago"
+            },
+            {
+              "kind": "message",
+              "from": "INV",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "fin.invoice.paid"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "calculate_commission suggested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "Aprovar"
+            },
+            {
+              "kind": "message",
+              "from": "INV",
+              "to": "COM",
+              "arrow": "->>",
+              "label": "cria comissão"
+            },
+            {
+              "kind": "message",
+              "from": "COM",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "hr.compliance.requested"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "COM",
+              "arrow": "->>",
+              "label": "generate_rgpd_report suggested"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "COM",
+              "arrow": "->>",
+              "label": "Aprovar"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "HR",
+              "arrow": "->>",
+              "label": "PDF conformidade"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 200
+              },
+              {
+                "id": "INV",
+                "label": "/fin/invoices",
+                "x": 400
+              },
+              {
+                "id": "COM",
+                "label": "/fin/commissions",
+                "x": 600
+              },
+              {
+                "id": "HR",
+                "label": "/hr/compliance",
+                "x": 800
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 1000
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "CRM",
+                "label": "lead → Ganho",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "CRM",
+                "target": "Orq",
+                "label": "crm.deal_closed",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "Orq",
+                "target": "CRM",
+                "label": "issue_proforma suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "U",
+                "target": "CRM",
+                "label": "Aprovar",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "CRM",
+                "target": "INV",
+                "label": "emite PF (ZK)",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "U",
+                "target": "INV",
+                "label": "Converter em fatura + Marcar pago",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "INV",
+                "target": "Orq",
+                "label": "fin.invoice.paid",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "Orq",
+                "target": "INV",
+                "label": "calculate_commission suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "U",
+                "target": "INV",
+                "label": "Aprovar",
+                "dashed": false
+              },
+              {
+                "id": "step-9",
+                "source": "INV",
+                "target": "COM",
+                "label": "cria comissão",
+                "dashed": false
+              },
+              {
+                "id": "step-10",
+                "source": "COM",
+                "target": "Orq",
+                "label": "hr.compliance.requested",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "Orq",
+                "target": "COM",
+                "label": "generate_rgpd_report suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-12",
+                "source": "U",
+                "target": "COM",
+                "label": "Aprovar",
+                "dashed": false
+              },
+              {
+                "id": "step-13",
+                "source": "U",
+                "target": "HR",
+                "label": "PDF conformidade",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li><strong>CRM</strong> — cria lead; move para <strong>Ganho</strong>; aprova <strong>emitir pro-forma</strong>.</li>\n<li><strong>Faturas</strong> — converte PF→FT; preenche linhas se necessário; <strong>Marcar pago</strong>.</li>\n<li>Aprova <strong>calcular comissão</strong> (10% vendedor por omissão em dev).</li>\n<li><strong>Comissões</strong> — confirma registo; aprova <strong>relatório RGPD</strong>.</li>\n<li><strong>Conformidade</strong> — imprime PDF (<code>Ctrl+P</code> → Guardar como PDF).</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Recibo (RC)",
+      "html": "<p>Em <code>/fin/invoices</code>, em fatura <strong>paga</strong>, clica <strong>Emitir recibo</strong>.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Reconciliação (opcional)",
+      "html": "<p><code>/fin/banking</code> → consentimento mock → sync → reconcilia com subscrições SaaS.</p>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Eventos auditados em <code>agent_events</code>.</li>\n<li>Nenhuma acção financeira automática sem aprovação humana.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Gestor comercial/financeiro",
+  "order": 99
+}

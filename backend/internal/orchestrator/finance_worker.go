@@ -23,6 +23,7 @@ func (FinanceWorker) Descriptor() Descriptor {
 		Handles: []string{
 			eventbus.FinSubscriptionStale,
 			eventbus.FinTransactionsSynced,
+			eventbus.FinInvoicePaid,
 		},
 	}
 }
@@ -33,6 +34,8 @@ func (w *FinanceWorker) Handle(ctx context.Context, ev eventbus.Event) error {
 		return w.suggestReviewSaaS(ctx, ev)
 	case eventbus.FinTransactionsSynced:
 		return w.suggestReconcile(ctx, ev)
+	case eventbus.FinInvoicePaid:
+		return w.suggestCommission(ctx, ev)
 	default:
 		return nil
 	}
@@ -71,5 +74,21 @@ func (w *FinanceWorker) suggestReconcile(ctx context.Context, ev eventbus.Event)
 		"unmatched_count":   meta.UnmatchedCount,
 		"agent_id":          "finance",
 		"auto_run":          false,
+	})
+}
+
+func (w *FinanceWorker) suggestCommission(ctx context.Context, ev eventbus.Event) error {
+	var meta struct {
+		InvoiceID     string `json:"invoice_id"`
+		InvoiceNumber string `json:"invoice_number"`
+	}
+	_ = json.Unmarshal(ev.Payload, &meta)
+	return eventbus.PublishJSON(ctx, w.Bus, eventbus.OrchestratorActionSuggested, ev.UserID, "orchestrator.finance", map[string]any{
+		"action":         "calculate_commission",
+		"reason":         "fin.invoice.paid",
+		"invoice_id":     meta.InvoiceID,
+		"invoice_number": meta.InvoiceNumber,
+		"agent_id":       "finance",
+		"auto_run":       false,
 	})
 }

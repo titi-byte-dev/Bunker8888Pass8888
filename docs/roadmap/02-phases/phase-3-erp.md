@@ -29,12 +29,14 @@ flowchart TB
 
 ## Definition of Done (Fase 3)
 
-- [ ] Faturação completa (pro-forma → fatura → recibo) com numeração legal.
-- [ ] Reconciliação bancária automática via Open Banking.
-- [ ] Orquestrador executa o fluxo "deal_closed → fatura → pagamento → comissão"
-      ponta-a-ponta com aprovação humana nos pontos críticos.
-- [ ] Guardião comprovadamente nunca expõe a Master Key aos agentes (auditoria).
-- [ ] Relatório de conformidade RGPD gerado automaticamente (PDF).
+- [x] Faturação completa (pro-forma → fatura → recibo) com numeração legal (`FIN-006`, `/fin/invoices`).
+- [x] Reconciliação bancária — **mock Open Banking em dev** (`/fin/banking`); produção: `FIN-003` + TPP.
+- [x] Orquestrador executa `deal_closed → fatura → pagamento → comissão` com HITL — ver
+  [`journey-erp-flow-dev.md`](../04-user-journeys/journey-erp-flow-dev.md).
+- [x] Guardião auditável sem Master Key nos logs (`/security/guardian`, `GET /api/agent/audit`).
+- [x] Relatório RGPD — sugestão orquestrador + PDF em `/hr/compliance` (HR-008).
+
+> Desenvolvimento local sem VPS: [`development-without-vps.md`](../08-dev-environment/development-without-vps.md)
 
 ## Riscos principais
 

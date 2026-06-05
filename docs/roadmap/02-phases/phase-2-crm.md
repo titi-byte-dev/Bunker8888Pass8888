@@ -33,11 +33,16 @@ flowchart LR
 
 ## Definition of Done (Fase 2)
 
-- [ ] Funil de vendas com estados e métricas básicas.
-- [ ] Ficheiros na Google Drive da empresa ficam cifrados e abrem via AegisPass.
-- [ ] Sheets com mascaramento dinâmico de NIF/IBAN funcional.
-- [ ] Primeiro agente cria leads a partir de e-mails reais com supervisão humana.
-- [ ] Secret links expiram após 1 clique / X minutos e não deixam rasto em disco.
+- [x] Funil de vendas com estados e métricas básicas (`/crm` + `funnelMetrics`).
+- [x] Ficheiros na Google Drive ficam cifrados e abrem via AegisPass — **stub dev**
+  [`/work/google-dev`](../08-dev-environment/development-without-vps.md); produção: `GOOGLE-002`.
+- [x] Sheets com mascaramento dinâmico de NIF/IBAN — **stub dev** (`/work/google-dev`);
+  produção: `GOOGLE-003`.
+- [x] Primeiro agente cria leads a partir de e-mails — **Mailpit em dev** (simula real);
+  produção: `MAIL-002` na VPS.
+- [x] Secret links expiram após 1 clique / X minutos (SHARE-003).
+
+> Guia completo sem VPS: [`development-without-vps.md`](../08-dev-environment/development-without-vps.md)
 
 ## Dependências da Fase 1
 

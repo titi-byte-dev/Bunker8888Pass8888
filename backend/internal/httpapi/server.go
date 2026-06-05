@@ -306,6 +306,9 @@ func NewRouter(deps Deps) http.Handler {
 		if deps.AgentBus != nil {
 			mux.Handle("POST /api/agent/finance/report-stale", requireAuth(deps.Auth, handleReportStaleSubscriptions(deps.AgentBus)))
 			mux.Handle("POST /api/agent/finance/report-sync", requireAuth(deps.Auth, handleReportTransactionsSynced(deps.AgentBus)))
+			mux.Handle("POST /api/agent/finance/report-invoice-paid", requireAuth(deps.Auth, handleReportInvoicePaid(deps.AgentBus)))
+			mux.Handle("POST /api/agent/crm/report-deal-closed", requireAuth(deps.Auth, handleReportDealClosed(deps.AgentBus)))
+			mux.Handle("POST /api/agent/hr/request-compliance", requireAuth(deps.Auth, handleRequestComplianceReport(deps.AgentBus)))
 		}
 		if deps.AgentEvents != nil {
 			mux.Handle("GET /api/agent/events", requireAuth(deps.Auth, handleListAgentEvents(deps.AgentEvents)))

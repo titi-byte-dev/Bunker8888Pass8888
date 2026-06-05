@@ -15,6 +15,9 @@
     type CommissionStatus,
   } from "$lib/fin/commissions";
   import { invoiceTotals, type InvoiceDocument } from "$lib/fin/invoices";
+  import { reportCommissionRecorded } from "$lib/fin/erpFlowService";
+  import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
+  import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -28,6 +31,8 @@
   let fInvoiceId = $state("");
   let fBeneficiary = $state("");
   let fRate = $state(10);
+  let agentEvents = $state<AgentEvent[]>([]);
+  let decidingId = $state<string | null>(null);
 
   const selectedInvoice = $derived(paidInvoices.find((i) => i.id === fInvoiceId));
   const preview = $derived(
@@ -52,6 +57,11 @@
       commissions = coms;
       // So faturas (FT) pagas geram comissao.
       paidInvoices = invs.filter((i) => i.docType === "invoice" && i.status === "paid");
+      try {
+        agentEvents = await listAgentEvents();
+      } catch {
+        agentEvents = [];
+      }
     } catch (e) {
       error = (e as Error).message;
     } finally {
@@ -83,6 +93,8 @@
     try {
       const payload = commissionFromInvoice(selectedInvoice, fRate, fBeneficiary);
       await createCommission(selectedInvoice.id, payload);
+      await reportCommissionRecorded(selectedInvoice.id);
+      agentEvents = await listAgentEvents();
       fBeneficiary = "";
       fRate = 10;
       fInvoiceId = "";
@@ -91,6 +103,37 @@
       error = (err as Error).message;
     } finally {
       busy = false;
+    }
+  }
+
+  function isPendingSuggestion(ev: AgentEvent): boolean {
+    return ev.type === "orchestrator.action.suggested" && (ev.approvalStatus ?? "pending") === "pending";
+  }
+
+  async function handleApprove(ev: AgentEvent) {
+    decidingId = ev.id;
+    try {
+      await approveSuggestion(ev.id);
+      if (ev.payload.action === "generate_rgpd_report") {
+        window.location.href = "/hr/compliance";
+      }
+      agentEvents = await listAgentEvents();
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      decidingId = null;
+    }
+  }
+
+  async function handleReject(ev: AgentEvent) {
+    decidingId = ev.id;
+    try {
+      await rejectSuggestion(ev.id);
+      agentEvents = await listAgentEvents();
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      decidingId = null;
     }
   }
 
@@ -123,6 +166,27 @@
     <p class="lock">Cofre bloqueado — desbloqueia para gerir comissoes.</p>
   {:else}
     {#if error}<p class="err">{error}</p>{/if}
+
+    <div class="card">
+      <h2>Actividade dos agentes</h2>
+      {#if agentEvents.length === 0}
+        <p class="muted">Sem eventos.</p>
+      {:else}
+        <ul class="ev-list">
+          {#each agentEvents.slice(0, 4) as ev (ev.id)}
+            <li class:suggested={isPendingSuggestion(ev)}>
+              <span>{ev.label}</span>
+              {#if isPendingSuggestion(ev) && ev.payload.action === "generate_rgpd_report"}
+                <span class="ev-actions">
+                  <button class="mini" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</button>
+                  <button class="mini" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</button>
+                </span>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
 
     <form class="card" onsubmit={handleCreate}>
       <h2>Gerar comissao</h2>
@@ -205,6 +269,10 @@
   .totals { display: flex; gap: 1.25rem; margin: 0.5rem 0 0.75rem; font-size: 0.85rem; color: #bbb; }
   .actions { display: flex; gap: 0.4rem; }
   .mini { background: #23232c; border: 1px solid #34343f; color: #ddd; border-radius: 5px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer; }
+  .ev-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .ev-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border: 1px solid #2c2c36; border-radius: 5px; font-size: 0.82rem; }
+  .ev-list li.suggested { border-color: var(--accent, #4f7cff); }
+  .ev-actions { display: flex; gap: 0.3rem; }
   .primary { background: var(--accent, #4f7cff); color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1rem; font-size: 0.85rem; cursor: pointer; margin-top: 0.5rem; }
   .primary:disabled { opacity: 0.6; cursor: default; }
   .badge { padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.7rem; text-transform: uppercase; }

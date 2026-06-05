@@ -21,6 +21,12 @@ const (
 	FinSubscriptionStale = "fin.subscription.stale"
 	// FinTransactionsSynced — cliente sincronizou movimentos e reportou reconciliação (FIN-003).
 	FinTransactionsSynced = "fin.transactions.synced"
+	// CRMDealClosed — lead passou a «won» (CRM-003 / DoD Fase 3).
+	CRMDealClosed = "crm.deal_closed"
+	// FinInvoicePaid — fatura marcada como paga no cliente (fluxo ERP).
+	FinInvoicePaid = "fin.invoice.paid"
+	// HRComplianceRequested — pedido de relatório RGPD após fecho do ciclo ERP.
+	HRComplianceRequested = "hr.compliance.requested"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).

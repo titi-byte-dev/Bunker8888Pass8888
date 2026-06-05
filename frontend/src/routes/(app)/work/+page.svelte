@@ -40,6 +40,12 @@
       </a>
     </li>
     <li>
+      <a href="/work/google-dev">
+        <strong>Google proxy (simulação dev)</strong>
+        <span>Drive cifrado + mascaramento Sheets sem OAuth real (DoD Fase 2)</span>
+      </a>
+    </li>
+    <li>
       <a href="/security/devices">
         <strong>Dispositivos CLI activos</strong>
         <span>Revogar certificados mTLS registados na conta</span>

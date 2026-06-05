@@ -1,0 +1,151 @@
+{
+  "slug": "journey-guardian-audit",
+  "title": "Journey: Auditoria do Guardião (DoD Fase 3)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "guardian_audit",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Auditoria do Guardião (DoD Fase 3)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Admin de segurança · <strong>Epic:</strong> AGENT-002</p>\n</blockquote>\n<p>Demonstra que agentes executam <strong>tools</strong> sem aceder à Master Key.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Sessão activa.</li>\n<li>Pelo menos uma prospeção ou recrutamento executado.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant CRM as /crm\r\n    participant G as Guardião\r\n    participant AUD as /security/guardian\r\n\r\n    U->>CRM: Aprovar prospeção\r\n    CRM->>G: run tool (input sanitizado)\r\n    G->>G: regista agent_id + tool_name\r\n    Note over G: sem master_key nos logs\r\n    U->>AUD: consulta auditoria",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Aprovar prospeção"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "G",
+              "arrow": "->>",
+              "label": "run tool (input sanitizado)"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "regista agent_id + tool_name"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "AUD",
+              "arrow": "->>",
+              "label": "consulta auditoria"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 200
+              },
+              {
+                "id": "G",
+                "label": "Guardião",
+                "x": 400
+              },
+              {
+                "id": "AUD",
+                "label": "/security/guardian",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "CRM",
+                "label": "Aprovar prospeção",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "CRM",
+                "target": "G",
+                "label": "run tool (input sanitizado)",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "G",
+                "target": "G",
+                "label": "regista agent_id + tool_name",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "U",
+                "target": "AUD",
+                "label": "consulta auditoria",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "O que verificar",
+      "html": "<table>\n<thead>\n<tr>\n<th>Campo</th>\n<th>Esperado</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>agent_id</code></td>\n<td>ex. <code>prospection</code></td>\n</tr>\n<tr>\n<td><code>tool_name</code></td>\n<td>ex. <code>list_mail_inbox</code></td>\n</tr>\n<tr>\n<td><code>success</code></td>\n<td>true/false</td>\n</tr>\n<tr>\n<td>Ausente</td>\n<td>passwords, blobs decifrados, Master Key</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Corre prospeção em <code>/crm</code> (com e-mail simulado via Mailpit).</li>\n<li>Abre <code>/security/guardian</code>.</li>\n<li>Confirma entradas recentes — só metadados.</li>\n</ol>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> o Guardião decifra no cliente ou via scoped context; o servidor de auditoria\nnunca persiste conteúdo sensível das tools.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Admin de segurança",
+  "order": 99
+}

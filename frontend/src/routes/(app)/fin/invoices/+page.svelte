@@ -16,6 +16,12 @@
     type InvoiceLine,
   } from "$lib/fin/invoices";
   import { canConvertToInvoice, invoiceFromProforma } from "$lib/crm/proformaToInvoice";
+  import { canIssueReceipt, receiptFromInvoice } from "$lib/fin/receiptFromInvoice";
+  import { reportInvoicePaid } from "$lib/fin/erpFlowService";
+  import { listAgentEvents, type AgentEvent } from "$lib/agent/eventsService";
+  import { approveSuggestion, rejectSuggestion } from "$lib/agent/approvalService";
+  import { commissionFromInvoice } from "$lib/fin/commissions";
+  import { createCommission } from "$lib/fin/commissionsService";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -23,6 +29,10 @@
   let error = $state("");
 
   let docs = $state<InvoiceDocument[]>([]);
+  let agentEvents = $state<AgentEvent[]>([]);
+  let decidingId = $state<string | null>(null);
+  const DEFAULT_RATE = 10;
+  const DEFAULT_BENEFICIARY = "Vendedor";
 
   // Formulario de emissao.
   let fDocType = $state<DocType>("invoice");
@@ -59,16 +69,29 @@
     fLines = fLines.filter((_, idx) => idx !== i);
   }
 
+  async function refreshEvents() {
+    try {
+      agentEvents = await listAgentEvents();
+    } catch {
+      agentEvents = [];
+    }
+  }
+
   async function refresh() {
     loading = true;
     error = "";
     try {
       docs = await listInvoices();
+      await refreshEvents();
     } catch (e) {
       error = (e as Error).message;
     } finally {
       loading = false;
     }
+  }
+
+  function isPendingSuggestion(ev: AgentEvent): boolean {
+    return ev.type === "orchestrator.action.suggested" && (ev.approvalStatus ?? "pending") === "pending";
   }
 
   onMount(() => {
@@ -129,12 +152,62 @@
     busy = true;
     error = "";
     try {
+      const doc = docs.find((d) => d.id === id);
       await updateInvoiceStatus(id, status);
+      if (status === "paid" && doc?.docType === "invoice") {
+        await reportInvoicePaid(doc.id, doc.number);
+        await refreshEvents();
+      }
       await refresh();
     } catch (err) {
       error = (err as Error).message;
     } finally {
       busy = false;
+    }
+  }
+
+  async function issueReceipt(d: InvoiceDocument) {
+    busy = true;
+    error = "";
+    try {
+      await issueInvoice("receipt", receiptFromInvoice(d));
+      await refresh();
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function handleApprove(ev: AgentEvent) {
+    decidingId = ev.id;
+    try {
+      const result = await approveSuggestion(ev.id);
+      await refreshEvents();
+      if (result.action === "calculate_commission") {
+        const invId = String(ev.payload.invoice_id ?? "");
+        const doc = docs.find((d) => d.id === invId);
+        if (doc) {
+          await createCommission(invId, commissionFromInvoice(doc, DEFAULT_RATE, DEFAULT_BENEFICIARY));
+          window.location.href = "/fin/commissions";
+        }
+      }
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      decidingId = null;
+    }
+  }
+
+  async function handleReject(ev: AgentEvent) {
+    decidingId = ev.id;
+    try {
+      await rejectSuggestion(ev.id);
+      await refreshEvents();
+    } catch (err) {
+      error = (err as Error).message;
+    } finally {
+      decidingId = null;
     }
   }
 </script>
@@ -202,6 +275,27 @@
     </form>
 
     <div class="card">
+      <h2>Actividade dos agentes</h2>
+      {#if agentEvents.length === 0}
+        <p class="muted">Sem eventos.</p>
+      {:else}
+        <ul class="ev-list">
+          {#each agentEvents.slice(0, 4) as ev (ev.id)}
+            <li class:suggested={isPendingSuggestion(ev)}>
+              <span>{ev.label}</span>
+              {#if isPendingSuggestion(ev) && ev.payload.action === "calculate_commission"}
+                <span class="ev-actions">
+                  <button class="mini" disabled={decidingId !== null} onclick={() => handleApprove(ev)}>Aprovar</button>
+                  <button class="mini" disabled={decidingId !== null} onclick={() => handleReject(ev)}>Rejeitar</button>
+                </span>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+
+    <div class="card">
       <h2>Documentos</h2>
       {#if loading}
         <p class="muted">A carregar...</p>
@@ -228,6 +322,9 @@
                   {#if d.status === "issued"}
                     <button class="mini" onclick={() => setStatus(d.id, "paid")} disabled={busy}>Marcar pago</button>
                     <button class="mini" onclick={() => setStatus(d.id, "void")} disabled={busy}>Anular</button>
+                  {/if}
+                  {#if canIssueReceipt(d)}
+                    <button class="mini" onclick={() => issueReceipt(d)} disabled={busy}>Emitir recibo</button>
                   {/if}
                 </td>
               </tr>
@@ -267,4 +364,8 @@
   .badge.issued { background: #2b3147; color: #9db4ff; }
   .badge.paid { background: #1f3a2a; color: #8ff0b4; }
   .badge.void { background: #3a2a2a; color: #d99; }
+  .ev-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .ev-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border: 1px solid #2c2c36; border-radius: 5px; font-size: 0.82rem; }
+  .ev-list li.suggested { border-color: var(--accent, #4f7cff); }
+  .ev-actions { display: flex; gap: 0.3rem; }
 </style>

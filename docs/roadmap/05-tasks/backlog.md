@@ -173,6 +173,6 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
 | GOOGLE-001 | OAuth2 + Service Account (Workspace) | 2 | L | ⚪ | INFRA-006 |
-| GOOGLE-002 | Cifragem ZK de ficheiros Drive/Docs | 2 | L | ⚪ | VAULT-002, GOOGLE-001 |
-| GOOGLE-003 | Data masking dinâmico em Sheets (regex + tokens) | 2 | L | ⚪ | GOOGLE-001 |
+| GOOGLE-002 | Cifragem ZK de ficheiros Drive/Docs | 2 | L | 🟡 | VAULT-002, GOOGLE-001 |
+| GOOGLE-003 | Data masking dinâmico em Sheets (regex + tokens) | 2 | L | 🟡 | GOOGLE-001 |
 | GOOGLE-004 | Relay Gmail com aliases + PGP | 2 | M | ⚪ | MAIL-004, GOOGLE-001 |

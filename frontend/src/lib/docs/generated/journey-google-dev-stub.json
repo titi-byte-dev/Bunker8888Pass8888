@@ -1,0 +1,160 @@
+{
+  "slug": "journey-google-dev-stub",
+  "title": "Journey: Google proxy em desenvolvimento (DoD Fase 2)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "google_dev_stub",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Google proxy em desenvolvimento (DoD Fase 2)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Administrador · <strong>Substitui:</strong> GOOGLE-001–003 até haver VPS + OAuth</p>\n</blockquote>\n<p>Simula Drive cifrado e mascaramento Sheets <strong>sem</strong> ligar à Google.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Master Key desbloqueada.</li>\n<li><code>docker compose up</code> (opcional — tudo corre no browser).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo — Drive",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant UI as /work/google-dev\r\n    participant LS as localStorage\r\n\r\n    U->>UI: texto + upload\r\n    UI->>UI: AES-GCM(master_key)\r\n    UI->>LS: blob opaco\r\n    Note over LS: Vista Google = ilegível\r\n    U->>UI: Abrir no AegisPass\r\n    UI->>UI: decifra em memória",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "UI",
+              "arrow": "->>",
+              "label": "texto + upload"
+            },
+            {
+              "kind": "message",
+              "from": "UI",
+              "to": "UI",
+              "arrow": "->>",
+              "label": "AES-GCM(master_key)"
+            },
+            {
+              "kind": "message",
+              "from": "UI",
+              "to": "LS",
+              "arrow": "->>",
+              "label": "blob opaco"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "UI",
+              "arrow": "->>",
+              "label": "Abrir no AegisPass"
+            },
+            {
+              "kind": "message",
+              "from": "UI",
+              "to": "UI",
+              "arrow": "->>",
+              "label": "decifra em memória"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "UI",
+                "label": "/work/google-dev",
+                "x": 200
+              },
+              {
+                "id": "LS",
+                "label": "localStorage",
+                "x": 400
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "UI",
+                "label": "texto + upload",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "UI",
+                "target": "UI",
+                "label": "AES-GCM(master_key)",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "UI",
+                "target": "LS",
+                "label": "blob opaco",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "U",
+                "target": "UI",
+                "label": "Abrir no AegisPass",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "UI",
+                "target": "UI",
+                "label": "decifra em memória",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo — Sheets",
+      "html": "<ol>\n<li>Cola texto com NIF <code>123456789</code> e IBAN <code>PT50…</code>.</li>\n<li>Vê <strong>tokens</strong> (<code>TOKEN_NIF_*</code>) — o que a Google guardaria.</li>\n<li>Vê <strong>vista AegisPass</strong> com valores reais reinjetados.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Nenhum dado enviado à Google.</li>\n<li>Padrão de tokenização reutilizável quando <code>GOOGLE-003</code> for implementado.</li>\n</ul>\n<blockquote>\n<p>💡 <strong>Conceito:</strong> em produção o mapa token→valor ficará no PostgreSQL cifrado, não no browser.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Administrador",
+  "order": 99
+}
