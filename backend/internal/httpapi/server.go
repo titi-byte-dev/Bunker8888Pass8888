@@ -13,6 +13,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
@@ -48,6 +49,7 @@ type Deps struct {
 	ShareKeys    *sharekeys.Repo    // nil desactiva endpoints /api/share/*
 	SharedVaults *sharedvaults.Repo // nil desactiva endpoints /api/share/vaults*
 	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
+	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -163,6 +165,16 @@ func NewRouter(deps Deps) http.Handler {
 		// Consumir é PÚBLICO: a chave de cifra vive no fragmento do URL, que
 		// nunca chega ao servidor. Qualquer pessoa com o link o pode abrir 1x.
 		mux.HandleFunc("POST /api/share/links/{id}", handleConsumeSecretLink(deps.SecretLinks))
+	}
+	if deps.BurnNotes != nil {
+		// Criar exige sessão (só utilizadores criam notas auto-destrutivas).
+		if deps.Auth != nil {
+			mux.Handle("POST /api/share/notes", requireAuth(deps.Auth, handleCreateBurnNote(deps.BurnNotes)))
+		}
+		// Ler (queima após leitura) e queimar manualmente (capacidade via token)
+		// são PÚBLICOS: a chave de cifra vive no fragmento do URL.
+		mux.HandleFunc("POST /api/share/notes/{id}", handleConsumeBurnNote(deps.BurnNotes))
+		mux.HandleFunc("POST /api/share/notes/{id}/burn", handleBurnNote(deps.BurnNotes))
 	}
 
 	return mux
