@@ -8,7 +8,13 @@
 import { loadSessionToken } from "$lib/session";
 import { getMasterKey } from "$lib/vault/masterKeyStore";
 import { decryptField, encryptField } from "./employees";
-import { EmployeesAPI, fieldBlob, type EmployeeRecordDTO } from "./employeesApi";
+import {
+  EmployeesAPI,
+  fieldBlob,
+  type EmployeeRecordDTO,
+  type ErasureCertificateDTO,
+} from "./employeesApi";
+import { verifyCertificate, type ErasureCertificate } from "./erasure";
 
 /** Um campo já decifrado (ou marcado como inacessível). */
 export interface DecryptedField {
@@ -95,4 +101,45 @@ export async function removeField(id: string, name: string): Promise<void> {
 /** Apaga a ficha inteira. */
 export async function deleteRecord(id: string): Promise<void> {
   await api().remove(id);
+}
+
+// --- Crypto-shredding (HR-003) + certificados (HR-004) ----------------------
+
+/** Um certificado já verificado para apresentação. */
+export interface VerifiedCertificate extends ErasureCertificate {
+  valid: boolean;
+}
+
+function mapCert(dto: ErasureCertificateDTO): ErasureCertificate {
+  return {
+    id: dto.id,
+    ownerId: dto.owner_id,
+    recordId: dto.record_id,
+    fieldName: dto.field_name,
+    valueDigest: dto.value_digest,
+    shreddedAt: dto.shredded_at,
+    certHash: dto.cert_hash,
+    issuedAt: dto.issued_at,
+  };
+}
+
+/** Crypto-shred de um campo: destrói a chave e devolve o certificado emitido. */
+export async function shredField(id: string, name: string): Promise<ErasureCertificate> {
+  return mapCert(await api().shredField(id, name));
+}
+
+/** Crypto-shred de toda a ficha; devolve os certificados emitidos. */
+export async function shredRecord(id: string): Promise<ErasureCertificate[]> {
+  return (await api().shredRecord(id)).map(mapCert);
+}
+
+/** Lista os certificados de eliminação, cada um já verificado localmente. */
+export async function listCertificates(): Promise<VerifiedCertificate[]> {
+  const dtos = await api().listCertificates();
+  const out: VerifiedCertificate[] = [];
+  for (const dto of dtos) {
+    const cert = mapCert(dto);
+    out.push({ ...cert, valid: await verifyCertificate(cert) });
+  }
+  return out;
 }

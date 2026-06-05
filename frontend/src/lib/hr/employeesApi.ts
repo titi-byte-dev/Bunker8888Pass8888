@@ -28,6 +28,17 @@ export interface EmployeeRecordFullDTO extends EmployeeRecordDTO {
   fields: EmployeeFieldDTO[];
 }
 
+export interface ErasureCertificateDTO {
+  id: string;
+  owner_id: string;
+  record_id: string;
+  field_name: string;
+  value_digest: string;
+  shredded_at: string;
+  cert_hash: string;
+  issued_at: string;
+}
+
 export class EmployeesAPI {
   constructor(
     private baseURL: string,
@@ -99,6 +110,29 @@ export class EmployeesAPI {
       `/api/hr/employees/${encodeURIComponent(id)}/fields/${encodeURIComponent(field)}`,
       { method: "DELETE" },
     );
+  }
+
+  /** Crypto-shred de um campo (HR-003); devolve o certificado emitido. */
+  async shredField(id: string, field: string): Promise<ErasureCertificateDTO> {
+    const res = await this.fetch(
+      `/api/hr/employees/${encodeURIComponent(id)}/fields/${encodeURIComponent(field)}/shred`,
+      { method: "POST" },
+    );
+    return (await res.json()) as ErasureCertificateDTO;
+  }
+
+  /** Crypto-shred de toda a ficha; devolve os certificados emitidos. */
+  async shredRecord(id: string): Promise<ErasureCertificateDTO[]> {
+    const res = await this.fetch(`/api/hr/employees/${encodeURIComponent(id)}/shred`, {
+      method: "POST",
+    });
+    return ((await res.json()) as { certificates: ErasureCertificateDTO[] }).certificates ?? [];
+  }
+
+  /** Lista os certificados de eliminação do utilizador. */
+  async listCertificates(): Promise<ErasureCertificateDTO[]> {
+    const res = await this.fetch("/api/hr/certificates");
+    return ((await res.json()) as { certificates: ErasureCertificateDTO[] }).certificates ?? [];
   }
 }
 

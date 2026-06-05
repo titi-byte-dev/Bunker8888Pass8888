@@ -5,13 +5,18 @@
   import {
     createRecord,
     deleteRecord,
+    listCertificates,
     listRecords,
     openRecord,
     removeField,
     saveField,
+    shredField,
+    shredRecord,
     type OpenRecord,
     type RecordSummary,
+    type VerifiedCertificate,
   } from "$lib/hr/employeesService";
+  import { certificateToJSON } from "$lib/hr/erasure";
 
   let locked = $state(false);
   let loading = $state(true);
@@ -23,6 +28,17 @@
   // Formulário de novo campo.
   let newFieldName = $state("");
   let newFieldValue = $state("");
+
+  // Certificados de eliminação (HR-004).
+  let certs = $state<VerifiedCertificate[]>([]);
+
+  async function refreshCerts() {
+    try {
+      certs = await listCertificates();
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao carregar certificados";
+    }
+  }
 
   async function refresh() {
     loading = true;
@@ -38,8 +54,10 @@
 
   onMount(() => {
     locked = !getMasterKey();
-    if (!locked) refresh();
-    else loading = false;
+    if (!locked) {
+      refresh();
+      refreshCerts();
+    } else loading = false;
   });
 
   async function onCreate() {
@@ -97,6 +115,53 @@
     }
   }
 
+  async function onShredField(name: string) {
+    if (!open) return;
+    if (
+      !confirm(
+        `Crypto-shred do campo "${fieldLabel(name)}"? A chave é destruída e o valor fica irrecuperável (RGPD Art. 17). É emitido um certificado.`,
+      )
+    )
+      return;
+    busy = true;
+    error = "";
+    try {
+      await shredField(open.id, name);
+      open = await openRecord(open.id);
+      await refreshCerts();
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao eliminar campo";
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function onShredRecord() {
+    if (!open) return;
+    if (!confirm("Crypto-shred de TODA a ficha? Cada campo emite um certificado.")) return;
+    busy = true;
+    error = "";
+    try {
+      await shredRecord(open.id);
+      open = await openRecord(open.id);
+      await refreshCerts();
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Falha ao eliminar ficha";
+    } finally {
+      busy = false;
+    }
+  }
+
+  function downloadCert(cert: VerifiedCertificate) {
+    const blob = new Blob([certificateToJSON(cert)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `erasure-${cert.fieldName}-${cert.id.slice(0, 8)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function onDeleteRecord() {
     if (!open) return;
     if (!confirm("Apagar a ficha inteira? Os campos cifrados vão com ela.")) return;
@@ -105,6 +170,7 @@
       await deleteRecord(open.id);
       open = null;
       await refresh();
+      await refreshCerts();
     } catch (e) {
       error = e instanceof Error ? e.message : "Falha ao apagar ficha";
     } finally {
@@ -185,9 +251,14 @@
         {:else}
           <div class="panel-head">
             <p class="eyebrow">Ficha · <span class="mono">{shortId(open.id)}</span></p>
-            <button type="button" class="btn danger-btn sm" onclick={onDeleteRecord} disabled={busy}>
-              Apagar ficha
-            </button>
+            <span class="head-actions">
+              <button type="button" class="btn ghost sm" onclick={onShredRecord} disabled={busy}>
+                🔥 Shred ficha
+              </button>
+              <button type="button" class="btn danger-btn sm" onclick={onDeleteRecord} disabled={busy}>
+                Apagar ficha
+              </button>
+            </span>
           </div>
 
           {#if open.fields.length === 0}
@@ -203,14 +274,27 @@
                     {:else}
                       <span class="value">{f.value}</span>
                     {/if}
-                    <button
-                      type="button"
-                      class="link-btn"
-                      onclick={() => onRemoveField(f.name)}
-                      disabled={busy}
-                    >
-                      remover
-                    </button>
+                    <span class="field-actions">
+                      {#if !f.shredded}
+                        <button
+                          type="button"
+                          class="link-btn shred"
+                          onclick={() => onShredField(f.name)}
+                          disabled={busy}
+                          title="Crypto-shred (RGPD Art. 17)"
+                        >
+                          shred
+                        </button>
+                      {/if}
+                      <button
+                        type="button"
+                        class="link-btn"
+                        onclick={() => onRemoveField(f.name)}
+                        disabled={busy}
+                      >
+                        remover
+                      </button>
+                    </span>
                   </dd>
                 </div>
               {/each}
@@ -249,6 +333,36 @@
         {/if}
       </section>
     </div>
+
+    <!-- Certificados de eliminação (HR-004) -->
+    <section class="panel">
+      <div class="panel-head">
+        <p class="eyebrow">Certificados de eliminação · RGPD Art. 17</p>
+        <span class="muted sm">{certs.length} emitido(s)</span>
+      </div>
+      <p class="muted">
+        Cada crypto-shred emite uma prova verificável: <span class="mono">sha256</span> sobre os
+        factos da eliminação. O selo ✓ confirma que o <span class="mono">cert_hash</span> foi
+        recalculado no teu dispositivo e bate certo.
+      </p>
+      {#if certs.length > 0}
+        <ul class="cert-list">
+          {#each certs as c (c.id)}
+            <li class="cert">
+              <span class="cert-badge" class:ok={c.valid} class:bad={!c.valid}>
+                {c.valid ? "✓ íntegro" : "✗ inválido"}
+              </span>
+              <span class="cert-field">{fieldLabel(c.fieldName)}</span>
+              <span class="muted sm mono">{c.certHash.slice(0, 16)}…</span>
+              <span class="muted sm">{new Date(c.shreddedAt).toLocaleString("pt-PT")}</span>
+              <button type="button" class="link-btn" onclick={() => downloadCert(c)}>
+                descarregar
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
   {/if}
 </section>
 
@@ -470,6 +584,67 @@
   }
   .link-btn:hover {
     color: var(--color-danger);
+  }
+  .link-btn.shred:hover {
+    color: var(--color-danger);
+  }
+  .field-actions {
+    display: inline-flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+  .head-actions {
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+  .btn.ghost {
+    background: none;
+    color: var(--color-text-muted);
+  }
+  .btn.ghost:hover:not(:disabled) {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+  }
+
+  .cert-list {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .cert {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    font-size: var(--text-sm);
+  }
+  .cert-field {
+    font-weight: 500;
+  }
+  .cert-badge {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+  .cert-badge.ok {
+    color: var(--color-success-fg);
+    background: var(--color-success-bg);
+  }
+  .cert-badge.bad {
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+  }
+  .cert .link-btn {
+    margin-left: auto;
+    color: var(--color-accent);
   }
   .inline-error {
     margin: 0 0 var(--space-4);

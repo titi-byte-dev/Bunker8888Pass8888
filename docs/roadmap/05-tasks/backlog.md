@@ -75,8 +75,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 |---|---|---|---|---|---|
 | HR-001 | Ficha de empregado com cifragem campo-a-campo | 1 | L | 🟢 | VAULT-002 |
 | HR-002 | Logs imutáveis com hashing encadeado | 1 | M | ⚪ | INFRA-004 |
-| HR-003 | Crypto-shredding + erasure RGPD (Art. 17) | 1 | L | ⚪ | HR-001 |
-| HR-004 | Certificado criptográfico de eliminação | 1 | M | ⚪ | HR-003 |
+| HR-003 | Crypto-shredding + erasure RGPD (Art. 17) | 1 | L | 🟢 | HR-001 |
+| HR-004 | Certificado criptográfico de eliminação | 1 | M | 🟢 | HR-003 |
 | HR-005 | Gestão de contratos (object storage, chave por ficheiro) | 1 | L | ⚪ | VAULT-002 |
 | HR-006 | Assinatura digital de contratos | 1 | L | ⚪ | HR-005 |
 | HR-007 | Dashboard de onboarding (1 clique) | 1 | M | ⚪ | VAULT-005, MAIL-001 |

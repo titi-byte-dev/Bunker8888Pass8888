@@ -110,6 +110,56 @@ func TestEmployeeRecords_Integration(t *testing.T) {
 		t.Fatalf("após apagar, esperava 1 campo, got %d", len(fields))
 	}
 
+	// --- Crypto-shredding (HR-003) + certificado (HR-004) -------------------
+	// Repor o salario para o eliminar a seguir via shred.
+	if _, err := repo.PutField(ctx, ownerID, rec.ID, "salary", []byte("v-sal3"), []byte("k-sal3")); err != nil {
+		t.Fatal(err)
+	}
+	cert, err := repo.ShredField(ctx, ownerID, rec.ID, "salary")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cert.CertHash == "" || cert.ValueDigest == "" || cert.RecordID != rec.ID {
+		t.Fatalf("certificado inválido: %+v", cert)
+	}
+	// O cert_hash tem de bater certo com o canónico reconstruído.
+	want := sha256hex([]byte(canonicalCert(rec.ID, "salary", cert.ValueDigest, cert.ShreddedAt, ownerID)))
+	if cert.CertHash != want {
+		t.Fatalf("cert_hash não verifica: got %s want %s", cert.CertHash, want)
+	}
+	// O campo ficou sem chave (shredded) mas o value_blob mantém-se.
+	_, fields, _ = repo.GetRecord(ctx, ownerID, rec.ID)
+	var salary *Field
+	for i := range fields {
+		if fields[i].FieldName == "salary" {
+			salary = &fields[i]
+		}
+	}
+	if salary == nil || salary.WrappedKey != nil || salary.ShreddedAt == nil || len(salary.ValueBlob) == 0 {
+		t.Fatalf("campo eliminado em estado inesperado: %+v", salary)
+	}
+	// Segundo shred é idempotente (ErrAlreadyShredded), sem novo certificado.
+	if _, err := repo.ShredField(ctx, ownerID, rec.ID, "salary"); err != ErrAlreadyShredded {
+		t.Fatalf("re-shred: esperado ErrAlreadyShredded, got %v", err)
+	}
+	// Estranho não pode emitir shred.
+	if _, err := repo.ShredField(ctx, strangerID, rec.ID, "full_name"); err != ErrNotFound {
+		t.Fatalf("shred estranho: esperado ErrNotFound, got %v", err)
+	}
+	// Certificado aparece na listagem do dono.
+	certs, err := repo.ListCertificates(ctx, ownerID)
+	if err != nil || len(certs) != 1 {
+		t.Fatalf("ListCertificates: certs=%d err=%v", len(certs), err)
+	}
+	// Shred da ficha inteira emite cert por cada campo ainda com chave (full_name).
+	more, err := repo.ShredRecord(ctx, ownerID, rec.ID)
+	if err != nil || len(more) != 1 {
+		t.Fatalf("ShredRecord: emitidos=%d err=%v", len(more), err)
+	}
+	if certs2, _ := repo.ListCertificates(ctx, ownerID); len(certs2) != 2 {
+		t.Fatalf("após ShredRecord esperava 2 certificados, got %d", len(certs2))
+	}
+
 	// --- Listagem e remoção da ficha ----------------------------------------
 	recs, err := repo.ListRecords(ctx, ownerID)
 	if err != nil || len(recs) != 1 {
