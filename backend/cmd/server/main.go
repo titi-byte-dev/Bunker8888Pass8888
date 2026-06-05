@@ -22,6 +22,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/secretlinks"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/security"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sentinel"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/sessions"
@@ -75,6 +76,10 @@ func main() {
 		shareKeysRepo := sharekeys.NewRepo(pool)
 		sharedVaultsRepo := sharedvaults.NewRepo(pool)
 
+		// Secret links vivem só em RAM (sem BD). Um reaper limpa os expirados.
+		secretLinksStore := secretlinks.NewStore()
+		go secretLinksStore.StartReaper(context.Background(), time.Minute)
+
 		var mtlsMat *config.MTLSMaterial
 		if cfg.MTLSAutoDev || cfg.MTLSCACert != "" {
 			var err error
@@ -120,6 +125,7 @@ func main() {
 			Sentinel:     sentinel.NewService(sentinelRepo),
 			ShareKeys:    shareKeysRepo,
 			SharedVaults: sharedVaultsRepo,
+			SecretLinks:  secretLinksStore,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
 		}
