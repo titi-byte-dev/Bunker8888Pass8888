@@ -21,36 +21,50 @@
       "level": 1,
       "title": "Visão geral",
       "html": "<h1>Journey: Direito ao Esquecimento (RGPD Art. 17)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Admin/RH (a pedido do titular dos dados) · <strong>Epics:</strong> <code>HR</code></p>\n</blockquote>\n<p>Apagar permanentemente todos os registos de um funcionário e provar que foi\nfeito — sem partir a cadeia de logs imutáveis.</p>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "O dilema",
-      "html": "<h2>O dilema</h2>\n<blockquote>\n<p>⚠️ <strong>Tensão de design:</strong> o RGPD exige <em>apagar</em> dados pessoais (Art. 17), mas a\nauditoria exige logs <em>imutáveis</em>. Como apagar sem violar a imutabilidade?</p>\n</blockquote>\n<p><strong>Solução — Crypto-shredding:</strong> os dados pessoais já estão cifrados com uma\nchave por funcionário. Para &quot;apagar&quot;, <strong>destruímos a chave</strong>. Os blobs cifrados\npodem permanecer (no log/backups), mas tornam-se matematicamente irrecuperáveis.</p>\n",
+      "html": "<blockquote>\n<p>⚠️ <strong>Tensão de design:</strong> o RGPD exige <em>apagar</em> dados pessoais (Art. 17), mas a\nauditoria exige logs <em>imutáveis</em>. Como apagar sem violar a imutabilidade?</p>\n</blockquote>\n<p><strong>Solução — Crypto-shredding:</strong> os dados pessoais já estão cifrados com uma\nchave por funcionário. Para &quot;apagar&quot;, <strong>destruímos a chave</strong>. Os blobs cifrados\npodem permanecer (no log/backups), mas tornam-se matematicamente irrecuperáveis.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Fluxo principal",
-      "html": "<h2>Fluxo principal</h2>\n<pre><code class=\"language-mermaid\">flowchart TB\n    A[&quot;Pedido de erasure (titular)&quot;] --&gt; B[&quot;Admin valida identidade do pedido&quot;]\n    B --&gt; C[&quot;Destrói a chave do funcionário (crypto-shred)&quot;]\n    C --&gt; D[&quot;Remove dados de tabelas operacionais&quot;]\n    D --&gt; E[&quot;Gera certificado criptográfico de eliminação&quot;]\n    E --&gt; F[&quot;Regista evento no log imutável (sem dados pessoais)&quot;]\n    F --&gt; G[&quot;Entrega certificado ao titular/auditoria&quot;]\n</code></pre>\n",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart TB\r\n    A[\"Pedido de erasure (titular)\"] --> B[\"Admin valida identidade do pedido\"]\r\n    B --> C[\"Destrói a chave do funcionário (crypto-shred)\"]\r\n    C --> D[\"Remove dados de tabelas operacionais\"]\r\n    D --> E[\"Gera certificado criptográfico de eliminação\"]\r\n    E --> F[\"Regista evento no log imutável (sem dados pessoais)\"]\r\n    F --> G[\"Entrega certificado ao titular/auditoria\"]",
+          "steps": []
+        }
+      ],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Passo-a-passo",
-      "html": "<h2>Passo-a-passo</h2>\n<ol>\n<li>Recebe-se o pedido de eliminação do titular.</li>\n<li>Valida-se a identidade e a legitimidade do pedido.</li>\n<li><strong>Destrói-se a chave</strong> de cifragem do funcionário (crypto-shredding).</li>\n<li>Removem-se os dados das tabelas operacionais.</li>\n<li>Gera-se um <strong>certificado criptográfico</strong> de eliminação (prova para auditoria).</li>\n<li>O evento entra no log imutável — registando <em>que</em> houve erasure, <strong>sem</strong>\nincluir dados pessoais.</li>\n</ol>\n",
+      "html": "<ol>\n<li>Recebe-se o pedido de eliminação do titular.</li>\n<li>Valida-se a identidade e a legitimidade do pedido.</li>\n<li><strong>Destrói-se a chave</strong> de cifragem do funcionário (crypto-shredding).</li>\n<li>Removem-se os dados das tabelas operacionais.</li>\n<li>Gera-se um <strong>certificado criptográfico</strong> de eliminação (prova para auditoria).</li>\n<li>O evento entra no log imutável — registando <em>que</em> houve erasure, <strong>sem</strong>\nincluir dados pessoais.</li>\n</ol>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Conceito didático",
-      "html": "<h2>Conceito didático</h2>\n<blockquote>\n<p>💡 <strong>Crypto-shredding:</strong> se um dado está cifrado e ninguém tem a chave, ele é,\nna prática, irrecuperável. Apagar a chave (pequena) equivale a apagar os dados\n(potencialmente grandes e espalhados por backups). É a forma robusta de cumprir\no &quot;direito ao esquecimento&quot; num sistema com backups imutáveis.</p>\n</blockquote>\n",
+      "html": "<blockquote>\n<p>💡 <strong>Crypto-shredding:</strong> se um dado está cifrado e ninguém tem a chave, ele é,\nna prática, irrecuperável. Apagar a chave (pequena) equivale a apagar os dados\n(potencialmente grandes e espalhados por backups). É a forma robusta de cumprir\no &quot;direito ao esquecimento&quot; num sistema com backups imutáveis.</p>\n</blockquote>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Critérios de aceitação",
-      "html": "<h2>Critérios de aceitação</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> Após erasure, nenhum dado pessoal do titular é decifrável.</li>\n<li><input disabled=\"\" type=\"checkbox\"> O certificado é verificável e referencia o evento de log.</li>\n<li><input disabled=\"\" type=\"checkbox\"> A cadeia de logs continua íntegra (não foi adulterada).</li>\n</ul>\n",
+      "html": "<ul>\n<li><input disabled=\"\" type=\"checkbox\"> Após erasure, nenhum dado pessoal do titular é decifrável.</li>\n<li><input disabled=\"\" type=\"checkbox\"> O certificado é verificável e referencia o evento de log.</li>\n<li><input disabled=\"\" type=\"checkbox\"> A cadeia de logs continua íntegra (não foi adulterada).</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

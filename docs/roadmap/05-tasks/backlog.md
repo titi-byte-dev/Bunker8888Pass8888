@@ -149,7 +149,9 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | DOC-005 | Journeys do roadmap expostos na app (04-user-journeys) | 1 | S | 🟢 | DOC-002 |
 | DOC-006 | Command palette + link em Definições | 1 | S | 🟢 | DOC-002 |
 | DOC-007 | Journeys em falta (SHARE, DW, emergency…) | 2 | M | ⚪ | DOC-005 |
-| DOC-008 | Renderer Mermaid nos percursos | 2 | S | ⚪ | DOC-005 |
+| DOC-008 | Renderer Mermaid nos percursos | 2 | S | 🟢 | DOC-005 |
+| DOC-009 | FlowPlayer animado (passo-a-passo + reproduzir) | 2 | M | 🟢 | DOC-008 |
+| DOC-010 | Pesquisa full-text + glossário inline nas páginas | 2 | M | ⚪ | DOC-002 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 

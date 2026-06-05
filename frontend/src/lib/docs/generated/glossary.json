@@ -51,12 +51,14 @@
       "level": 2,
       "title": "Aprofundar: pilares Zero-Trust",
       "html": "<table>\n<thead>\n<tr>\n<th>Pilar</th>\n<th>O que significa na prática</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Rede</td>\n<td>Túnel WireGuard antes de falar com a API</td>\n</tr>\n<tr>\n<td>Identidade</td>\n<td>Auth Hash + sessão + passkeys</td>\n</tr>\n<tr>\n<td>Contexto</td>\n<td>Turno (NTP), geofencing, dispositivo registado</td>\n</tr>\n<tr>\n<td>Dados</td>\n<td>Blobs cifrados; score de higiene calculado no cliente</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Técnico: onde vive cada segredo",
       "html": "<table>\n<thead>\n<tr>\n<th>Segredo</th>\n<th>Onde</th>\n<th>Nunca</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Master Key</td>\n<td>Memória do browser (volátil)</td>\n<td>Servidor, localStorage</td>\n</tr>\n<tr>\n<td>Auth Hash</td>\n<td>PostgreSQL (hash one-way)</td>\n<td>Transmitido em claro após registo</td>\n</tr>\n<tr>\n<td>Blobs do cofre</td>\n<td>PostgreSQL (cifrados)</td>\n<td>Decifrados no servidor</td>\n</tr>\n<tr>\n<td>Segredo TOTP</td>\n<td>Dentro do blob cifrado</td>\n<td>Logs ou API em claro</td>\n</tr>\n</tbody></table>\n<p>Ver implementação: <code>frontend/src/lib/crypto.ts</code>, <code>backend/pkg/crypto/</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

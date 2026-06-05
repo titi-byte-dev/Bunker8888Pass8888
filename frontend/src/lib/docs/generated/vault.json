@@ -35,18 +35,21 @@
       "level": 1,
       "title": "O que podes fazer",
       "html": "<ul>\n<li>Criar, editar e apagar itens em <code>/vault</code></li>\n<li>Gerar palavras-passe fortes no formulário</li>\n<li>Ver códigos <strong>TOTP</strong> inline (2FA)</li>\n<li>Importar credenciais de CSV</li>\n<li>Pesquisar localmente (títulos já decifrados em memória)</li>\n</ul>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Aprofundar: higiene de passwords",
       "html": "<p>O <strong>score de higiene</strong> (fraca, reutilizada, exposta) calcula-se no cliente em\n<code>frontend/src/lib/vault/hygiene.ts</code>. O servidor pode receber apenas o número agregado\npara relatórios — nunca a password em claro.</p>\n<p>Abre <strong>Segurança → Saúde</strong> para acções recomendadas.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Técnico: API e módulos",
       "html": "<table>\n<thead>\n<tr>\n<th>Camada</th>\n<th>Caminho</th>\n<th>Responsabilidade</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>UI</td>\n<td><code>frontend/src/routes/(app)/vault/</code></td>\n<td>Listagem, CRUD, unlock gate</td>\n</tr>\n<tr>\n<td>Cliente API</td>\n<td><code>frontend/src/lib/vault/api.ts</code></td>\n<td>REST + headers geofence</td>\n</tr>\n<tr>\n<td>Cifragem</td>\n<td><code>frontend/src/lib/vault/items.ts</code></td>\n<td>Serializar → cifrar blob</td>\n</tr>\n<tr>\n<td>Backend</td>\n<td><code>backend/internal/vault/</code></td>\n<td>CRUD blobs, RLS, WebSocket</td>\n</tr>\n<tr>\n<td>Persistência</td>\n<td>migrações <code>vault_items</code></td>\n<td><code>tenant_id</code>, <code>user_id</code>, blob</td>\n</tr>\n</tbody></table>\n<p>Endpoints principais: <code>GET/POST /api/vault</code>, <code>GET/PUT/DELETE /api/vault/:id</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

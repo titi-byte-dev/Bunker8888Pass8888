@@ -37,9 +37,25 @@ Explicação didática — aparece como dropdown na app.
 :::level{level=2 title="Aprofundar"}
 Conteúdo intermédio — secção colapsável.
 :::
+
+```mermaid
+sequenceDiagram
+    A->>B: exemplo
+```
+
+Ou bloco dedicado com título:
+
+:::flow{id=meu-fluxo title="Fluxo de login" type=sequence}
+```mermaid
+sequenceDiagram
+    ...
+```
+:::
 ```
 
 **Níveis:** `1` Essencial · `2` Intermédio · `3` Técnico
+
+**Fluxos:** blocos `mermaid` renderizam como diagrama + player passo-a-passo (DOC-008/009).
 
 ## Regenerar para a app
 

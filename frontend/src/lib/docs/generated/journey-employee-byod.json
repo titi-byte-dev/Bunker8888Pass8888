@@ -21,36 +21,143 @@
       "level": 1,
       "title": "Visão geral",
       "html": "<h1>Journey: Funcionário acede ao cofre (BYOD)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Funcionário · <strong>Dispositivo:</strong> pessoal (BYOD) · <strong>Epics:</strong> <code>VAULT</code></p>\n</blockquote>\n<p>Mostra como o Zero-Trust se aplica na prática: rede, identidade, contexto e\ncifragem, por camadas.</p>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Pré-condições",
-      "html": "<h2>Pré-condições</h2>\n<ul>\n<li>A empresa (tenant) está provisionada.</li>\n<li>O funcionário tem a app AegisPass instalada e perfil WireGuard.</li>\n<li>Está dentro do horário de turno definido pelo admin.</li>\n</ul>\n",
+      "html": "<ul>\n<li>A empresa (tenant) está provisionada.</li>\n<li>O funcionário tem a app AegisPass instalada e perfil WireGuard.</li>\n<li>Está dentro do horário de turno definido pelo admin.</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Fluxo principal (happy path)",
-      "html": "<h2>Fluxo principal (happy path)</h2>\n<pre><code class=\"language-mermaid\">sequenceDiagram\n    participant U as Funcionário\n    participant App as App (Svelte)\n    participant VPN as WireGuard\n    participant G as Go API\n    participant DB as PostgreSQL\n\n    U-&gt;&gt;App: abre app + Master Password\n    App-&gt;&gt;VPN: ativa túnel silenciosamente\n    App-&gt;&gt;App: Argon2id → Master Key (local) + Auth Hash\n    App-&gt;&gt;G: login (Auth Hash) via túnel\n    G-&gt;&gt;G: valida turno (NTP) + geofencing (IP/GPS)\n    alt fora do turno OU local suspeito\n        G--&gt;&gt;App: acesso negado / alerta RH\n        App-&gt;&gt;App: garante que não há chave em memória\n    else dentro das regras\n        G-&gt;&gt;DB: SET LOCAL app.tenant_id + lê blobs\n        DB--&gt;&gt;G: blobs cifrados (RLS aplicada)\n        G--&gt;&gt;App: blobs cifrados\n        App-&gt;&gt;App: decifra com Master Key (em memória)\n        App--&gt;&gt;U: mostra cofre\n    end\n</code></pre>\n",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Funcionário\r\n    participant App as App (Svelte)\r\n    participant VPN as WireGuard\r\n    participant G as Go API\r\n    participant DB as PostgreSQL\r\n\r\n    U->>App: abre app + Master Password\r\n    App->>VPN: ativa túnel silenciosamente\r\n    App->>App: Argon2id → Master Key (local) + Auth Hash\r\n    App->>G: login (Auth Hash) via túnel\r\n    G->>G: valida turno (NTP) + geofencing (IP/GPS)\r\n    alt fora do turno OU local suspeito\r\n        G-->>App: acesso negado / alerta RH\r\n        App->>App: garante que não há chave em memória\r\n    else dentro das regras\r\n        G->>DB: SET LOCAL app.tenant_id + lê blobs\r\n        DB-->>G: blobs cifrados (RLS aplicada)\r\n        G-->>App: blobs cifrados\r\n        App->>App: decifra com Master Key (em memória)\r\n        App-->>U: mostra cofre\r\n    end",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "App",
+              "arrow": "->>",
+              "label": "abre app + Master Password"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "VPN",
+              "arrow": "->>",
+              "label": "ativa túnel silenciosamente"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "Argon2id → Master Key (local) + Auth Hash"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "G",
+              "arrow": "->>",
+              "label": "login (Auth Hash) via túnel"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "G",
+              "arrow": "->>",
+              "label": "valida turno (NTP) + geofencing (IP/GPS)"
+            },
+            {
+              "kind": "branch",
+              "label": "alt fora do turno OU local suspeito"
+            },
+            {
+              "kind": "message",
+              "from": "G-",
+              "to": "App",
+              "arrow": "->>",
+              "label": "acesso negado / alerta RH"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "garante que não há chave em memória"
+            },
+            {
+              "kind": "message",
+              "from": "G",
+              "to": "DB",
+              "arrow": "->>",
+              "label": "SET LOCAL app.tenant_id + lê blobs"
+            },
+            {
+              "kind": "message",
+              "from": "DB-",
+              "to": "G",
+              "arrow": "->>",
+              "label": "blobs cifrados (RLS aplicada)"
+            },
+            {
+              "kind": "message",
+              "from": "G-",
+              "to": "App",
+              "arrow": "->>",
+              "label": "blobs cifrados"
+            },
+            {
+              "kind": "message",
+              "from": "App",
+              "to": "App",
+              "arrow": "->>",
+              "label": "decifra com Master Key (em memória)"
+            },
+            {
+              "kind": "message",
+              "from": "App-",
+              "to": "U",
+              "arrow": "->>",
+              "label": "mostra cofre"
+            },
+            {
+              "kind": "branch",
+              "label": "end"
+            }
+          ]
+        }
+      ],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Passo-a-passo",
-      "html": "<h2>Passo-a-passo</h2>\n<ol>\n<li>Funcionário abre a app e insere a Master Password.</li>\n<li>A app ativa o WireGuard em background (sem o túnel, a API é inalcançável).</li>\n<li>Localmente, deriva a Master Key (fica no dispositivo) e o Auth Hash (enviado).</li>\n<li>A API valida: sessão + <strong>turno</strong> (relógio NTP do servidor) + <strong>geofencing</strong>.</li>\n<li>Se passar, a BD devolve blobs cifrados (RLS garante isolamento do tenant).</li>\n<li>O Svelte decifra em memória e mostra os dados — que nunca tocam o disco.</li>\n</ol>\n",
+      "html": "<ol>\n<li>Funcionário abre a app e insere a Master Password.</li>\n<li>A app ativa o WireGuard em background (sem o túnel, a API é inalcançável).</li>\n<li>Localmente, deriva a Master Key (fica no dispositivo) e o Auth Hash (enviado).</li>\n<li>A API valida: sessão + <strong>turno</strong> (relógio NTP do servidor) + <strong>geofencing</strong>.</li>\n<li>Se passar, a BD devolve blobs cifrados (RLS garante isolamento do tenant).</li>\n<li>O Svelte decifra em memória e mostra os dados — que nunca tocam o disco.</li>\n</ol>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Fluxos alternativos",
-      "html": "<h2>Fluxos alternativos</h2>\n<ul>\n<li><strong>Fora do turno:</strong> acesso negado; a chave de desencriptação é negada/expurgada.</li>\n<li><strong>Local geograficamente impossível:</strong> Sentinel Mode exige prova adicional.</li>\n<li><strong>Sem VPN:</strong> a API nem é alcançável (a porta está fechada à internet).</li>\n</ul>\n",
+      "html": "<ul>\n<li><strong>Fora do turno:</strong> acesso negado; a chave de desencriptação é negada/expurgada.</li>\n<li><strong>Local geograficamente impossível:</strong> Sentinel Mode exige prova adicional.</li>\n<li><strong>Sem VPN:</strong> a API nem é alcançável (a porta está fechada à internet).</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Pós-condições",
-      "html": "<h2>Pós-condições</h2>\n<ul>\n<li>Acesso registado num log imutável.</li>\n<li>Ao fim do turno/bloqueio, a Master Key é descartada da memória.</li>\n</ul>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> repara que existem <strong>5 barreiras</strong> independentes (VPN →\nauth → turno → geofencing → cifragem). Mesmo que uma falhe, as outras seguram.</p>\n</blockquote>\n",
+      "html": "<ul>\n<li>Acesso registado num log imutável.</li>\n<li>Ao fim do turno/bloqueio, a Master Key é descartada da memória.</li>\n</ul>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> repara que existem <strong>5 barreiras</strong> independentes (VPN →\nauth → turno → geofencing → cifragem). Mesmo que uma falhe, as outras seguram.</p>\n</blockquote>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

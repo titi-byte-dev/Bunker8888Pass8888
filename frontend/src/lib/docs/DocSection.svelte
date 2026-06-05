@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { DocSection } from "./types";
   import { LEVEL_LABELS, type DocComplexityLevel } from "./types";
+  import DocSectionBody from "./DocSectionBody.svelte";
 
   interface Props {
     section: DocSection;
@@ -31,8 +32,8 @@
         <span class="hint">clica para expandir</span>
         <span class="chevron" aria-hidden="true">▾</span>
       </summary>
-      <div class="section-body prose">
-        {@html section.html}
+      <div class="section-body">
+        <DocSectionBody html={section.html} flows={section.flows} />
       </div>
     </details>
   {:else}
@@ -40,8 +41,8 @@
       {#if section.title}
         <h2 class="section-heading">{section.title}</h2>
       {/if}
-      <div class="section-body prose">
-        {@html section.html}
+      <div class="section-body">
+        <DocSectionBody html={section.html} flows={section.flows} />
       </div>
     </section>
   {/if}

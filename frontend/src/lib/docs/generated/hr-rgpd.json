@@ -35,18 +35,21 @@
       "level": 1,
       "title": "Funcionalidades na app",
       "html": "<ul>\n<li><code>/hr</code> — fichas de empregado</li>\n<li><code>/hr/onboarding</code> — wizard de integração</li>\n<li><code>/hr/compliance</code> — relatório RGPD (PDF)</li>\n</ul>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Aprofundar: logs imutáveis",
       "html": "<p>Acessos a dados sensíveis registam-se com <strong>hashing encadeado</strong> — alterar uma linha\nquebra a cadeia e é detectável. Os logs nunca contêm o dado em si, só metadados.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Técnico",
       "html": "<p><code>backend/internal/hr/</code>, migrações <code>employees</code>, <code>audit_logs</code>. Testes RGPD em\n<code>docs/roadmap/06-testing/rgpd-compliance-tests.md</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

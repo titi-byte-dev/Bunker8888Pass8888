@@ -9,6 +9,8 @@
  *   - :::summary ... :::           → resumo sempre visível
  *   - :::concept{id title level}   → cartão expansível de conceito
  *   - :::level{level title} ... ::: → secção por nível de complexidade
+ *   - ```mermaid ... ```          → fluxo interactivo (FlowPlayer na app)
+ *   - :::flow{id title type} ... ::: → fluxo com título explícito
  *
  * Uso: node scripts/build-docs.mjs
  */
@@ -45,6 +47,75 @@ const CATEGORY_LABELS = {
 };
 
 marked.setOptions({ gfm: true, breaks: false });
+
+/** Tipo de diagrama Mermaid detectado a partir da primeira linha */
+function detectMermaidType(source) {
+  const first = source.trim().split("\n")[0]?.trim() ?? "";
+  if (first.startsWith("sequenceDiagram")) return "sequence";
+  if (first.startsWith("flowchart") || first.startsWith("graph ")) return "flowchart";
+  return "diagram";
+}
+
+/**
+ * Extrai passos legíveis de um sequenceDiagram para o FlowPlayer animado.
+ * Didático: cada seta vira um «momento» que o utilizador percorre passo a passo.
+ */
+function parseSequenceSteps(source) {
+  const steps = [];
+  for (const line of source.split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("sequenceDiagram") || t.startsWith("participant")) continue;
+    if (t === "alt" || t.startsWith("alt ") || t === "else" || t === "end") {
+      steps.push({ kind: "branch", label: t });
+      continue;
+    }
+    const m = t.match(/^(\S+)\s*(->>?|-->>)\s*(\S+)\s*:\s*(.+)$/);
+    if (m) {
+      steps.push({
+        kind: "message",
+        from: m[1],
+        to: m[3],
+        arrow: m[2],
+        label: m[4].trim(),
+      });
+    }
+  }
+  return steps;
+}
+
+/** Substitui blocos mermaid por comentários HTML (placeholders para o Svelte). */
+function injectFlowPlaceholders(text, flows, flowCounter) {
+  let counter = flowCounter;
+  const replaced = text.replace(/```mermaid\s*\n([\s\S]*?)\n```/g, (_, raw) => {
+    counter += 1;
+    const source = raw.trim();
+    const id = `flow-${counter}`;
+    const type = detectMermaidType(source);
+    flows.push({
+      id,
+      title: "",
+      type,
+      source,
+      steps: type === "sequence" ? parseSequenceSteps(source) : [],
+    });
+    return `\n<!--DOC_FLOW:${id}-->\n`;
+  });
+  return { text: replaced, counter };
+}
+
+/** Remove <h2> duplicado quando o título da secção já vem do ## Markdown. */
+function stripDuplicateHeading(html, title) {
+  if (!title) return html;
+  const esc = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return html.replace(new RegExp(`<h2[^>]*>\\s*${esc}\\s*</h2>\\s*`, "i"), "");
+}
+
+/** Converte Markdown em HTML e recolhe fluxos Mermaid embutidos. */
+function markdownToHtmlWithFlows(md) {
+  const flows = [];
+  const { text } = injectFlowPlaceholders(md, flows, 0);
+  return { html: marked.parse(text), flows };
+}
 
 function parseFrontmatter(raw) {
   const trimmed = raw.replace(/^\uFEFF/, "").trimStart();
@@ -93,7 +164,14 @@ function extractBlocks(body) {
   while ((match = blockRe.exec(body)) !== null) {
     const before = body.slice(lastIndex, match.index).trim();
     if (before) {
-      sections.push({ level: 1, title: "", html: marked.parse(before), collapsed: false });
+      const parsed = markdownToHtmlWithFlows(before);
+      sections.push({
+        level: 1,
+        title: "",
+        html: parsed.html,
+        flows: parsed.flows,
+        collapsed: false,
+      });
     }
     lastIndex = blockRe.lastIndex;
 
@@ -111,11 +189,31 @@ function extractBlocks(body) {
         html: marked.parse(inner),
       });
     } else if (kind === "level") {
+      const parsed = markdownToHtmlWithFlows(inner);
       sections.push({
         level: Number(attrs.level ?? 2),
         title: attrs.title ?? LEVEL_LABELS[attrs.level] ?? "Secção",
-        html: marked.parse(inner),
+        html: parsed.html,
+        flows: parsed.flows,
         collapsed: Number(attrs.level ?? 2) > 1,
+      });
+    } else if (kind === "flow") {
+      const source = inner.replace(/^```mermaid\s*\n?|\n?```$/g, "").trim();
+      const id = attrs.id ?? `flow-${sections.length + 1}`;
+      const type = attrs.type ?? detectMermaidType(source);
+      const flow = {
+        id,
+        title: attrs.title ?? "Fluxo",
+        type,
+        source,
+        steps: type === "sequence" ? parseSequenceSteps(source) : [],
+      };
+      sections.push({
+        level: Number(attrs.level ?? 2),
+        title: flow.title,
+        html: `<!--DOC_FLOW:${id}-->`,
+        flows: [flow],
+        collapsed: false,
       });
     }
   }
@@ -125,26 +223,33 @@ function extractBlocks(body) {
     // Journeys sem blocos :::level — corpo inteiro como nível 1 + resto colapsável
     const parts = tail.split(/\n(?=## )/);
     if (parts.length > 1) {
+      const intro = markdownToHtmlWithFlows(parts[0]);
       sections.push({
         level: 1,
         title: "Visão geral",
-        html: marked.parse(parts[0]),
+        html: intro.html,
+        flows: intro.flows,
         collapsed: false,
       });
       for (let i = 1; i < parts.length; i++) {
         const heading = parts[i].match(/^## (.+)/);
+        const sectionTitle = heading?.[1] ?? `Secção ${i}`;
+        const parsed = markdownToHtmlWithFlows(parts[i]);
         sections.push({
           level: 2,
-          title: heading?.[1] ?? `Secção ${i}`,
-          html: marked.parse(parts[i]),
+          title: sectionTitle,
+          html: stripDuplicateHeading(parsed.html, sectionTitle),
+          flows: parsed.flows,
           collapsed: true,
         });
       }
     } else {
+      const parsed = markdownToHtmlWithFlows(tail);
       sections.push({
         level: 1,
         title: "",
-        html: marked.parse(tail),
+        html: parsed.html,
+        flows: parsed.flows,
         collapsed: false,
       });
     }

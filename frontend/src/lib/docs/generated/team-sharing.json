@@ -34,18 +34,21 @@
       "level": 1,
       "title": "Onde encontrar na app",
       "html": "<ul>\n<li><code>/team/vaults</code> — cofres partilhados</li>\n<li><code>/team/links</code> — secret links</li>\n<li><code>/team/notes</code> — notas auto-destrutivas</li>\n</ul>\n",
+      "flows": [],
       "collapsed": false
     },
     {
       "level": 2,
       "title": "Aprofundar: notas temporárias",
       "html": "<p>Notas com <strong>TTL</strong> (<em>time-to-live</em>): após expirar, o conteúdo deixa de estar disponível.\nÚtil para partilhar IBAN ou códigos de um só uso sem rasto permanente.</p>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Técnico",
       "html": "<p>Backend: <code>backend/internal/sharing/</code>. Frontend: <code>frontend/src/routes/(app)/team/</code>.\nEpic: <code>docs/roadmap/03-epics/epic-sharing.md</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     }
   ],

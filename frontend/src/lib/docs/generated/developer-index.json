@@ -19,24 +19,28 @@
       "level": 2,
       "title": "Estrutura do repositório",
       "html": "<pre><code>backend/     API Go, migrações SQL, pkg/crypto\nfrontend/    SvelteKit, WebCrypto, vault UI\ncli/         Injeção mTLS de segredos\ndocs/        Documentação SSOT (esta app lê daqui)\nscripts/     build-docs.mjs, backups\n</code></pre>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 2,
       "title": "Convenções obrigatórias",
       "html": "<ul>\n<li><strong>Zero-Knowledge:</strong> nunca enviar Master Key ao servidor</li>\n<li><strong>Multi-tenant:</strong> filtrar <code>tenant_id</code>; confiar na RLS como rede de segurança</li>\n<li><strong>Cripto:</strong> só <code>crypto/*</code> (Go) e WebCrypto (browser) — nunca inventar algoritmos</li>\n<li><strong>Didático:</strong> comentários que explicam o <em>porquê</em> (ver <code>.cursor/rules/</code>)</li>\n</ul>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Comandos úteis",
       "html": "<table>\n<thead>\n<tr>\n<th>Comando</th>\n<th>Efeito</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>make backend-test</code></td>\n<td>Testes Go incl. cripto</td>\n</tr>\n<tr>\n<td><code>make frontend-test</code></td>\n<td>Vitest no frontend</td>\n</tr>\n<tr>\n<td><code>make test</code></td>\n<td>Ambos</td>\n</tr>\n<tr>\n<td><code>node scripts/build-docs.mjs</code></td>\n<td>Regenera docs na app</td>\n</tr>\n<tr>\n<td><code>docker compose up</code></td>\n<td>Ambiente local completo</td>\n</tr>\n</tbody></table>\n",
+      "flows": [],
       "collapsed": true
     },
     {
       "level": 3,
       "title": "Backlog e épicos",
       "html": "<p>Tasks com IDs (<code>VAULT-001</code>, <code>UI-004</code>) em <code>docs/roadmap/05-tasks/backlog.md</code>.\nÉpicos em <code>docs/roadmap/03-epics/</code>.</p>\n",
+      "flows": [],
       "collapsed": true
     }
   ],
