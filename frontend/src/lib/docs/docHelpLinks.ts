@@ -26,6 +26,7 @@ export const DOC_HELP_ROUTES: DocHelpRoute[] = [
   { prefix: "/hr/onboarding", slug: "journey-hr-agent-onboarding", label: "Como funciona o agente RH?" },
   { prefix: "/hr/compliance", slug: "journey-rgpd-erasure", label: "Como funciona o direito ao esquecimento?" },
   { prefix: "/hr", slug: "hr-rgpd", label: "Como funciona o RH cifrado?" },
+  { prefix: "/work/inventory", slug: "journey-ops-agent-inventory", label: "Como funciona o inventário?" },
   { prefix: "/work/shifts", slug: "security", label: "Como funcionam turnos e geofence?" },
   { prefix: "/work/sandbox", slug: "vault", label: "Como funciona o browser sandbox?" },
   { prefix: "/work/cli", slug: "developer-crypto", label: "Como funciona a CLI mTLS?" },

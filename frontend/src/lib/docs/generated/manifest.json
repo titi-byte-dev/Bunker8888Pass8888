@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T15:19:33.694Z",
+  "generatedAt": "2026-06-05T15:26:53.730Z",
   "categories": [
     {
       "id": "concepts",
@@ -305,6 +305,27 @@
       "summary": "",
       "related": [],
       "actor": "Utilizador BYOD",
+      "order": 99
+    },
+    {
+      "slug": "journey-ops-agent-inventory",
+      "title": "Journey: Agente de operações sugere ordem de compra (AGENT-008)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "ops_agent_inventory",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Responsável de operações",
       "order": 99
     },
     {

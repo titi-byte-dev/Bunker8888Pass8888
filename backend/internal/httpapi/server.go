@@ -22,6 +22,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
@@ -66,6 +67,7 @@ type Deps struct {
 	MailRateLimiter   *mail.RateLimiter   // nil desactiva quotas MAIL-005
 	MailWebhookSecret string              // vazio desactiva webhook
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
+	Ops          *ops.Repo          // nil desactiva endpoints /api/ops/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner       // executor de tools (AGENT-001)
 	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
@@ -254,6 +256,14 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("POST /api/fin/subscriptions", requireAuth(deps.Auth, handleCreateSubscription(deps.Fin)))
 		mux.Handle("PUT /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleUpdateSubscription(deps.Fin)))
 		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
+	}
+	if deps.Ops != nil && deps.Auth != nil {
+		// Inventário operacional (AGENT-008).
+		mux.Handle("GET /api/ops/inventory", requireAuth(deps.Auth, handleListInventory(deps.Ops)))
+		mux.Handle("POST /api/ops/inventory", requireAuth(deps.Auth, handleCreateInventory(deps.Ops, deps.AgentBus)))
+		mux.Handle("PUT /api/ops/inventory/{id}", requireAuth(deps.Auth, handleUpdateInventory(deps.Ops, deps.AgentBus)))
+		mux.Handle("POST /api/ops/inventory/{id}/adjust", requireAuth(deps.Auth, handleAdjustInventory(deps.Ops, deps.AgentBus)))
+		mux.Handle("DELETE /api/ops/inventory/{id}", requireAuth(deps.Auth, handleDeleteInventory(deps.Ops)))
 	}
 	if deps.Agent != nil && deps.AgentRunner != nil && deps.Auth != nil {
 		// Sistema de tools para agentes (AGENT-001) + auditoria Guardião (AGENT-002).

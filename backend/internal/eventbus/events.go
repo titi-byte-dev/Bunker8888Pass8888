@@ -13,6 +13,8 @@ const (
 	CRMProspectionRun = "crm.prospection.run"
 	// HREmployeeCreated — ficha de empregado vazia criada (pedido de onboarding).
 	HREmployeeCreated = "hr.employee.created"
+	// OpsStockLow — inventário atingiu nível de reordenação (AGENT-008).
+	OpsStockLow = "ops.stock.low"
 	// AgentToolExecuted — tool de agente executada (complementa guardian audit).
 	AgentToolExecuted = "agent.tool.executed"
 	// OrchestratorActionSuggested — orquestrador sugere acção (human-in-the-loop).

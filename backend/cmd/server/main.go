@@ -24,6 +24,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/eventbus"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/orchestrator"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/ops"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
@@ -88,6 +89,7 @@ func main() {
 		mailRepo := mail.NewRepo(pool)
 		mailInbox := mail.NewInboxRepo(pool)
 		finRepo := fin.NewRepo(pool)
+		opsRepo := ops.NewRepo(pool)
 		crmRepo := crm.NewRepo(pool)
 		agentAudit := guardian.NewAuditRepo(pool)
 
@@ -137,6 +139,7 @@ func main() {
 		agentOrchestrator := orchestrator.New(agentBus, logger,
 			orchestrator.NewProspectionWorker(agentBus),
 			orchestrator.NewOnboardingWorker(agentBus),
+			orchestrator.NewOperationsWorker(agentBus),
 		)
 
 		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
@@ -186,6 +189,7 @@ func main() {
 			MailRateLimiter:   mailLimiter,
 			MailWebhookSecret: cfg.MailWebhookSecret,
 			Fin:          finRepo,
+			Ops:          opsRepo,
 			Agent:        agentReg,
 			AgentRunner:  agentRun,
 			AgentAudit:   agentAudit,

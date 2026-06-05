@@ -11,7 +11,11 @@ function collectFlows(slug: string): DocFlow[] {
 
 describe("Svelte Flow nos journeys (DOC-011/012)", () => {
   it("journeys do orquestrador usam renderer svelteflow com grafo", () => {
-    for (const slug of ["journey-orchestrator", "journey-human-in-the-loop"]) {
+    for (const slug of [
+      "journey-orchestrator",
+      "journey-human-in-the-loop",
+      "journey-ops-agent-inventory",
+    ]) {
       const flows = collectFlows(slug);
       const sequence = flows.find((f) => f.type === "sequence");
       expect(sequence, slug).toBeDefined();

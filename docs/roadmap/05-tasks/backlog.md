@@ -139,7 +139,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | AGENT-005 | Orquestrador multi-agente | 3 | XL | 🟢 | AGENT-004 |
 | AGENT-006 | Agente Financeiro (reconciliação) | 3 | L | ⚪ | AGENT-005, FIN-003 |
 | AGENT-007 | Agente RH (recrutamento às cegas + onboarding) | 3 | L | 🟡 | AGENT-005, HR-007 |
-| AGENT-008 | Agente Operações (compras/inventário) | 3 | L | ⚪ | AGENT-005 |
+| AGENT-008 | Agente Operações (compras/inventário) | 3 | L | 🟡 | AGENT-005 |
 | AGENT-009 | Human-in-the-loop p/ ações sensíveis | 3 | M | 🟢 | AGENT-005 |
 | AGENT-010 | Mitigação de prompt injection (dados ≠ instruções) | 2 | M | 🟢 | AGENT-001 |
 

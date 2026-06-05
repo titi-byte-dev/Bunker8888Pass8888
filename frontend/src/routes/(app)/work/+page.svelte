@@ -34,6 +34,12 @@
       </a>
     </li>
     <li>
+      <a href="/work/inventory">
+        <strong>Inventário</strong>
+        <span>Stock operacional, alertas e ordens de compra sugeridas (AGENT-008)</span>
+      </a>
+    </li>
+    <li>
       <a href="/security/devices">
         <strong>Dispositivos CLI activos</strong>
         <span>Revogar certificados mTLS registados na conta</span>

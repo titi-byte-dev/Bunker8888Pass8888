@@ -22,6 +22,10 @@ describe("doc help links (DOC-013)", () => {
     expect(resolveDocHelp("/hr/onboarding")?.slug).toBe("journey-hr-agent-onboarding");
   });
 
+  it("resolve inventário com journey do agente de operações", () => {
+    expect(resolveDocHelp("/work/inventory")?.slug).toBe("journey-ops-agent-inventory");
+  });
+
   it("devolve null para rotas sem doc", () => {
     expect(resolveDocHelp("/settings")).toBeNull();
   });

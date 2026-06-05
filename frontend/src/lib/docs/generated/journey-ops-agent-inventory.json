@@ -1,0 +1,193 @@
+{
+  "slug": "journey-ops-agent-inventory",
+  "title": "Journey: Agente de operações sugere ordem de compra (AGENT-008)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "ops_agent_inventory",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Agente de operações sugere ordem de compra (AGENT-008)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Responsável de operações · <strong>Epics:</strong> <code>AGENT</code>, <code>WORK</code></p>\n</blockquote>\n<p>Quando o stock de um artigo desce ao nível de reordenação, o orquestrador\nsugere uma ordem de compra — sem enviar automaticamente a fornecedores.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Orquestrador activo com worker <code>operations</code> (AGENT-005).</li>\n<li>Artigos registados em <code>/work/inventory</code>.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant INV as /work/inventory\r\n    participant API as API\r\n    participant Orq as Orquestrador\r\n\r\n    U->>INV: ajusta stock (−1)\r\n    INV->>API: POST .../adjust\r\n    API->>Orq: ops.stock.low\r\n    Orq->>API: orchestrator.action.suggested\r\n    INV->>API: GET /api/agent/events\r\n    Note over INV: «Sugestão: ordem de compra»\r\n    U->>INV: Aprovar (AGENT-009)\r\n    INV->>INV: rascunho de PO no cliente",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "ajusta stock (−1)"
+            },
+            {
+              "kind": "message",
+              "from": "INV",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST .../adjust"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "Orq",
+              "arrow": "->>",
+              "label": "ops.stock.low"
+            },
+            {
+              "kind": "message",
+              "from": "Orq",
+              "to": "API",
+              "arrow": "->>",
+              "label": "orchestrator.action.suggested"
+            },
+            {
+              "kind": "message",
+              "from": "INV",
+              "to": "API",
+              "arrow": "->>",
+              "label": "GET /api/agent/events"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "Aprovar (AGENT-009)"
+            },
+            {
+              "kind": "message",
+              "from": "INV",
+              "to": "INV",
+              "arrow": "->>",
+              "label": "rascunho de PO no cliente"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "INV",
+                "label": "/work/inventory",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "API",
+                "x": 400
+              },
+              {
+                "id": "Orq",
+                "label": "Orquestrador",
+                "x": 600
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "INV",
+                "label": "ajusta stock (−1)",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "INV",
+                "target": "API",
+                "label": "POST .../adjust",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "API",
+                "target": "Orq",
+                "label": "ops.stock.low",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "Orq",
+                "target": "API",
+                "label": "orchestrator.action.suggested",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "INV",
+                "target": "API",
+                "label": "GET /api/agent/events",
+                "dashed": false
+              },
+              {
+                "id": "step-5",
+                "source": "U",
+                "target": "INV",
+                "label": "Aprovar (AGENT-009)",
+                "dashed": false
+              },
+              {
+                "id": "step-6",
+                "source": "INV",
+                "target": "INV",
+                "label": "rascunho de PO no cliente",
+                "dashed": false
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Adiciona artigos com quantidade e nível de reordenação.</li>\n<li>Simula consumo com <strong>−1</strong> até <code>quantity &lt;= reorder_level</code>.</li>\n<li>No feed, aparece <strong>Sugestão: ordem de compra</strong>.</li>\n<li><strong>Aprova</strong> — gera rascunho com quantidade sugerida (stub local).</li>\n<li>Envia manualmente ao fornecedor (fora do scope desta fase).</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Evento <code>ops.stock.low</code> auditado em <code>agent_events</code>.</li>\n<li>Rascunho de PO visível na UI; nenhuma encomenda automática.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Responsável de operações",
+  "order": 99
+}
