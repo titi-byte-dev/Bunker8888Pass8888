@@ -89,8 +89,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | MAIL-001 | Geração de aliases + reencaminhamento | 1 | M | 🟢 | INFRA-003 |
 | MAIL-002 | Servidor de e-mail open-source (SMTP/IMAP) na VPS | 1 | L | 🟡 | INFRA-003 |
 | MAIL-003 | SPF/DKIM/DMARC + domínio personalizado | 2 | M | ⚪ | MAIL-002 |
-| MAIL-004 | Compor/iniciar e-mail a partir do alias (relay) | 2 | M | ⚪ | MAIL-002 |
-| MAIL-005 | Rate limiting / anti open-relay | 2 | M | ⚪ | MAIL-002 |
+| MAIL-004 | Compor/iniciar e-mail a partir do alias (relay) | 2 | M | 🟢 | MAIL-002 |
+| MAIL-005 | Rate limiting / anti open-relay | 2 | M | 🟢 | MAIL-002 |
 
 ## SHARE — Partilha
 

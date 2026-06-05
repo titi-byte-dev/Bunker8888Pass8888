@@ -46,6 +46,8 @@ services:
       # MAIL-002 (dev): URL interna do Mailpit para buscar corpo completo das mensagens.
       AEGIS_MAILPIT_URL: "http://mailpit:8025"
       AEGIS_MAIL_WEBHOOK_SECRET: ${AEGIS_MAIL_WEBHOOK_SECRET:-dev-mail-webhook-secret}
+      # MAIL-004: relay SMTP para o destino real do alias (Mailpit em dev).
+      AEGIS_SMTP_RELAY_HOST: "mailpit:1025"
     ports:
       - "${BACKEND_PORT:-8080}:8080"
       - "${BACKEND_MTLS_PORT:-8443}:8443"

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-05T12:22:00.668Z",
+  "generatedAt": "2026-06-05T14:14:44.136Z",
   "categories": [
     {
       "id": "concepts",
@@ -161,6 +161,27 @@
       "order": 99
     },
     {
+      "slug": "journey-crm-prospection",
+      "title": "Journey: Prospeção automática — e-mail → lead cifrado (AGENT-003)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "crm_prospection",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Comercial / gestor de vendas",
+      "order": 99
+    },
+    {
       "slug": "journey-emergency-access",
       "title": "Journey: Acesso de emergência (herdeiro digital)",
       "category": "journeys",
@@ -200,6 +221,27 @@
       "summary": "",
       "related": [],
       "actor": "Funcionário",
+      "order": 99
+    },
+    {
+      "slug": "journey-mail-alias-relay",
+      "title": "Journey: Alias de e-mail com relay e inbox (MAIL-001/002/004)",
+      "category": "journeys",
+      "categoryLabel": "Percursos",
+      "audience": [
+        "user",
+        "admin"
+      ],
+      "layer": [
+        "product"
+      ],
+      "feature": "mail_alias_relay",
+      "level": 1,
+      "maxLevel": 2,
+      "in_app": true,
+      "summary": "",
+      "related": [],
+      "actor": "Utilizador BYOD",
       "order": 99
     },
     {

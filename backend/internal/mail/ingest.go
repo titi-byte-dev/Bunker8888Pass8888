@@ -17,6 +17,8 @@ type IngestService struct {
 	Aliases *Repo
 	Inbox   *InboxRepo
 	Mailpit *MailpitClient
+	Relay   *RelayService // MAIL-004: reencaminha para destination (opcional)
+	Limiter *RateLimiter  // MAIL-005: anti-abuso
 }
 
 // IngestResult resume o que aconteceu com uma mensagem recebida.
@@ -26,6 +28,8 @@ type IngestResult struct {
 	InboxID     string `json:"inbox_id,omitempty"`
 	OwnerID     string `json:"owner_id,omitempty"`
 	Status      string `json:"status"`
+	Relayed     bool   `json:"relayed,omitempty"`
+	RelayTo     string `json:"relay_to,omitempty"`
 }
 
 // ProcessMailpitWebhook trata o POST do Mailpit quando chega SMTP para um alias.
@@ -51,6 +55,11 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 	if alias == nil {
 		return &IngestResult{MessageID: summary.ID, Status: "ignored"}, ErrWebhookIgnored
 	}
+	if s.Limiter != nil {
+		if err := s.Limiter.AllowInbound(ctx, alias.OwnerID); err != nil {
+			return nil, err
+		}
+	}
 	body, err := s.fetchBody(ctx, summary)
 	if err != nil {
 		return nil, err
@@ -67,13 +76,33 @@ func (s *IngestService) ProcessMailpitWebhook(ctx context.Context, raw []byte) (
 	if err != nil {
 		return nil, fmt.Errorf("mail: criar inbox: %w", err)
 	}
-	return &IngestResult{
+	result := &IngestResult{
 		MessageID: summary.ID,
 		AliasUsed: alias.AliasAddress,
 		InboxID:   msg.ID,
 		OwnerID:   alias.OwnerID,
 		Status:    "ingested",
-	}, nil
+	}
+	if s.Limiter != nil {
+		_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirInbound, from, alias.AliasAddress)
+	}
+	if s.Relay != nil {
+		relayOK := s.Limiter == nil
+		if s.Limiter != nil {
+			relayOK = s.Limiter.AllowRelay(ctx, alias.ID) == nil
+		}
+		if relayOK {
+			if relayOut, err := s.Relay.ForwardInbound(ctx, alias, from, subject, body); err == nil && relayOut != nil {
+				result.Relayed = true
+				result.RelayTo = relayOut.To
+				if s.Limiter != nil {
+					_ = s.Limiter.Record(ctx, alias.OwnerID, alias.ID, DirOutboundRelay, alias.AliasAddress, relayOut.To)
+				}
+			}
+		}
+		// Falha de relay não bloqueia ingestão na inbox — registo local primeiro.
+	}
+	return result, nil
 }
 
 func (s *IngestService) fetchBody(ctx context.Context, summary *mailpitSummary) (string, error) {

@@ -131,13 +131,25 @@ func main() {
 		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 		prospectionSvc := &agent.Prospection{Runner: agentRun, Inbox: mailInbox}
 
+		mailLimiter := mail.NewRateLimiter(pool, mail.RateConfig{
+			InboundPerHour:  cfg.MailRateInboundPerHour,
+			RelayPerHour:    cfg.MailRateRelayPerHour,
+			ComposePerHour:  cfg.MailRateComposePerHour,
+		})
+		var mailRelay *mail.RelayService
+		if cfg.SMTPRelayHost != "" {
+			mailRelay = &mail.RelayService{SMTPHost: cfg.SMTPRelayHost}
+		}
 		var mailIngest *mail.IngestService
 		if cfg.MailWebhookSecret != "" {
 			var mp *mail.MailpitClient
 			if cfg.MailpitURL != "" {
 				mp = mail.NewMailpitClient(cfg.MailpitURL)
 			}
-			mailIngest = &mail.IngestService{Aliases: mailRepo, Inbox: mailInbox, Mailpit: mp}
+			mailIngest = &mail.IngestService{
+				Aliases: mailRepo, Inbox: mailInbox, Mailpit: mp,
+				Relay: mailRelay, Limiter: mailLimiter,
+			}
 		}
 
 		deps = httpapi.Deps{
@@ -162,6 +174,8 @@ func main() {
 			Mail:         mailRepo,
 			MailInbox:         mailInbox,
 			MailIngest:        mailIngest,
+			MailRelay:         mailRelay,
+			MailRateLimiter:   mailLimiter,
 			MailWebhookSecret: cfg.MailWebhookSecret,
 			Fin:          finRepo,
 			Agent:        agentReg,

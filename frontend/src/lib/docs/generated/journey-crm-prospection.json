@@ -1,0 +1,323 @@
+{
+  "slug": "journey-crm-prospection",
+  "title": "Journey: Prospeção automática — e-mail → lead cifrado (AGENT-003)",
+  "category": "journeys",
+  "categoryLabel": "Percursos",
+  "audience": [
+    "user",
+    "admin"
+  ],
+  "layer": [
+    "product"
+  ],
+  "feature": "crm_prospection",
+  "level": 1,
+  "maxLevel": 2,
+  "in_app": true,
+  "summary": "",
+  "concepts": [],
+  "sections": [
+    {
+      "level": 1,
+      "title": "Visão geral",
+      "html": "<h1>Journey: Prospeção automática — e-mail → lead cifrado (AGENT-003)</h1>\n<blockquote>\n<p><strong>Ator:</strong> Comercial / gestor de vendas · <strong>Epics:</strong> <code>AGENT</code>, <code>CRM</code>, <code>MAIL</code></p>\n</blockquote>\n<p>O agente de prospeção lê e-mails pendentes na inbox, gera rascunhos de lead e o\nutilizador importa para o funil CRM com cifragem Zero-Knowledge no browser.</p>\n",
+      "flows": [],
+      "collapsed": false
+    },
+    {
+      "level": 2,
+      "title": "Pré-condições",
+      "html": "<ul>\n<li>Cofre <strong>desbloqueado</strong> (Master Key em memória).</li>\n<li>Mensagens na inbox (<code>/mail</code>) com estado <strong>pendente</strong>.</li>\n<li>Agente <code>prospection</code> autorizado pelo Guardião (AGENT-002).</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxo principal (sequence)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "sequence",
+          "source": "sequenceDiagram\r\n    participant U as Utilizador\r\n    participant CRM as /crm\r\n    participant API as Go API\r\n    participant AG as Agente prospection\r\n    participant DB as PostgreSQL\r\n    participant MK as Master Key (cliente)\r\n\r\n    U->>CRM: Correr prospeção\r\n    CRM->>API: POST /api/agent/prospection/run\r\n    API->>DB: inbox WHERE processed_at IS NULL\r\n    loop Por mensagem\r\n        API->>AG: draft_lead_from_email\r\n        AG-->>API: rascunho JSON (sanitizado)\r\n    end\r\n    API-->>CRM: drafts[]\r\n\r\n    U->>CRM: Importar rascunho\r\n    CRM->>MK: encryptLead(payload)\r\n    MK-->>CRM: blob AES-GCM\r\n    CRM->>API: POST /api/crm/leads { blob }\r\n    CRM->>API: POST /api/mail/inbox/{id}/processed\r\n    API-->>CRM: lead criado",
+          "steps": [
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Correr prospeção"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/agent/prospection/run"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "DB",
+              "arrow": "->>",
+              "label": "inbox WHERE processed_at IS NULL"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "AG",
+              "arrow": "->>",
+              "label": "draft_lead_from_email"
+            },
+            {
+              "kind": "message",
+              "from": "AG",
+              "to": "API",
+              "arrow": "-->>",
+              "label": "rascunho JSON (sanitizado)"
+            },
+            {
+              "kind": "branch",
+              "label": "end"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "CRM",
+              "arrow": "-->>",
+              "label": "drafts[]"
+            },
+            {
+              "kind": "message",
+              "from": "U",
+              "to": "CRM",
+              "arrow": "->>",
+              "label": "Importar rascunho"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "MK",
+              "arrow": "->>",
+              "label": "encryptLead(payload)"
+            },
+            {
+              "kind": "message",
+              "from": "MK",
+              "to": "CRM",
+              "arrow": "-->>",
+              "label": "blob AES-GCM"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/crm/leads { blob }"
+            },
+            {
+              "kind": "message",
+              "from": "CRM",
+              "to": "API",
+              "arrow": "->>",
+              "label": "POST /api/mail/inbox/{id}/processed"
+            },
+            {
+              "kind": "message",
+              "from": "API",
+              "to": "CRM",
+              "arrow": "-->>",
+              "label": "lead criado"
+            }
+          ],
+          "renderer": "svelteflow",
+          "graph": {
+            "nodes": [
+              {
+                "id": "U",
+                "label": "Utilizador",
+                "x": 0
+              },
+              {
+                "id": "CRM",
+                "label": "/crm",
+                "x": 200
+              },
+              {
+                "id": "API",
+                "label": "Go API",
+                "x": 400
+              },
+              {
+                "id": "AG",
+                "label": "Agente prospection",
+                "x": 600
+              },
+              {
+                "id": "DB",
+                "label": "PostgreSQL",
+                "x": 800
+              },
+              {
+                "id": "MK",
+                "label": "Master Key (cliente)",
+                "x": 1000
+              }
+            ],
+            "edges": [
+              {
+                "id": "step-0",
+                "source": "U",
+                "target": "CRM",
+                "label": "Correr prospeção",
+                "dashed": false
+              },
+              {
+                "id": "step-1",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST /api/agent/prospection/run",
+                "dashed": false
+              },
+              {
+                "id": "step-2",
+                "source": "API",
+                "target": "DB",
+                "label": "inbox WHERE processed_at IS NULL",
+                "dashed": false
+              },
+              {
+                "id": "step-3",
+                "source": "API",
+                "target": "AG",
+                "label": "draft_lead_from_email",
+                "dashed": false
+              },
+              {
+                "id": "step-4",
+                "source": "AG",
+                "target": "API",
+                "label": "rascunho JSON (sanitizado)",
+                "dashed": true
+              },
+              {
+                "id": "step-5",
+                "source": "API",
+                "target": "CRM",
+                "label": "drafts[]",
+                "dashed": true
+              },
+              {
+                "id": "step-6",
+                "source": "U",
+                "target": "CRM",
+                "label": "Importar rascunho",
+                "dashed": false
+              },
+              {
+                "id": "step-7",
+                "source": "CRM",
+                "target": "MK",
+                "label": "encryptLead(payload)",
+                "dashed": false
+              },
+              {
+                "id": "step-8",
+                "source": "MK",
+                "target": "CRM",
+                "label": "blob AES-GCM",
+                "dashed": true
+              },
+              {
+                "id": "step-9",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST /api/crm/leads { blob }",
+                "dashed": false
+              },
+              {
+                "id": "step-10",
+                "source": "CRM",
+                "target": "API",
+                "label": "POST /api/mail/inbox/{id}/processed",
+                "dashed": false
+              },
+              {
+                "id": "step-11",
+                "source": "API",
+                "target": "CRM",
+                "label": "lead criado",
+                "dashed": true
+              }
+            ]
+          }
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxograma do Guardião e tools",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "flowchart",
+          "source": "flowchart TD\r\n    A[POST prospection/run] --> B{agent_id = prospection?}\r\n    B -->|não| X[403 Forbidden]\r\n    B -->|sim| C[list_mail_inbox + draft_lead]\r\n    C --> D{Permissões OK?}\r\n    D -->|mail:read_metadata + crm:write_lead_draft| E[Executar tools]\r\n    D -->|não| X\r\n    E --> F{Body com prompt injection?}\r\n    F -->|sim| G[Ignorar mensagem]\r\n    F -->|não| H[Rascunho no JSON de resposta]\r\n    G --> E",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Diagrama de estados (lead)",
+      "html": "<!--DOC_FLOW:flow-1-->\n\n\n",
+      "flows": [
+        {
+          "id": "flow-1",
+          "title": "",
+          "type": "diagram",
+          "source": "stateDiagram-v2\r\n    [*] --> Rascunho: agente gera draft\r\n    Rascunho --> Cifrado: utilizador importa\r\n    Cifrado --> Novo: stage = new no funil\r\n    Novo --> Contactado: move estágio\r\n    Contactado --> Qualificado\r\n    Qualificado --> Proposta\r\n    Proposta --> Ganho\r\n    Proposta --> Perdido",
+          "steps": [],
+          "renderer": "mermaid"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Passo-a-passo",
+      "html": "<ol>\n<li>Garante e-mails na inbox (SMTP para alias ou simulação em dev).</li>\n<li>Abre <code>/crm</code> com cofre desbloqueado.</li>\n<li>Clica <strong>Correr prospeção</strong> — o servidor devolve rascunhos (não grava PII em claro no CRM).</li>\n<li>Revê cada rascunho (e-mail, assunto, notas sanitizadas).</li>\n<li><strong>Importar para o funil</strong> — o cliente cifra e grava o blob.</li>\n<li>A mensagem de inbox fica <strong>processada</strong>; nova prospeção não a repete.</li>\n</ol>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Conceito didático",
+      "html": "<blockquote>\n<p>💡 <strong>Function calling:</strong> o agente não escreve na BD directamente — pede tools\nvalidadas (<code>list_mail_inbox</code>, <code>draft_lead_from_email</code>) com schemas JSON.</p>\n</blockquote>\n<blockquote>\n<p>⚠️ <strong>Segurança:</strong> conteúdo de e-mail passa por <code>SanitizeExternalContent</code> e\n<code>RejectIfLooksLikeInstruction</code> (AGENT-010). Leads no CRM são sempre blobs opacos.</p>\n</blockquote>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Fluxos alternativos",
+      "html": "<ul>\n<li><strong>Cofre bloqueado:</strong> importação falha — só metadados de rascunho visíveis até unlock.</li>\n<li><strong>Sem e-mails pendentes:</strong> prospeção devolve lista vazia.</li>\n<li><strong>Rate limit (MAIL-005):</strong> ingest bloqueada antes de chegar à inbox.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    },
+    {
+      "level": 2,
+      "title": "Pós-condições",
+      "html": "<ul>\n<li>Lead no funil CRM (cifrado).</li>\n<li>Entrada em <code>GET /api/agent/audit</code> para <code>prospection_run</code>.</li>\n<li>Mensagem de inbox marcada processada.</li>\n</ul>\n",
+      "flows": [],
+      "collapsed": true
+    }
+  ],
+  "related": [],
+  "actor": "Comercial / gestor de vendas",
+  "order": 99
+}

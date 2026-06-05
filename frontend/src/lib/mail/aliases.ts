@@ -79,3 +79,16 @@ export async function setAliasActive(id: string, active: boolean): Promise<void>
 export async function deleteAlias(id: string): Promise<void> {
   await authedFetch(`/api/mail/aliases/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
+
+/** Envia e-mail com remetente = alias (MAIL-004 compose). */
+export async function composeFromAlias(
+  aliasId: string,
+  to: string,
+  subject: string,
+  body: string,
+): Promise<void> {
+  await authedFetch("/api/mail/compose", {
+    method: "POST",
+    body: JSON.stringify({ alias_id: aliasId, to, subject, body }),
+  });
+}
