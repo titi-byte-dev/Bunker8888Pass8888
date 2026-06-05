@@ -22,6 +22,8 @@ func TestEmployeeRecordRoutesGuarded(t *testing.T) {
 		{http.MethodPost, "/api/hr/employees/abc/fields/salary/shred"},
 		{http.MethodPost, "/api/hr/employees/abc/shred"},
 		{http.MethodGet, "/api/hr/certificates"},
+		{http.MethodGet, "/api/hr/audit"},
+		{http.MethodGet, "/api/hr/compliance-report"},
 	}
 	for _, rt := range routes {
 		req := httptest.NewRequest(rt.method, rt.path, nil)

@@ -88,6 +88,9 @@ func (r *Repo) CreateRecord(ctx context.Context, ownerID string) (*Record, error
 	if err != nil {
 		return nil, err
 	}
+	if _, err := r.AppendAudit(ctx, ownerID, AuditRecordCreate, rec.ID); err != nil {
+		return nil, err
+	}
 	return rec, nil
 }
 
@@ -191,6 +194,9 @@ func (r *Repo) PutField(ctx context.Context, ownerID, recordID, fieldName string
 	}
 	// Após o upsert, refrescamos o timestamp da ficha (toque de auditoria).
 	_, _ = r.pool.Exec(ctx, `UPDATE employee_records SET updated_at = now() WHERE id = $1`, recordID)
+	if _, err := r.AppendAudit(ctx, ownerID, AuditFieldPut, fieldName); err != nil {
+		return nil, err
+	}
 	return f, nil
 }
 
@@ -209,6 +215,9 @@ func (r *Repo) DeleteField(ctx context.Context, ownerID, recordID, fieldName str
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
 	}
+	if _, err := r.AppendAudit(ctx, ownerID, AuditFieldDelete, fieldName); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -222,6 +231,9 @@ func (r *Repo) DeleteRecord(ctx context.Context, ownerID, recordID string) error
 	}
 	if tag.RowsAffected() == 0 {
 		return ErrNotFound
+	}
+	if _, err := r.AppendAudit(ctx, ownerID, AuditRecordDelete, recordID); err != nil {
+		return err
 	}
 	return nil
 }

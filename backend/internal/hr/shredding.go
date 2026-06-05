@@ -103,6 +103,11 @@ func (r *Repo) ShredField(ctx context.Context, ownerID, recordID, fieldName stri
 		return nil, err
 	}
 
+	// Regista a eliminacao na cadeia de auditoria, na mesma transacao.
+	if _, err := r.appendAuditTx(ctx, tx, ownerID, AuditFieldShred, fieldName); err != nil {
+		return nil, err
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
