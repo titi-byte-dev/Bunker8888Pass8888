@@ -1,5 +1,6 @@
 <script lang="ts">
   import PlaygroundDev from "$lib/playground/PlaygroundDev.svelte";
+  import MotionDemo from "$lib/motion/MotionDemo.svelte";
 </script>
 
 <svelte:head>
@@ -7,3 +8,4 @@
 </svelte:head>
 
 <PlaygroundDev />
+<MotionDemo />

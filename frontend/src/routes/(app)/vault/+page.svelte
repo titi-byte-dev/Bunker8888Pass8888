@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { filterLogins, loadDecodedLogins, type DecodedLogin } from "$lib/vault/ui";
+  import { animateListStagger } from "$lib/motion/presets";
+  import { runMotionScope } from "$lib/motion/scope";
 
   let items = $state<DecodedLogin[]>([]);
   let query = $state("");
@@ -8,6 +10,16 @@
   let error = $state("");
 
   const filtered = $derived(filterLogins(items, query));
+
+  let listRoot = $state<HTMLElement | undefined>(undefined);
+  let lastBusy = true;
+
+  $effect(() => {
+    if (lastBusy && !busy && filtered.length > 0 && listRoot) {
+      runMotionScope(listRoot, () => animateListStagger(listRoot!, "li"));
+    }
+    lastBusy = busy;
+  });
 
   async function refresh() {
     busy = true;
@@ -57,7 +69,7 @@
       <a href="/vault/new">Criar login</a>
     </div>
   {:else}
-    <ul class="list">
+    <ul class="list" bind:this={listRoot}>
       {#each filtered as { meta, login } (meta.id)}
         <li>
           <a href="/vault/{meta.id}" class="row-link">

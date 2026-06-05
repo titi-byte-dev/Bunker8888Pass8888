@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { Snippet } from "svelte";
+  import { animatePanelEnter } from "$lib/motion/presets";
+  import { runMotionScope } from "$lib/motion/scope";
 
   interface Props {
     title?: string;
@@ -8,6 +11,12 @@
   }
 
   let { title, subtitle, children }: Props = $props();
+  let card: HTMLElement | undefined;
+
+  onMount(() => {
+    if (!card) return;
+    return runMotionScope(card, () => animatePanelEnter(card!));
+  });
 </script>
 
 <div class="auth-page">
@@ -16,7 +25,7 @@
     <span class="name">AegisPass</span>
   </a>
 
-  <div class="card">
+  <div class="card" bind:this={card}>
     {#if title}
       <h1>{title}</h1>
     {/if}
