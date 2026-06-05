@@ -79,14 +79,14 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | HR-004 | Certificado criptográfico de eliminação | 1 | M | 🟢 | HR-003 |
 | HR-005 | Gestão de contratos (object storage, chave por ficheiro) | 1 | L | 🟢 | VAULT-002 |
 | HR-006 | Assinatura digital de contratos | 1 | L | 🟢 | HR-005 |
-| HR-007 | Dashboard de onboarding (1 clique) | 1 | M | ⚪ | VAULT-005, MAIL-001 |
+| HR-007 | Dashboard de onboarding (1 clique) | 1 | M | 🟢 | VAULT-005, MAIL-001 |
 | HR-008 | Relatório de conformidade RGPD (PDF) | 2 | M | 🟢 | HR-002 |
 
 ## MAIL — Aliases & E-mail
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
-| MAIL-001 | Geração de aliases + reencaminhamento | 1 | M | ⚪ | INFRA-003 |
+| MAIL-001 | Geração de aliases + reencaminhamento | 1 | M | 🟢 | INFRA-003 |
 | MAIL-002 | Servidor de e-mail open-source (SMTP/IMAP) na VPS | 1 | L | ⚪ | INFRA-003 |
 | MAIL-003 | SPF/DKIM/DMARC + domínio personalizado | 2 | M | ⚪ | MAIL-002 |
 | MAIL-004 | Compor/iniciar e-mail a partir do alias (relay) | 2 | M | ⚪ | MAIL-002 |

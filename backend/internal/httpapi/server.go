@@ -18,6 +18,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -52,6 +53,7 @@ type Deps struct {
 	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
 	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
+	Mail         *mail.Repo         // nil desactiva endpoints /api/mail/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -205,6 +207,13 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("GET /api/hr/employees/{id}/contracts/{cid}", requireAuth(deps.Auth, handleGetContract(deps.HR)))
 		mux.Handle("POST /api/hr/employees/{id}/contracts/{cid}/sign", requireAuth(deps.Auth, handleSignContract(deps.HR)))
 		mux.Handle("DELETE /api/hr/employees/{id}/contracts/{cid}", requireAuth(deps.Auth, handleDeleteContract(deps.HR)))
+	}
+	if deps.Mail != nil && deps.Auth != nil {
+		// Aliases de e-mail (MAIL-001).
+		mux.Handle("GET /api/mail/aliases", requireAuth(deps.Auth, handleListAliases(deps.Mail)))
+		mux.Handle("POST /api/mail/aliases", requireAuth(deps.Auth, handleCreateAlias(deps.Mail)))
+		mux.Handle("PATCH /api/mail/aliases/{id}", requireAuth(deps.Auth, handleSetAliasActive(deps.Mail)))
+		mux.Handle("DELETE /api/mail/aliases/{id}", requireAuth(deps.Auth, handleDeleteAlias(deps.Mail)))
 	}
 
 	return mux

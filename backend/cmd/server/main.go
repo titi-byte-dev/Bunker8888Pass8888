@@ -21,6 +21,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/httpapi"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/mail"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -78,6 +79,7 @@ func main() {
 		shareKeysRepo := sharekeys.NewRepo(pool)
 		sharedVaultsRepo := sharedvaults.NewRepo(pool)
 		hrRepo := hr.NewRepo(pool)
+		mailRepo := mail.NewRepo(pool)
 
 		// Secret links vivem só em RAM (sem BD). Um reaper limpa os expirados.
 		secretLinksStore := secretlinks.NewStore()
@@ -135,6 +137,7 @@ func main() {
 			SecretLinks:  secretLinksStore,
 			BurnNotes:    burnNotesStore,
 			HR:           hrRepo,
+			Mail:         mailRepo,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
 		}
