@@ -77,3 +77,18 @@ func (r *Repo) ListByUser(ctx context.Context, userID string) ([]Device, error) 
 	}
 	return out, rows.Err()
 }
+
+// Revoke marca um dispositivo como revogado (só se pertencer ao utilizador).
+func (r *Repo) Revoke(ctx context.Context, userID, deviceID string) error {
+	tag, err := r.pool.Exec(ctx, `
+		UPDATE cli_devices SET revoked_at = now()
+		WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL`,
+		deviceID, userID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}

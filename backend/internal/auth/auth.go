@@ -132,6 +132,26 @@ func (s *Service) Logout(ctx context.Context, token string) error {
 	return s.sessions.Delete(ctx, hashToken(token))
 }
 
+// ListSessions devolve metadados das sessões activas do utilizador.
+func (s *Service) ListSessions(ctx context.Context, userID string) ([]sessions.SessionInfo, error) {
+	return s.sessions.ListByUser(ctx, userID)
+}
+
+// RevokeSession invalida uma sessão concreta (id opaco em hex).
+func (s *Service) RevokeSession(ctx context.Context, userID, sessionIDHex string) error {
+	return s.sessions.DeleteByIDForUser(ctx, userID, sessionIDHex)
+}
+
+// RevokeOtherSessions mantém só o token actual; devolve quantas sessões foram revogadas.
+func (s *Service) RevokeOtherSessions(ctx context.Context, userID, currentToken string) (int64, error) {
+	return s.sessions.DeleteAllForUserExcept(ctx, userID, hashToken(currentToken))
+}
+
+// SessionIDForToken devolve o identificador opaco da sessão actual (hex do hash).
+func (s *Service) SessionIDForToken(token string) string {
+	return hex.EncodeToString(hashToken(token))
+}
+
 // newToken gera um token de sessão aleatório (256 bits) em hexadecimal.
 func newToken() (string, error) {
 	raw := make([]byte, 32)

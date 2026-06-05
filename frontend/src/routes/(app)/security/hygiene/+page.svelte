@@ -1,7 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { analyzeVaultHygiene, type HygieneSummary, type ItemHygieneResult } from "$lib/vault/hygiene";
-  import { checkPasswordBreached, type BreachCheckResult } from "$lib/darkweb/breach";
+  import {
+    buildHealthReport,
+    checkPasswordBreached,
+    itemsRequiringPasswordChange,
+    remediationEditUrl,
+    saveHealthSnapshot,
+    type BreachCheckResult,
+  } from "$lib/darkweb";
+  import SecurityHealthCard from "$lib/security/SecurityHealthCard.svelte";
   import { loadDecodedLogins } from "$lib/vault/ui";
 
   let summary = $state<HygieneSummary | null>(null);
@@ -11,6 +19,14 @@
   let breachError = $state("");
   let busy = $state(true);
   let error = $state("");
+
+  const healthReport = $derived(
+    summary ? buildHealthReport(summary, breachByItem) : null,
+  );
+
+  const remediation = $derived(
+    summary ? itemsRequiringPasswordChange(summary, breachByItem) : [],
+  );
 
   async function loadHygiene() {
     busy = true;
@@ -34,7 +50,6 @@
     }
   }
 
-  /** Verificação k-anonymity (DW-001) — só corre quando o utilizador pede. */
   async function scanBreaches() {
     if (!summary) return;
     breachBusy = true;
@@ -48,6 +63,10 @@
         next.set(item.itemId, result);
         breachByItem = new Map(next);
         await new Promise((r) => setTimeout(r, 400));
+      }
+      if (summary) {
+        const report = buildHealthReport(summary, next);
+        saveHealthSnapshot(report);
       }
     } catch (e) {
       breachError = e instanceof Error ? e.message : "Verificação falhou";
@@ -76,35 +95,41 @@
 </script>
 
 <svelte:head>
-  <title>Higiene — AegisPass</title>
+  <title>Saúde de segurança — AegisPass</title>
 </svelte:head>
 
 <section class="page">
   <a href="/security" class="back">← Segurança</a>
-  <h1>Higiene de passwords</h1>
+  <h1>Saúde de segurança</h1>
   <p class="lead">
-    Análise 100% no cliente — o servidor nunca vê as tuas passwords. A verificação
-    de fugas (Dark Web) usa <strong>k-anonymity</strong>: só saem 5 caracteres do hash.
+    Higiene + fugas (DW-003). Análise no cliente; k-anonymity para breach check (DW-001).
   </p>
 
   {#if busy}
     <p class="muted">A analisar cofre…</p>
   {:else if error}
     <p class="error" role="alert">{error}</p>
-  {:else if summary}
-    <div class="score-card {scoreClass(summary.overallScore)}">
-      <span class="score-value">{summary.overallScore}</span>
-      <div>
-        <strong>Score global</strong>
-        <p>{summary.totalLogins} login{summary.totalLogins === 1 ? "" : "s"} · {summary.weakCount} fraca(s) · {summary.reusedCount} reutilizada(s)</p>
+  {:else if summary && healthReport}
+    <SecurityHealthCard report={healthReport} />
+
+    {#if remediation.length > 0}
+      <div class="remediation-banner" role="alert">
+        <strong>Acção necessária (DW-002)</strong>
+        <p>{remediation.length} password(s) exposta(s) em fugas — altera-as já.</p>
+        <ul>
+          {#each remediation as item (item.itemId)}
+            <li>
+              <a href={remediationEditUrl(item.itemId, item.reason)}>{item.title} — Alterar password</a>
+            </li>
+          {/each}
+        </ul>
       </div>
-    </div>
+    {/if}
 
     <div class="breach-panel">
-      <h2>Preview Dark Web (DW-001)</h2>
+      <h2>Verificação de fugas</h2>
       <p class="hint">
-        Clica para verificar fugas conhecidas via API pública (HIBP). Comparação final
-        local — hash completo nunca sai do dispositivo.
+        API HIBP com k-anonymity — só os primeiros 5 caracteres do hash SHA-1 saem do dispositivo.
       </p>
       <button type="button" onclick={scanBreaches} disabled={breachBusy || summary.items.length === 0}>
         {breachBusy ? "A verificar…" : "Verificar fugas"}
@@ -114,10 +139,12 @@
       {/if}
     </div>
 
+    <h2 class="section-title">Detalhe por login</h2>
     <ul class="items">
       {#each summary.items as item (item.itemId)}
         {@const breach = breachByItem.get(item.itemId)}
-        <li>
+        {@const needsFix = breach?.breached}
+        <li class:urgent={needsFix}>
           <div class="row">
             <a href="/vault/{item.itemId}">{item.title}</a>
             <span class="badge {scoreClass(item.score)}">{item.score}</span>
@@ -126,11 +153,16 @@
           {#if breach}
             <p class="breach" class:exposed={breach.breached}>
               {#if breach.breached}
-                ⚠ Exposta em fugas ({breach.exposureCount.toLocaleString("pt-PT")}×)
+                ⚠ Exposta ({breach.exposureCount.toLocaleString("pt-PT")}×)
               {:else}
                 ✓ Sem ocorrências conhecidas
               {/if}
             </p>
+          {/if}
+          {#if needsFix}
+            <a class="fix-btn" href={remediationEditUrl(item.itemId, item.issues.includes("weak") ? "weak_and_breach" : "breach")}>
+              Alterar password
+            </a>
           {/if}
         </li>
       {/each}
@@ -164,40 +196,32 @@
     line-height: var(--leading-body);
   }
 
-  .score-card {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
+  .section-title {
+    font-size: var(--text-lg);
+    margin: 0 0 var(--space-3);
+  }
+
+  .remediation-banner {
     padding: var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
     margin-bottom: var(--space-6);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-warning);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
   }
 
-  .score-card.good {
-    background: var(--color-success-bg);
-  }
-
-  .score-card.warn {
-    background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-surface));
-  }
-
-  .score-card.bad {
-    background: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-surface));
-  }
-
-  .score-value {
-    font-family: var(--font-display);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    min-width: 3rem;
-    text-align: center;
-  }
-
-  .score-card p {
-    margin: var(--space-1) 0 0;
+  .remediation-banner p {
+    margin: var(--space-2) 0;
     font-size: var(--text-sm);
-    color: var(--color-text-muted);
+  }
+
+  .remediation-banner ul {
+    margin: 0;
+    padding-left: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .remediation-banner a {
+    color: var(--color-link);
   }
 
   .breach-panel {
@@ -245,6 +269,10 @@
   .items li {
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .items li.urgent {
+    background: color-mix(in srgb, var(--color-warning) 6%, transparent);
   }
 
   .items li:last-child {
@@ -302,6 +330,15 @@
 
   .breach.exposed {
     color: var(--color-warning);
+  }
+
+  .fix-btn {
+    display: inline-block;
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
   }
 
   .error {

@@ -179,4 +179,5 @@ func registerCLIRoutes(mux *http.ServeMux, deps Deps) {
 	}
 	mux.Handle("POST /api/cli/devices", requireAuth(deps.Auth, handleRegisterCLIDevice(cd)))
 	mux.Handle("GET /api/cli/devices", requireAuth(deps.Auth, handleCLIListDevices(deps.Devices)))
+	mux.Handle("DELETE /api/cli/devices/{id}", requireAuth(deps.Auth, handleRevokeCLIDevice(deps.Devices)))
 }

@@ -6,6 +6,8 @@
     initial?: Partial<LoginItem>;
     submitLabel?: string;
     busy?: boolean;
+    focusPassword?: boolean;
+    remediationNote?: string;
     onsubmit: (payload: LoginItem) => void | Promise<void>;
   }
 
@@ -13,8 +15,18 @@
     initial = {},
     submitLabel = "Guardar",
     busy = false,
+    focusPassword = false,
+    remediationNote = "",
     onsubmit,
   }: Props = $props();
+
+  let passwordInput = $state<HTMLInputElement | undefined>(undefined);
+
+  $effect(() => {
+    if (focusPassword && passwordInput) {
+      passwordInput.focus();
+    }
+  });
 
   let title = $state("");
   let username = $state("");
@@ -48,6 +60,9 @@
 </script>
 
 <form class="vault-form" onsubmit={handleSubmit}>
+  {#if remediationNote}
+    <p class="remediation" role="alert">{remediationNote}</p>
+  {/if}
   <label>
     Título
     <input type="text" bind:value={title} required disabled={busy} />
@@ -59,7 +74,7 @@
   <label>
     Password
     <div class="row">
-      <input type="text" bind:value={password} required disabled={busy} />
+      <input type="text" bind:value={password} bind:this={passwordInput} required disabled={busy} />
       <button type="button" class="secondary" onclick={handleGenerate} disabled={busy}>Gerar</button>
     </div>
   </label>
@@ -135,5 +150,15 @@
   .vault-form button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .remediation {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-warning);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    font-size: var(--text-sm);
+    color: var(--color-text);
   }
 </style>

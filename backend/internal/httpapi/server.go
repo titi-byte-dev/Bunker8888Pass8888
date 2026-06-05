@@ -62,6 +62,10 @@ func NewRouter(deps Deps) http.Handler {
 	}
 	if deps.Auth != nil && deps.Users != nil {
 		mux.Handle("GET /api/auth/session", requireAuth(deps.Auth, handleAuthSession(deps.Users)))
+		mux.Handle("GET /api/auth/sessions", requireAuth(deps.Auth, handleListSessions(deps.Auth)))
+		mux.Handle("DELETE /api/auth/sessions/{id}", requireAuth(deps.Auth, handleRevokeSession(deps.Auth)))
+		mux.Handle("POST /api/auth/sessions/revoke-others", requireAuth(deps.Auth, handleRevokeOtherSessions(deps.Auth)))
+		mux.Handle("POST /api/auth/logout", requireAuth(deps.Auth, handleLogout(deps.Auth)))
 	}
 	if deps.Auth != nil && deps.Vault != nil {
 		vd := vaultDeps{repo: deps.Vault, hub: deps.Hub}

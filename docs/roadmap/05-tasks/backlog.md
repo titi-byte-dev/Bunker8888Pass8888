@@ -107,8 +107,8 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
 | DW-001 | Verificação de fugas via k-anonymity (breach data API) | 2 | M | 🟢 | VAULT-005 |
-| DW-002 | Forçar alteração de password em exposição | 2 | S | ⚪ | DW-001 |
-| DW-003 | Painel de saúde de segurança (score) | 2 | M | ⚪ | VAULT-008 |
+| DW-002 | Forçar alteração de password em exposição | 2 | S | 🟢 | DW-001 |
+| DW-003 | Painel de saúde de segurança (score) | 2 | M | 🟢 | VAULT-008 |
 | DW-004 | Sentinel Mode (deteção de login impossível) | 2 | L | ⚪ | VAULT-004 |
 
 ## FIN — FinTech

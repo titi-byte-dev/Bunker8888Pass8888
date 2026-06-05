@@ -63,10 +63,17 @@ export function buildActionCommands(): CommandEntry[] {
     },
     {
       id: "action-hygiene",
-      label: "Painel de higiene",
+      label: "Saúde de segurança",
       group: "action",
-      keywords: "segurança score breach dark web",
+      keywords: "segurança score breach dark web higiene",
       href: "/security/hygiene",
+    },
+    {
+      id: "action-devices",
+      label: "Dispositivos e sessões",
+      group: "action",
+      keywords: "segurança passkey cli sessão",
+      href: "/security/devices",
     },
     {
       id: "action-unlock",
