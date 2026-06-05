@@ -121,12 +121,19 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | FIN-004 | Cartões virtuais efémeros | 3 | XL | ⚪ | FIN-003 |
 | FIN-005 | Categorização fiscal automática | 3 | M | ⚪ | FIN-001, AGENT-002 |
 
+## CRM — Pipeline de vendas
+
+| ID | Descrição | Fase | Tamanho | Estado | Depende de |
+|---|---|---|---|---|---|
+| CRM-001 | Modelo leads cifrados + API CRUD | 2 | M | 🟢 | VAULT-005 |
+| CRM-002 | UI funil básico (`/crm`) | 2 | M | 🟢 | CRM-001, UI-002 |
+
 ## AGENT — Agentes de IA
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |
 |---|---|---|---|---|---|
 | AGENT-001 | Interface `Tool` + validação (reimplementada de raiz) | 2 | M | 🟢 | INFRA-006 |
-| AGENT-002 | Guardião (decifra só o necessário, menor privilégio) | 2 | L | ⚪ | VAULT-002 |
+| AGENT-002 | Guardião (decifra só o necessário, menor privilégio) | 2 | L | 🟢 | VAULT-002 |
 | AGENT-003 | Primeiro agente: prospeção (lê e-mails → leads) | 2 | L | ⚪ | AGENT-001, MAIL-001 |
 | AGENT-004 | Event Bus (channels Go / NATS) | 3 | L | ⚪ | INFRA-003 |
 | AGENT-005 | Orquestrador multi-agente | 3 | XL | ⚪ | AGENT-004 |

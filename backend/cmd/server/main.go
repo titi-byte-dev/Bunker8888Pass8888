@@ -17,6 +17,8 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/config"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/crm"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/db"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
@@ -83,6 +85,8 @@ func main() {
 		hrRepo := hr.NewRepo(pool)
 		mailRepo := mail.NewRepo(pool)
 		finRepo := fin.NewRepo(pool)
+		crmRepo := crm.NewRepo(pool)
+		agentAudit := guardian.NewAuditRepo(pool)
 
 		// Secret links vivem só em RAM (sem BD). Um reaper limpa os expirados.
 		secretLinksStore := secretlinks.NewStore()
@@ -122,7 +126,7 @@ func main() {
 		}
 
 		agentReg := agent.NewDefaultRegistry()
-		agentRun := agent.NewRunner(agentReg, agent.PermissivePolicy{})
+		agentRun := agent.NewRunner(agentReg, guardian.Policy{})
 
 		deps = httpapi.Deps{
 			Auth:         auth.NewService(userRepo, sessionRepo, sessionTTL),
@@ -147,6 +151,8 @@ func main() {
 			Fin:          finRepo,
 			Agent:        agentReg,
 			AgentRunner:  agentRun,
+			AgentAudit:   agentAudit,
+			CRM:          crmRepo,
 			AdminKey:     cfg.AdminKey,
 			Pool:         pool,
 		}

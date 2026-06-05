@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/agent"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 )
 
 type agentRunRequest struct {
@@ -21,7 +22,30 @@ func handleListAgentTools(reg *agent.Registry) http.HandlerFunc {
 	}
 }
 
-func handleRunAgentTool(run *agent.Runner) http.HandlerFunc {
+func handleListAgentAudit(audit *guardian.AuditRepo) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := r.Context().Value(userIDKey).(string)
+		entries, err := audit.ListRecent(r.Context(), userID, 50)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "falha ao ler auditoria")
+			return
+		}
+		out := make([]map[string]any, 0, len(entries))
+		for _, e := range entries {
+			out = append(out, map[string]any{
+				"id":         e.ID,
+				"agent_id":   e.AgentID,
+				"tool_name":  e.ToolName,
+				"success":    e.Success,
+				"error_msg":  e.ErrorMsg,
+				"created_at": e.CreatedAt,
+			})
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"events": out})
+	}
+}
+
+func handleRunAgentTool(run *agent.Runner, audit *guardian.AuditRepo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("name")
 		if name == "" {
@@ -42,6 +66,9 @@ func handleRunAgentTool(run *agent.Runner) http.HandlerFunc {
 			AgentID: req.AgentID,
 			Input:   req.Input,
 		})
+		if audit != nil {
+			_ = audit.Record(r.Context(), userID, req.AgentID, name, err)
+		}
 		if mapAgentError(w, err) {
 			return
 		}

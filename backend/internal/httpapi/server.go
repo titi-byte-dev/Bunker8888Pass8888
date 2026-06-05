@@ -16,6 +16,8 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/auth"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/burnnotes"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/crm"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/guardian"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/fin"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
@@ -59,6 +61,8 @@ type Deps struct {
 	Fin          *fin.Repo          // nil desactiva endpoints /api/fin/*
 	Agent        *agent.Registry    // nil desactiva endpoints /api/agent/*
 	AgentRunner  *agent.Runner      // executor de tools (AGENT-001)
+	AgentAudit   *guardian.AuditRepo // nil desactiva GET /api/agent/audit
+	CRM          *crm.Repo          // nil desactiva endpoints /api/crm/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -228,9 +232,18 @@ func NewRouter(deps Deps) http.Handler {
 		mux.Handle("DELETE /api/fin/subscriptions/{id}", requireAuth(deps.Auth, handleDeleteSubscription(deps.Fin)))
 	}
 	if deps.Agent != nil && deps.AgentRunner != nil && deps.Auth != nil {
-		// Sistema de tools para agentes (AGENT-001).
+		// Sistema de tools para agentes (AGENT-001) + auditoria Guardião (AGENT-002).
 		mux.Handle("GET /api/agent/tools", requireAuth(deps.Auth, handleListAgentTools(deps.Agent)))
-		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner)))
+		mux.Handle("POST /api/agent/tools/{name}/run", requireAuth(deps.Auth, handleRunAgentTool(deps.AgentRunner, deps.AgentAudit)))
+		if deps.AgentAudit != nil {
+			mux.Handle("GET /api/agent/audit", requireAuth(deps.Auth, handleListAgentAudit(deps.AgentAudit)))
+		}
+	}
+	if deps.CRM != nil && deps.Auth != nil {
+		mux.Handle("GET /api/crm/leads", requireAuth(deps.Auth, handleListLeads(deps.CRM)))
+		mux.Handle("POST /api/crm/leads", requireAuth(deps.Auth, handleCreateLead(deps.CRM)))
+		mux.Handle("PUT /api/crm/leads/{id}", requireAuth(deps.Auth, handleUpdateLead(deps.CRM)))
+		mux.Handle("DELETE /api/crm/leads/{id}", requireAuth(deps.Auth, handleDeleteLead(deps.CRM)))
 	}
 
 	return mux
