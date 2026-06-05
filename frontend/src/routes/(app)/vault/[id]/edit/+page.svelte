@@ -13,6 +13,13 @@
   let error = $state("");
 
   const id = $derived(page.params.id ?? "");
+  const remediate = $derived(page.url.searchParams.get("remediate"));
+
+  const remediationNote = $derived(
+    remediate === "breach" || remediate === "weak_and_breach"
+      ? "⚠️ Esta password apareceu em fugas de dados. Escolhe uma password nova e única antes de guardar."
+      : "",
+  );
 
   async function load() {
     busy = true;
@@ -64,6 +71,8 @@
       initial={item.login}
       submitLabel="Guardar alterações"
       busy={saving}
+      focusPassword={!!remediationNote}
+      remediationNote={remediationNote}
       onsubmit={handleSave}
     />
   {/if}

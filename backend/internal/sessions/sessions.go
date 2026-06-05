@@ -3,7 +3,9 @@ package sessions
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -46,6 +48,64 @@ func (r *Repo) UserIDByToken(ctx context.Context, tokenHash []byte) (string, err
 		return "", err
 	}
 	return userID, nil
+}
+
+// SessionInfo metadados de uma sessão HTTP (sem expor o token).
+type SessionInfo struct {
+	ID        string
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
+// ListByUser devolve sessões activas do utilizador (ordenadas da mais recente).
+func (r *Repo) ListByUser(ctx context.Context, userID string) ([]SessionInfo, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT token_hash, created_at, expires_at FROM sessions
+		WHERE user_id = $1 AND expires_at > now()
+		ORDER BY created_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []SessionInfo
+	for rows.Next() {
+		var hash []byte
+		var s SessionInfo
+		if err := rows.Scan(&hash, &s.CreatedAt, &s.ExpiresAt); err != nil {
+			return nil, err
+		}
+		s.ID = hex.EncodeToString(hash)
+		out = append(out, s)
+	}
+	return out, rows.Err()
+}
+
+// DeleteByIDForUser revoga uma sessão pelo id opaco (hex do token_hash).
+func (r *Repo) DeleteByIDForUser(ctx context.Context, userID, idHex string) error {
+	hash, err := hex.DecodeString(idHex)
+	if err != nil {
+		return ErrInvalidSession
+	}
+	tag, err := r.pool.Exec(ctx, `
+		DELETE FROM sessions WHERE user_id = $1 AND token_hash = $2`, userID, hash)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrInvalidSession
+	}
+	return nil
+}
+
+// DeleteAllForUserExcept revoga todas as sessões excepto a indicada (logout remoto).
+func (r *Repo) DeleteAllForUserExcept(ctx context.Context, userID string, keepHash []byte) (int64, error) {
+	tag, err := r.pool.Exec(ctx, `
+		DELETE FROM sessions WHERE user_id = $1 AND token_hash <> $2`, userID, keepHash)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
 }
 
 // Delete remove uma sessão (logout).

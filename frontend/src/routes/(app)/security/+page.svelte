@@ -12,8 +12,14 @@
   <ul class="links">
     <li>
       <a href="/security/hygiene">
-        <strong>Higiene de passwords</strong>
-        <span>Score no cliente + verificação de fugas k-anonymity (UI-007 / DW-001)</span>
+        <strong>Saúde de segurança</strong>
+        <span>Score composto, fugas k-anonymity, alteração forçada (UI-007 / DW-002 / DW-003)</span>
+      </a>
+    </li>
+    <li>
+      <a href="/security/devices">
+        <strong>Dispositivos e sessões</strong>
+        <span>Sessões HTTP, passkeys e certificados CLI</span>
       </a>
     </li>
     <li>
@@ -23,8 +29,6 @@
       </a>
     </li>
   </ul>
-
-  <p class="muted">Dispositivos e sessões — em breve.</p>
 </section>
 
 <style>
@@ -46,12 +50,13 @@
   .links {
     list-style: none;
     padding: 0;
-    margin: 0 0 var(--space-6);
+    margin: 0;
   }
 
   .links a {
     display: block;
     padding: var(--space-4);
+    margin-bottom: var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -69,11 +74,6 @@
   }
 
   .links span {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-  }
-
-  .muted {
     font-size: var(--text-sm);
     color: var(--color-text-muted);
   }
