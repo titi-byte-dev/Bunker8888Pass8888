@@ -17,6 +17,7 @@ import (
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/clidevices"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/emergency"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/geofence"
+	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/hr"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/passkeys"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/realtime"
 	"github.com/titi-byte-dev/Bunker8888Pass8888/backend/internal/recovery"
@@ -50,6 +51,7 @@ type Deps struct {
 	SharedVaults *sharedvaults.Repo // nil desactiva endpoints /api/share/vaults*
 	SecretLinks  *secretlinks.Store // nil desactiva endpoints /api/share/links*
 	BurnNotes    *burnnotes.Store   // nil desactiva endpoints /api/share/notes*
+	HR           *hr.Repo           // nil desactiva endpoints /api/hr/*
 	AdminKey     string             // vazio desactiva endpoints /api/admin/*
 	Pool         *pgxpool.Pool
 }
@@ -175,6 +177,17 @@ func NewRouter(deps Deps) http.Handler {
 		// são PÚBLICOS: a chave de cifra vive no fragmento do URL.
 		mux.HandleFunc("POST /api/share/notes/{id}", handleConsumeBurnNote(deps.BurnNotes))
 		mux.HandleFunc("POST /api/share/notes/{id}/burn", handleBurnNote(deps.BurnNotes))
+	}
+	if deps.HR != nil && deps.Auth != nil {
+		// Fichas de empregado com cifragem campo-a-campo (HR-001). Tudo exige
+		// sessão; cada utilizador só vê e gere as suas próprias fichas.
+		mux.Handle("POST /api/hr/employees", requireAuth(deps.Auth, handleCreateEmployeeRecord(deps.HR)))
+		mux.Handle("GET /api/hr/employees", requireAuth(deps.Auth, handleListEmployeeRecords(deps.HR)))
+		mux.Handle("GET /api/hr/employees/{id}", requireAuth(deps.Auth, handleGetEmployeeRecord(deps.HR)))
+		mux.Handle("DELETE /api/hr/employees/{id}", requireAuth(deps.Auth, handleDeleteEmployeeRecord(deps.HR)))
+		// Campos individuais (upsert/remover por nome de campo).
+		mux.Handle("PUT /api/hr/employees/{id}/fields/{field}", requireAuth(deps.Auth, handlePutEmployeeField(deps.HR)))
+		mux.Handle("DELETE /api/hr/employees/{id}/fields/{field}", requireAuth(deps.Auth, handleDeleteEmployeeField(deps.HR)))
 	}
 
 	return mux
