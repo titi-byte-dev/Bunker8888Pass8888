@@ -1,0 +1,81 @@
+---
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy, getService, pagePath, type ServiceSlug } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ConstructionBanner from "../components/ConstructionBanner.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+interface Props {
+  locale: Locale;
+  slug: ServiceSlug;
+}
+
+const { locale, slug } = Astro.props;
+const t = getCopy(locale);
+const service = getService(locale, slug);
+
+const secondaryHref =
+  slug === "deployment" ? pagePath(locale, "partners") : pagePath(locale, "platform");
+---
+
+<SiteShell locale={locale} meta={service.meta}>
+  <section class="section page-top">
+    <div class="container">
+      {
+        service.pageStatus !== "live" && <ConstructionBanner t={t} />
+      }
+      <div class="product-hero-row">
+        <PageHero
+          eyebrow={service.hero.eyebrow}
+          headline={service.hero.headline}
+          subline={service.hero.subline}
+          compact
+        />
+        <StatusBadge label={t.statusLabels[service.pageStatus]} status={service.pageStatus} />
+      </div>
+      <FeatureGrid title={service.features.title} items={service.features.items} t={t} />
+      <div class="product-page-ctas">
+        <a class="btn btn-primary" href={`mailto:hello@aegispass.com`}>{service.cta.primary}</a>
+        <a class="btn btn-secondary" href={secondaryHref}>{service.cta.secondary}</a>
+      </div>
+    </div>
+  </section>
+  <CtaBand
+    title={t.home.ctaBand.title}
+    body={t.home.ctaBand.body}
+    primaryLabel={t.home.ctaBand.primary}
+    primaryHref={APP_URL}
+  />
+</SiteShell>
+
+<style>
+  .page-top {
+    padding-top: var(--space-8);
+  }
+
+  .product-hero-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  @media (min-width: 768px) {
+    .product-hero-row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+  }
+
+  .product-page-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+</style>
