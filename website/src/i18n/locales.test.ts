@@ -31,4 +31,9 @@ describe("i18n locales", () => {
     expect(Object.keys(pt.products)).toHaveLength(4);
     expect(pt.products.vault.meta.title.length).toBeGreaterThan(10);
   });
+
+  it("três serviços com meta e hero", () => {
+    expect(Object.keys(pt.services)).toHaveLength(3);
+    expect(pt.services.agents.meta.title.length).toBeGreaterThan(10);
+  });
 });

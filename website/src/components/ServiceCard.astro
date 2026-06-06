@@ -1,0 +1,76 @@
+---
+import type { Locale } from "../config";
+import type { ServiceSlug, SiteCopy } from "../i18n/types";
+import { servicePath } from "../i18n/types";
+import StatusBadge from "./StatusBadge.astro";
+
+interface Props {
+  locale: Locale;
+  slug: ServiceSlug;
+  t: SiteCopy;
+  exploreLabel: string;
+}
+
+const { locale, slug, t, exploreLabel } = Astro.props;
+const card = t.servicesIndex.cards[slug];
+---
+
+<a class="product-card card" href={servicePath(locale, slug)}>
+  <div class="product-card-top">
+    <span class="product-card-tag">{card.tagline}</span>
+    <StatusBadge label={t.statusLabels[card.status]} status={card.status} />
+  </div>
+  <p class="product-card-desc">{card.description}</p>
+  <span class="product-card-link">{exploreLabel} →</span>
+</a>
+
+<style>
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .product-card:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    transform: translateY(-2px);
+  }
+
+  .product-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .product-card-tag {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-lg);
+  }
+
+  .product-card-desc {
+    margin: 0;
+    flex: 1;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+  }
+
+  .product-card-link {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .product-card:hover {
+      transform: none;
+    }
+  }
+</style>

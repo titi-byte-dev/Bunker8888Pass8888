@@ -12,6 +12,7 @@ const de: SiteCopy = {
   skip: "Zum Inhalt springen",
   nav: {
     products: "Produkte",
+    services: "Services",
     platform: "Plattform",
     partners: "Partner",
     enter: "Anmelden",
@@ -20,6 +21,11 @@ const de: SiteCopy = {
       security: "Sicherheit",
       team: "Team",
       workspace: "Workspace",
+    },
+    serviceLabels: {
+      agents: "KI-Agenten",
+      compliance: "Compliance",
+      deployment: "Implementierung",
     },
   },
   home: {
@@ -68,6 +74,12 @@ const de: SiteCopy = {
           status: "building",
         },
       },
+    },
+    services: {
+      title: "Professionelle Services",
+      lead: "Implementierung, DSGVO-Compliance und Agenten mit Human-in-the-loop — das Ökosystem ohne Prozess-Neuerfindung adoptieren.",
+      explore: "Entdecken",
+      allLink: "Alle Services ansehen",
     },
     platformTeaser: {
       title: "Zero-Knowledge-Plattform",
@@ -211,6 +223,127 @@ const de: SiteCopy = {
       cta: { primary: "Fortschritt in der App", secondary: "Plattform ansehen" },
     },
   },
+  productsIndex: {
+    meta: {
+      title: "Produkte — AegisPass-Ökosystem",
+      description:
+        "Tresor, Sicherheit, Team und Workspace — vier Zero-Knowledge-Module auf demselben Identitätskern.",
+    },
+    hero: {
+      eyebrow: "Produkte",
+      headline: "Vier Module. Ein Kern.",
+      subline:
+        "Jedes Produkt hat eine eigene Seite — Funktionen, Launch-Status erkunden und Feedback vor Go-live geben.",
+    },
+  },
+  servicesIndex: {
+    meta: {
+      title: "Services — Implementierung und Compliance | AegisPass",
+      description:
+        "KI-Agenten, DSGVO-Audit und BYOD-Rollout — professionelle Services auf der Zero-Knowledge-Plattform.",
+    },
+    hero: {
+      eyebrow: "Services",
+      headline: "Vom Audit zum Betrieb.",
+      subline:
+        "Wir helfen KMU und Partnern beim Ökosystem-Adopt — klare Deliverables, Human-in-the-loop, ohne Secrets preiszugeben.",
+    },
+    explore: "Entdecken",
+    cards: {
+      agents: {
+        tagline: "KI-Agenten",
+        description:
+          "Onboarding-Automatisierung, Ticket-Triage und interne Assistenten — immer mit menschlicher Freigabe und verschlüsselten Daten.",
+        status: "preview",
+      },
+      compliance: {
+        tagline: "Compliance",
+        description:
+          "DSGVO-Gap-Analyse, Verarbeitungsverzeichnis, Crypto-Shredding und Löschzertifikate — abgestimmt auf HR-Modul.",
+        status: "preview",
+      },
+      deployment: {
+        tagline: "Implementierung",
+        description:
+          "BYOD-Rollout, WireGuard, Multi-Tenant und Google-Workspace-Integration — vom Pilot bis Produktion.",
+        status: "building",
+      },
+    },
+  },
+  services: {
+    agents: {
+      meta: {
+        title: "KI-Agenten — Human-in-the-loop | AegisPass",
+        description:
+          "Assistenten und Automatisierung auf verschlüsselten Daten — Freigaben, Audit Trail und Least Privilege standardmäßig.",
+      },
+      pageStatus: "preview",
+      hero: {
+        eyebrow: "Service · KI-Agenten",
+        headline: "Automatisierung ohne Kontrollverlust.",
+        subline:
+          "Agenten lesen Metadaten und Blobs nur clientseitig — sensible Aktionen durchlaufen eine Freigabe-Warteschlange.",
+      },
+      features: {
+        title: "Deliverables",
+        items: [
+          { title: "Assistiertes Onboarding", body: "Checklisten, Aliase und Start-Tresore — Agent schlägt vor, Admin genehmigt.", status: "preview" },
+          { title: "Anfragen-Triage", body: "Interne Tickets klassifizieren ohne Secrets an externe LLMs zu exportieren.", status: "preview" },
+          { title: "Unveränderlicher Audit Trail", body: "Jede Agentenaktion verkettet im Log — auditbereit.", status: "building" },
+          { title: "Richtlinien pro Tenant", body: "Scope-Grenzen, Zeiten und Geofence vor Ausführung.", status: "building" },
+        ],
+      },
+      cta: { primary: "Early Access anfragen", secondary: "Plattform ansehen" },
+    },
+    compliance: {
+      meta: {
+        title: "DSGVO-Compliance — Audit | AegisPass",
+        description:
+          "Gap-Analyse, Verarbeitungsverzeichnis und kryptographische Löschnachweise — DSGVO by design.",
+      },
+      pageStatus: "preview",
+      hero: {
+        eyebrow: "Service · Compliance",
+        headline: "DSGVO, die man beweisen kann.",
+        subline:
+          "Wir kartieren Verarbeitungen, minimieren Daten und dokumentieren Crypto-Shredding — ohne generische Slides.",
+      },
+      features: {
+        title: "Deliverables",
+        items: [
+          { title: "Initiale Gap-Analyse", body: "Fluss-Inventar, Rechtsgrundlagen und Risiken — für KMU priorisiert.", status: "preview" },
+          { title: "Verarbeitungsverzeichnis", body: "Art. 30 abgestimmt auf HR- und Tresor-Module — sensible Felder verschlüsselt.", status: "preview" },
+          { title: "Löschzertifikat", body: "Kryptographischer Erasure-Nachweis nach Crypto-Shredding.", status: "building" },
+          { title: "DPO-light-Schulung", body: "Workshops für kleine Teams — Business-Sprache, kein Juristenjargon.", status: "building" },
+        ],
+      },
+      cta: { primary: "Gespräch vereinbaren", secondary: "Plattform ansehen" },
+    },
+    deployment: {
+      meta: {
+        title: "Implementierung — BYOD und Tenant | AegisPass",
+        description:
+          "Pilot, WireGuard, Multi-Tenant und Integrationen — sicherer Rollout des AegisPass-Ökosystems.",
+      },
+      pageStatus: "building",
+      hero: {
+        eyebrow: "Service · Implementierung",
+        headline: "Vom Pilot zur Produktion.",
+        subline:
+          "Wir konfigurieren Tenant, BYOD-Richtlinien und Netz — mit Runbooks und Übergabe an Ihr Team oder MSP-Partner.",
+      },
+      features: {
+        title: "Typische Phasen",
+        items: [
+          { title: "Sandbox-Pilot", body: "10–30 Nutzer, live Tresor, Adoptionsmetriken.", status: "preview" },
+          { title: "WireGuard-Netz", body: "Zero-Trust-Tunnel zwischen Geräten und API — ohne Legacy-VPN.", status: "building" },
+          { title: "Multi-Tenant + RLS", body: "PostgreSQL-Isolation mit negativen Tests validiert.", status: "building" },
+          { title: "Workspace-Integration", body: "Google, Aliase und mTLS-CLI — Roadmap am Produkt ausgerichtet.", status: "building" },
+        ],
+      },
+      cta: { primary: "Team kontaktieren", secondary: "Partner ansehen" },
+    },
+  },
   partners: {
     meta: {
       title: "Partner — White-label | AegisPass",
@@ -241,7 +374,7 @@ const de: SiteCopy = {
   statusLabels: { live: "Verfügbar", preview: "Vorschau", building: "Im Aufbau" },
   footer: {
     tagline: "Identität und Geheimnisse für BYOD-Teams.",
-    columns: { products: "Produkte", company: "Unternehmen", legal: "Rechtliches" },
+    columns: { products: "Produkte", services: "Services", company: "Unternehmen", legal: "Rechtliches" },
     platform: "Plattform",
     partners: "Partner",
     contact: "Kontakt",

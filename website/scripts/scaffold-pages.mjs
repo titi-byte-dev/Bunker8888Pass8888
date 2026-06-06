@@ -1,5 +1,5 @@
 /**
- * Gera wrappers finos de páginas por locale (evita duplicar 28 ficheiros à mão).
+ * Gera wrappers finos de páginas por locale (evita duplicar dezenas de ficheiros à mão).
  * Didático: cada .astro só passa locale + slug ao template — copy vive nos locales TS.
  */
 import fs from "node:fs";
@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pagesRoot = path.join(root, "src/pages");
-const SLUGS = ["vault", "security", "team", "workspace"];
-
+const PRODUCT_SLUGS = ["vault", "security", "team", "workspace"];
+const SERVICE_SLUGS = ["agents", "compliance", "deployment"];
 const LOCALES = ["pt", "fr", "es", "de"];
 
 function templateImport(pageDir) {
@@ -52,18 +52,49 @@ import ${comp} from "${t}${comp}.astro";
     );
   }
 
-  for (const slug of SLUGS) {
-    const dir = path.join(root, base, "products");
-    const t = templateImport(dir);
+  const productsDir = path.join(root, base, "products");
+  const tProducts = templateImport(productsDir);
+  write(
+    `${base}/products/index.astro`,
+    `---
+import CatalogPage from "${tProducts}CatalogPage.astro";
+---
+<CatalogPage locale="${loc}" kind="products" />
+`,
+  );
+
+  for (const slug of PRODUCT_SLUGS) {
     write(
       `${base}/products/${slug}.astro`,
       `---
-import ProductPage from "${t}ProductPage.astro";
+import ProductPage from "${tProducts}ProductPage.astro";
 ---
 <ProductPage locale="${loc}" slug="${slug}" />
 `,
     );
   }
+
+  const servicesDir = path.join(root, base, "services");
+  const tServices = templateImport(servicesDir);
+  write(
+    `${base}/services/index.astro`,
+    `---
+import CatalogPage from "${tServices}CatalogPage.astro";
+---
+<CatalogPage locale="${loc}" kind="services" />
+`,
+  );
+
+  for (const slug of SERVICE_SLUGS) {
+    write(
+      `${base}/services/${slug}.astro`,
+      `---
+import ServicePage from "${tServices}ServicePage.astro";
+---
+<ServicePage locale="${loc}" slug="${slug}" />
+`,
+    );
+  }
 }
 
-console.log("pages: geradas para pt, fr, es, de");
+console.log("pages: geradas para pt, fr, es, de (produtos + serviços)");

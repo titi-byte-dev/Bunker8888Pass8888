@@ -1,0 +1,72 @@
+---
+import type { Locale } from "../config";
+import { getCopy, PRODUCT_SLUGS, SERVICE_SLUGS } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ProductCard from "../components/ProductCard.astro";
+import ServiceCard from "../components/ServiceCard.astro";
+
+interface Props {
+  locale: Locale;
+  kind: "products" | "services";
+}
+
+const { locale, kind } = Astro.props;
+const t = getCopy(locale);
+const isProducts = kind === "products";
+const meta = isProducts ? t.productsIndex.meta : t.servicesIndex.meta;
+const hero = isProducts ? t.productsIndex.hero : t.servicesIndex.hero;
+const exploreLabel = isProducts ? t.home.products.explore : t.servicesIndex.explore;
+---
+
+<SiteShell locale={locale} meta={meta}>
+  <section class="section page-top">
+    <div class="container">
+      <PageHero
+        eyebrow={hero.eyebrow}
+        headline={hero.headline}
+        subline={hero.subline}
+        compact
+      />
+      <div class:list={["catalog-grid", isProducts ? "catalog-grid-products" : "catalog-grid-services"]}>
+        {
+          isProducts
+            ? PRODUCT_SLUGS.map((slug) => (
+                <ProductCard locale={locale} slug={slug} t={t} exploreLabel={exploreLabel} />
+              ))
+            : SERVICE_SLUGS.map((slug) => (
+                <ServiceCard locale={locale} slug={slug} t={t} exploreLabel={exploreLabel} />
+              ))
+        }
+      </div>
+    </div>
+  </section>
+</SiteShell>
+
+<style>
+  .page-top {
+    padding-top: var(--space-8);
+  }
+
+  .catalog-grid {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-10);
+  }
+
+  @media (min-width: 768px) {
+    .catalog-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .catalog-grid-products {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .catalog-grid-services {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

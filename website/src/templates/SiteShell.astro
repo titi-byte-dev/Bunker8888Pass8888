@@ -26,17 +26,40 @@ const t = getCopy(locale);
   <SiteFooter locale={locale} t={t} appUrl={APP_URL} />
 </BaseLayout>
 
-<script is:inline>
+<script>
+  // Didático: `is:inline` não passa pelo compilador TS — só JavaScript válido aqui.
   document.querySelectorAll("[data-nav-dropdown]").forEach((root) => {
     const btn = root.querySelector("[data-dropdown-trigger]");
     const panel = root.querySelector("[data-dropdown-panel]");
     if (!(btn instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
-    btn.addEventListener("click", () => {
-      const open = root.classList.toggle("is-open");
-      btn.setAttribute("aria-expanded", String(open));
+
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = !root.classList.contains("is-open");
+
+      document.querySelectorAll("[data-nav-dropdown].is-open").forEach((other) => {
+        if (other !== root) {
+          other.classList.remove("is-open");
+          const otherBtn = other.querySelector("[data-dropdown-trigger]");
+          if (otherBtn instanceof HTMLButtonElement) {
+            otherBtn.setAttribute("aria-expanded", "false");
+          }
+        }
+      });
+
+      root.classList.toggle("is-open", willOpen);
+      btn.setAttribute("aria-expanded", String(willOpen));
     });
-    document.addEventListener("click", (e) => {
-      if (!root.contains(e.target as Node)) {
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target instanceof Node && root.contains(target)) return;
+      root.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
         root.classList.remove("is-open");
         btn.setAttribute("aria-expanded", "false");
       }

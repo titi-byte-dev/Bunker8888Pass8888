@@ -12,6 +12,7 @@ const pt: SiteCopy = {
   skip: "Saltar para o conteúdo",
   nav: {
     products: "Produtos",
+    services: "Serviços",
     platform: "Plataforma",
     partners: "Parceiros",
     enter: "Entrar",
@@ -20,6 +21,11 @@ const pt: SiteCopy = {
       security: "Segurança",
       team: "Equipa",
       workspace: "Workspace",
+    },
+    serviceLabels: {
+      agents: "Agentes IA",
+      compliance: "Conformidade",
+      deployment: "Implementação",
     },
   },
   home: {
@@ -68,6 +74,12 @@ const pt: SiteCopy = {
           status: "building",
         },
       },
+    },
+    services: {
+      title: "Serviços profissionais",
+      lead: "Implementação, conformidade RGPD e agentes com human-in-the-loop — para adoptar o ecossistema sem reinventar processos.",
+      explore: "Explorar",
+      allLink: "Ver todos os serviços",
     },
     platformTeaser: {
       title: "Plataforma zero-knowledge",
@@ -285,6 +297,175 @@ const pt: SiteCopy = {
       cta: { primary: "Ver progresso na app", secondary: "Ver plataforma" },
     },
   },
+  productsIndex: {
+    meta: {
+      title: "Produtos — Ecossistema AegisPass",
+      description:
+        "Cofre, Segurança, Equipa e Workspace — quatro módulos zero-knowledge que assentam no mesmo núcleo de identidade.",
+    },
+    hero: {
+      eyebrow: "Produtos",
+      headline: "Quatro módulos. Um núcleo.",
+      subline:
+        "Cada produto tem página própria — explora capacidades, estado de lançamento e dá feedback antes do go-live.",
+    },
+  },
+  servicesIndex: {
+    meta: {
+      title: "Serviços — Implementação e conformidade | AegisPass",
+      description:
+        "Agentes IA, auditoria RGPD e implementação BYOD — serviços profissionais sobre a plataforma zero-knowledge.",
+    },
+    hero: {
+      eyebrow: "Serviços",
+      headline: "Da auditoria à operação.",
+      subline:
+        "Ajudamos PME e parceiros a adoptar o ecossistema — com entregáveis claros, human-in-the-loop e sem expor segredos.",
+    },
+    explore: "Explorar",
+    cards: {
+      agents: {
+        tagline: "Agentes IA",
+        description:
+          "Automação de onboarding, triagem de pedidos e assistentes internos — sempre com aprovação humana e dados cifrados.",
+        status: "preview",
+      },
+      compliance: {
+        tagline: "Conformidade",
+        description:
+          "Gap analysis RGPD, registos de tratamento, crypto-shredding e certificados de eliminação — alinhado ao produto HR.",
+        status: "preview",
+      },
+      deployment: {
+        tagline: "Implementação",
+        description:
+          "Rollout BYOD, WireGuard, tenant multi-empresa e integração com Google Workspace — do piloto à produção.",
+        status: "building",
+      },
+    },
+  },
+  services: {
+    agents: {
+      meta: {
+        title: "Agentes IA — Human-in-the-loop | AegisPass",
+        description:
+          "Assistentes e automações sobre dados cifrados — aprovações, audit trail e menor privilégio por defeito.",
+      },
+      pageStatus: "preview",
+      hero: {
+        eyebrow: "Serviço · Agentes IA",
+        headline: "Automação sem perder controlo.",
+        subline:
+          "Agentes leem metadados e blobs só no cliente — pedidos sensíveis passam por fila de aprovação antes de agir.",
+      },
+      features: {
+        title: "Entregáveis",
+        items: [
+          {
+            title: "Onboarding assistido",
+            body: "Checklists, aliases e cofres iniciais — o agente propõe, o admin aprova.",
+            status: "preview",
+          },
+          {
+            title: "Triagem de pedidos",
+            body: "Classifica tickets internos sem exportar segredos para LLMs externos.",
+            status: "preview",
+          },
+          {
+            title: "Audit trail imutável",
+            body: "Cada acção do agente fica encadeada em log — pronto para auditoria.",
+            status: "building",
+          },
+          {
+            title: "Políticas por tenant",
+            body: "Limites de scope, horários e geofence aplicados antes de executar.",
+            status: "building",
+          },
+        ],
+      },
+      cta: { primary: "Pedir early access", secondary: "Ver plataforma" },
+    },
+    compliance: {
+      meta: {
+        title: "Conformidade RGPD — Auditoria | AegisPass",
+        description:
+          "Gap analysis, registos de tratamento e evidências criptográficas de eliminação — RGPD by design.",
+      },
+      pageStatus: "preview",
+      hero: {
+        eyebrow: "Serviço · Conformidade",
+        headline: "RGPD que se prova.",
+        subline:
+          "Mapeamos tratamentos, minimizamos dados e documentamos crypto-shredding — sem slides genéricos.",
+      },
+      features: {
+        title: "Entregáveis",
+        items: [
+          {
+            title: "Gap analysis inicial",
+            body: "Inventário de fluxos, bases legais e riscos — priorizado para PME.",
+            status: "preview",
+          },
+          {
+            title: "Registo de tratamentos",
+            body: "Art. 30 alinhado aos módulos HR e Cofre — campos sensíveis cifrados.",
+            status: "preview",
+          },
+          {
+            title: "Certificado de eliminação",
+            body: "Prova criptográfica de erasure após crypto-shredding.",
+            status: "building",
+          },
+          {
+            title: "Formação DPO light",
+            body: "Workshops para equipas pequenas — linguagem de negócio, não juridiquês.",
+            status: "building",
+          },
+        ],
+      },
+      cta: { primary: "Agendar conversa", secondary: "Ver plataforma" },
+    },
+    deployment: {
+      meta: {
+        title: "Implementação — BYOD e tenant | AegisPass",
+        description:
+          "Piloto, WireGuard, multi-tenant e integrações — rollout seguro do ecossistema AegisPass.",
+      },
+      pageStatus: "building",
+      hero: {
+        eyebrow: "Serviço · Implementação",
+        headline: "Do piloto à produção.",
+        subline:
+          "Configuramos tenant, políticas BYOD e rede — com runbooks e handover para a tua equipa ou MSP parceiro.",
+      },
+      features: {
+        title: "Fases típicas",
+        items: [
+          {
+            title: "Piloto sandbox",
+            body: "10–30 utilizadores, cofre live, métricas de adopção.",
+            status: "preview",
+          },
+          {
+            title: "Rede WireGuard",
+            body: "Túnel zero-trust entre dispositivos e API — sem VPN legacy.",
+            status: "building",
+          },
+          {
+            title: "Multi-tenant + RLS",
+            body: "Isolamento PostgreSQL validado com testes negativos.",
+            status: "building",
+          },
+          {
+            title: "Integração Workspace",
+            body: "Google, aliases e CLI mTLS — roadmap alinhado ao produto.",
+            status: "building",
+          },
+        ],
+      },
+      cta: { primary: "Contactar equipa", secondary: "Ver parceiros" },
+    },
+  },
   partners: {
     meta: {
       title: "Parceiros — White-label | AegisPass",
@@ -323,7 +504,7 @@ const pt: SiteCopy = {
   },
   footer: {
     tagline: "Identidade e segredos para equipas BYOD.",
-    columns: { products: "Produtos", company: "Empresa", legal: "Legal" },
+    columns: { products: "Produtos", services: "Serviços", company: "Empresa", legal: "Legal" },
     platform: "Plataforma",
     partners: "Parceiros",
     contact: "Contacto",
