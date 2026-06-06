@@ -1,5 +1,5 @@
 import type { Locale } from "../config";
-import type { ProductSlug, SiteCopy } from "./types";
+import type { ProductSlug, ServiceSlug, SiteCopy } from "./types";
 import pt from "./locales/pt";
 import fr from "./locales/fr";
 import es from "./locales/es";
@@ -25,5 +25,9 @@ export function htmlLang(locale: Locale): string {
   return map[locale];
 }
 
-export type { SiteCopy, ProductSlug, PageStatus } from "./types";
-export { PRODUCT_SLUGS, pagePath, productPath } from "./types";
+export function getService(locale: Locale, slug: ServiceSlug) {
+  return getCopy(locale).services[slug];
+}
+
+export type { SiteCopy, ProductSlug, ServiceSlug, PageStatus } from "./types";
+export { PRODUCT_SLUGS, SERVICE_SLUGS, pagePath, productPath, servicePath } from "./types";
