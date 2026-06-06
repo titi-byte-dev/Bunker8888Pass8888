@@ -3,7 +3,9 @@ import type { Locale } from "../config";
 import {
   pagePath,
   PRODUCT_SLUGS,
+  SERVICE_SLUGS,
   productPath,
+  servicePath,
   type SiteCopy,
 } from "../i18n";
 
@@ -30,6 +32,15 @@ const year = new Date().getFullYear();
       {
         PRODUCT_SLUGS.map((slug) => (
           <a href={productPath(locale, slug)}>{t.nav.productLabels[slug]}</a>
+        ))
+      }
+    </div>
+
+    <div class="footer-col">
+      <span class="footer-heading">{t.footer.columns.services}</span>
+      {
+        SERVICE_SLUGS.map((slug) => (
+          <a href={servicePath(locale, slug)}>{t.nav.serviceLabels[slug]}</a>
         ))
       }
     </div>
@@ -65,7 +76,7 @@ const year = new Date().getFullYear();
 
   @media (min-width: 768px) {
     .footer-grid {
-      grid-template-columns: 1.4fr repeat(3, 1fr);
+      grid-template-columns: 1.4fr repeat(4, 1fr);
     }
   }
 

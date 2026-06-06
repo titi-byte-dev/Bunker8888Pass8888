@@ -191,6 +191,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | WEB-003 | Secção parceiros (teaser white-label) | 2 | S | 🟢 | WEB-001 |
 | WEB-004 | Deploy estático (CDN/nginx) + domínio aegispass.com | 1 | M | 🟡 | WEB-001 |
 | WEB-005 | Multi-página (produtos, plataforma, parceiros) + i18n paths + campanha | 2 | L | 🟢 | WEB-001 |
+| WEB-006 | Serviços profissionais (índice + subpáginas) + header/footer + home teaser | 2 | M | 🟢 | WEB-005 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 

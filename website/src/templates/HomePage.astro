@@ -1,10 +1,11 @@
 ---
 import type { Locale } from "../config";
 import { APP_URL } from "../config";
-import { getCopy, pagePath, PRODUCT_SLUGS } from "../i18n";
+import { getCopy, pagePath, PRODUCT_SLUGS, SERVICE_SLUGS } from "../i18n";
 import SiteShell from "./SiteShell.astro";
 import PageHero from "../components/PageHero.astro";
 import ProductCard from "../components/ProductCard.astro";
+import ServiceCard from "../components/ServiceCard.astro";
 import CtaBand from "../components/CtaBand.astro";
 
 interface Props {
@@ -60,6 +61,32 @@ const t = getCopy(locale);
           ))
         }
       </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="container">
+      <header class="section-header">
+        <h2 class="section-title">{t.home.services.title}</h2>
+        <p class="section-lead">{t.home.services.lead}</p>
+      </header>
+      <div class="service-grid">
+        {
+          SERVICE_SLUGS.map((slug) => (
+            <ServiceCard
+              locale={locale}
+              slug={slug}
+              t={t}
+              exploreLabel={t.home.services.explore}
+            />
+          ))
+        }
+      </div>
+      <p class="services-all">
+        <a class="btn btn-secondary" href={pagePath(locale, "services")}>
+          {t.home.services.allLink} →
+        </a>
+      </p>
     </div>
   </section>
 
@@ -140,6 +167,22 @@ const t = getCopy(locale);
     .product-grid {
       grid-template-columns: repeat(4, 1fr);
     }
+  }
+
+  .service-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 768px) {
+    .service-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .services-all {
+    margin: var(--space-8) 0 0;
+    text-align: center;
   }
 
   .platform-teaser-inner {

@@ -1,6 +1,13 @@
 ---
 import type { Locale } from "../config";
-import { pagePath, PRODUCT_SLUGS, productPath, type SiteCopy } from "../i18n";
+import {
+  pagePath,
+  PRODUCT_SLUGS,
+  SERVICE_SLUGS,
+  productPath,
+  servicePath,
+  type SiteCopy,
+} from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -42,6 +49,28 @@ const home = pagePath(locale);
           }
         </div>
       </div>
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button
+          type="button"
+          class="nav-dropdown-trigger"
+          data-dropdown-trigger
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          {t.nav.services}
+          <span class="chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="nav-dropdown-panel" data-dropdown-panel role="menu">
+          {
+            SERVICE_SLUGS.map((slug) => (
+              <a href={servicePath(locale, slug)} role="menuitem">
+                <span class="item-label">{t.nav.serviceLabels[slug]}</span>
+                <span class={`item-dot item-dot-${t.servicesIndex.cards[slug].status}`} />
+              </a>
+            ))
+          }
+        </div>
+      </div>
       <a href={pagePath(locale, "platform")}>{t.nav.platform}</a>
       <a href={pagePath(locale, "partners")}>{t.nav.partners}</a>
     </nav>
@@ -61,6 +90,7 @@ const home = pagePath(locale);
     border-bottom: 1px solid var(--color-border);
     background: color-mix(in srgb, var(--color-bg-base) 85%, transparent);
     backdrop-filter: blur(16px);
+    overflow: visible;
   }
 
   .header-inner {
@@ -69,6 +99,7 @@ const home = pagePath(locale);
     gap: var(--space-4);
     min-height: 3.75rem;
     padding-block: var(--space-2);
+    overflow: visible;
   }
 
   .brand {
@@ -80,7 +111,7 @@ const home = pagePath(locale);
     font-family: var(--font-display);
     font-weight: 600;
     font-size: var(--text-lg);
-    margin-right: auto;
+    flex-shrink: 0;
   }
 
   .brand-mark {
@@ -91,6 +122,7 @@ const home = pagePath(locale);
     display: none;
     align-items: center;
     gap: var(--space-1);
+    overflow: visible;
   }
 
   .header-nav > a {
@@ -146,6 +178,7 @@ const home = pagePath(locale);
     border-radius: var(--radius-md);
     background: var(--color-bg-elevated);
     box-shadow: 0 16px 40px color-mix(in srgb, var(--color-bg-base) 50%, transparent);
+    z-index: 60;
   }
 
   .nav-dropdown.is-open .nav-dropdown-panel {
@@ -192,6 +225,8 @@ const home = pagePath(locale);
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
   .header-cta {
@@ -202,10 +237,8 @@ const home = pagePath(locale);
   @media (min-width: 960px) {
     .header-nav {
       display: flex;
-    }
-
-    .brand {
-      margin-right: 0;
+      flex: 1;
+      justify-content: center;
     }
   }
 </style>
