@@ -1,0 +1,57 @@
+# Exemplo nginx — aegispass.com (site estático Astro)
+# Copiar para /etc/nginx/sites-available/ e symlink em sites-enabled.
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name aegispass.com;
+
+    # ssl_certificate /etc/letsencrypt/live/aegispass.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/aegispass.com/privkey.pem;
+
+    root /var/www/aegispass/dist;
+    index index.html;
+
+    # Segurança básica
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # i18n: ficheiros estáticos por locale
+    location / {
+        try_files $uri $uri/ $uri/index.html =404;
+    }
+
+    location = /fr {
+        return 301 /fr/;
+    }
+    location = /es {
+        return 301 /es/;
+    }
+    location = /de {
+        return 301 /de/;
+    }
+
+    # Cache agressivo para assets com hash (Astro futuro); SVG/favicon curto
+    location ~* \.(svg|ico|woff2?)$ {
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    gzip on;
+    gzip_types text/css application/javascript text/html image/svg+xml;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name aegispass.com www.aegispass.com;
+    return 301 https://aegispass.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.aegispass.com;
+    return 301 https://aegispass.com$request_uri;
+}

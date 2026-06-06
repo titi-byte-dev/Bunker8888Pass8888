@@ -189,7 +189,7 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | WEB-001 | Scaffold Astro + i18n PT/FR/ES/DE + hero, ZK, ecossistema, pilares, rodapé | 1 | L | 🟢 | UI-001 |
 | WEB-002 | Pré-visualização produto + OG cards | 2 | M | 🟢 | WEB-001 |
 | WEB-003 | Secção parceiros (teaser white-label) | 2 | S | 🟢 | WEB-001 |
-| WEB-004 | Deploy estático (CDN/nginx) + domínio aegispass.com | 1 | M | ⚪ | WEB-001 |
+| WEB-004 | Deploy estático (CDN/nginx) + domínio aegispass.com | 1 | M | 🟡 | WEB-001 |
 
 ## GOOGLE — Layer de Proxy (transversal)
 

@@ -38,6 +38,9 @@ npm run preview
 
 Output em `website/dist/` — servir via CDN ou nginx estático.
 
+Deploy em produção: [`docs/roadmap/10-production/website-deploy.md`](../docs/roadmap/10-production/website-deploy.md)
+e [`deploy/nginx-aegispass.conf.example`](deploy/nginx-aegispass.conf.example).
+
 ## PRD
 
 Ver [`docs/roadmap/09-design/site-institucional-spec.md`](../docs/roadmap/09-design/site-institucional-spec.md).
