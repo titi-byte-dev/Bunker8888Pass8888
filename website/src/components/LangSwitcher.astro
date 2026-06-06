@@ -1,6 +1,6 @@
 ---
 import type { Locale } from "../config";
-import { LOCALES, localePath } from "../config";
+import { LOCALES } from "../config";
 import type { SiteCopy } from "../i18n";
 
 interface Props {
@@ -24,14 +24,28 @@ const { locale, t } = Astro.props;
   </select>
 </div>
 
-<script define:vars={{ paths: Object.fromEntries(LOCALES.map((l) => [l, localePath(l)])) }}>
+<script>
   const select = document.getElementById("lang-select");
   if (select instanceof HTMLSelectElement) {
+    const path = window.location.pathname.replace(/\/$/, "") || "/";
+
+    /** Remove prefixo /fr|/es|/de do path actual. */
+    function stripLocalePrefix(p: string): string {
+      const m = p.match(/^\/(fr|es|de)(\/.*|$)/);
+      if (m) return m[2] || "/";
+      return p;
+    }
+
+    function pathForLocale(loc: string): string {
+      const suffix = stripLocalePrefix(path);
+      if (loc === "pt") return suffix === "/" ? "/" : suffix;
+      if (suffix === "/") return `/${loc}/`;
+      return `/${loc}${suffix}`;
+    }
+
     select.addEventListener("change", () => {
       const next = select.value;
-      if (next && paths[next]) {
-        window.location.href = paths[next];
-      }
+      if (next) window.location.href = pathForLocale(next);
     });
   }
 </script>

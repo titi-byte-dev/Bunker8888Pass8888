@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LOCALES } from "../config";
 import { getCopy } from "../i18n";
-import pt from "../i18n/locales/pt";
+import pt from "./locales/pt";
 
-/** Garante paridade de chaves entre locales (i18n não fica a meio). */
 function leafKeys(obj: unknown, prefix = ""): string[] {
   if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
     return prefix ? [prefix] : [];
@@ -21,11 +20,15 @@ describe("i18n locales", () => {
   const ptKeys = new Set(leafKeys(pt));
 
   it.each(LOCALES)("locale %s tem as mesmas chaves que pt", (locale) => {
-    const keys = new Set(leafKeys(getCopy(locale)));
-    expect(keys).toEqual(ptKeys);
+    expect(new Set(leafKeys(getCopy(locale)))).toEqual(ptKeys);
   });
 
   it("frase-âncora PT contém Cofre", () => {
-    expect(pt.hero.headline).toContain("Cofre");
+    expect(pt.home.campaign.highlight).toContain("Cofre");
+  });
+
+  it("quatro produtos com meta e hero", () => {
+    expect(Object.keys(pt.products)).toHaveLength(4);
+    expect(pt.products.vault.meta.title.length).toBeGreaterThan(10);
   });
 });

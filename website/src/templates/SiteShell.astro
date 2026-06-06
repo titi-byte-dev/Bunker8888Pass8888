@@ -1,0 +1,45 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy } from "../i18n";
+import SiteHeader from "../components/SiteHeader.astro";
+import LangSwitcher from "../components/LangSwitcher.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+interface Props {
+  locale: Locale;
+  meta?: { title: string; description: string };
+}
+
+const { locale, meta } = Astro.props;
+const t = getCopy(locale);
+---
+
+<BaseLayout locale={locale} meta={meta}>
+  <SiteHeader locale={locale} t={t} appUrl={APP_URL}>
+    <LangSwitcher slot="lang" locale={locale} t={t} />
+  </SiteHeader>
+  <main id="main" class="site-main">
+    <slot />
+  </main>
+  <SiteFooter locale={locale} t={t} appUrl={APP_URL} />
+</BaseLayout>
+
+<script is:inline>
+  document.querySelectorAll("[data-nav-dropdown]").forEach((root) => {
+    const btn = root.querySelector("[data-dropdown-trigger]");
+    const panel = root.querySelector("[data-dropdown-panel]");
+    if (!(btn instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
+    btn.addEventListener("click", () => {
+      const open = root.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("click", (e) => {
+      if (!root.contains(e.target as Node)) {
+        root.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    });
+  });
+</script>

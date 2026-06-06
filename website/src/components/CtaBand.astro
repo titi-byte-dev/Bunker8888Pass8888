@@ -1,0 +1,57 @@
+---
+interface Props {
+  title: string;
+  body: string;
+  primaryLabel: string;
+  primaryHref: string;
+}
+
+const { title, body, primaryLabel, primaryHref } = Astro.props;
+---
+
+<section class="cta-band section">
+  <div class="container cta-band-inner card">
+    <div>
+      <h2 class="cta-band-title">{title}</h2>
+      <p class="cta-band-body">{body}</p>
+    </div>
+    <a class="btn btn-primary" href={primaryHref}>{primaryLabel}</a>
+  </div>
+</section>
+
+<style>
+  .cta-band-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    align-items: flex-start;
+    border-color: color-mix(in srgb, var(--color-accent) 25%, var(--color-border));
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)),
+      var(--color-bg-elevated)
+    );
+  }
+
+  @media (min-width: 768px) {
+    .cta-band-inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .cta-band-title {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+  }
+
+  .cta-band-body {
+    margin: 0;
+    max-width: 32rem;
+    color: var(--color-text-muted);
+    line-height: var(--leading-body);
+  }
+</style>

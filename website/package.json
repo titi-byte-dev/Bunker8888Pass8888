@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "scaffold:pages": "node scripts/scaffold-pages.mjs",
+    "predev": "npm run scaffold:pages",
+    "prebuild": "npm run scaffold:pages",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

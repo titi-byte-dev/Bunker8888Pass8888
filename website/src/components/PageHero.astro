@@ -1,0 +1,57 @@
+---
+interface Props {
+  eyebrow?: string;
+  headline: string;
+  highlight?: string;
+  subline: string;
+  compact?: boolean;
+}
+
+const { eyebrow, headline, highlight, subline, compact = false } = Astro.props;
+---
+
+<header class:list={["page-hero", compact && "page-hero-compact"]}>
+  {eyebrow && <p class="section-eyebrow">{eyebrow}</p>}
+  <h1 class="page-hero-title">
+    {headline}
+    {highlight && <span class="page-hero-highlight">{highlight}</span>}
+  </h1>
+  <p class="page-hero-subline">{subline}</p>
+</header>
+
+<style>
+  .page-hero {
+    max-width: var(--prose-max);
+    margin-bottom: var(--space-10);
+  }
+
+  .page-hero-compact {
+    margin-bottom: var(--space-8);
+  }
+
+  .page-hero-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .page-hero-highlight {
+    display: block;
+    margin-top: var(--space-2);
+    background: linear-gradient(120deg, var(--color-accent), var(--color-link));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .page-hero-subline {
+    margin: var(--space-5) 0 0;
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+    max-width: 38rem;
+  }
+</style>

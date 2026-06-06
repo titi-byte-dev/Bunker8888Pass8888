@@ -1,0 +1,105 @@
+---
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  layers: SiteCopy["platform"]["layers"];
+}
+
+const { layers } = Astro.props;
+---
+
+<section class="layers-block">
+  <header class="section-header">
+    <h2 class="section-title">{layers.title}</h2>
+    <p class="section-lead">{layers.lead}</p>
+  </header>
+  <div class="stack-visual card">
+    <div class="stack-layer">
+      <div class="stack-head">
+        <span class="stack-tag">{layers.workspaceLabel}</span>
+        <span class="stack-hint">{layers.workspaceHint}</span>
+      </div>
+      <ul class="stack-items">
+        {layers.workspaceItems.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+    <div class="stack-connector" aria-hidden="true">↓</div>
+    <div class="stack-layer stack-core">
+      <div class="stack-head">
+        <span class="stack-tag stack-tag-core">{layers.coreLabel}</span>
+        <span class="stack-hint">{layers.coreHint}</span>
+      </div>
+      <ul class="stack-items">
+        {layers.coreItems.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+  </div>
+  <p class="muted-note">{layers.footnote}</p>
+</section>
+
+<style>
+  .stack-visual {
+    padding: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .stack-layer {
+    padding: var(--space-6);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-inset);
+  }
+
+  .stack-core {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-surface));
+  }
+
+  .stack-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .stack-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-text-label);
+  }
+
+  .stack-tag-core {
+    color: var(--color-accent);
+  }
+
+  .stack-hint {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .stack-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stack-items li {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    font-size: var(--text-sm);
+  }
+
+  .stack-connector {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+</style>

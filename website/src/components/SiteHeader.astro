@@ -1,7 +1,6 @@
 ---
 import type { Locale } from "../config";
-import { localePath } from "../config";
-import type { SiteCopy } from "../i18n";
+import { pagePath, PRODUCT_SLUGS, productPath, type SiteCopy } from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -10,20 +9,41 @@ interface Props {
 }
 
 const { locale, t, appUrl } = Astro.props;
+const home = pagePath(locale);
 ---
 
 <header class="site-header">
   <div class="container header-inner">
-    <a class="brand" href={localePath(locale)} aria-label="AegisPass">
+    <a class="brand" href={home} aria-label={t.site.name}>
       <span class="brand-mark" aria-hidden="true">◆</span>
-      <span class="brand-name">AegisPass</span>
+      <span class="brand-name">{t.site.name}</span>
     </a>
 
     <nav class="header-nav" aria-label="Principal">
-      <a href={`#${t.zk.id}`}>{t.nav.zeroKnowledge}</a>
-      <a href={`#${t.ecosystem.id}`}>{t.nav.ecosystem}</a>
-      <a href={`#${t.product.id}`}>{t.nav.product}</a>
-      <a href={`#${t.partners.id}`}>{t.nav.partners}</a>
+      <div class="nav-dropdown" data-nav-dropdown>
+        <button
+          type="button"
+          class="nav-dropdown-trigger"
+          data-dropdown-trigger
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          {t.nav.products}
+          <span class="chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="nav-dropdown-panel" data-dropdown-panel role="menu">
+          {
+            PRODUCT_SLUGS.map((slug) => (
+              <a href={productPath(locale, slug)} role="menuitem">
+                <span class="item-label">{t.nav.productLabels[slug]}</span>
+                <span class={`item-dot item-dot-${t.home.products.cards[slug].status}`} />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+      <a href={pagePath(locale, "platform")}>{t.nav.platform}</a>
+      <a href={pagePath(locale, "partners")}>{t.nav.partners}</a>
     </nav>
 
     <div class="header-actions">
@@ -39,15 +59,15 @@ const { locale, t, appUrl } = Astro.props;
     top: 0;
     z-index: 50;
     border-bottom: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-bg-base) 88%, transparent);
-    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--color-bg-base) 85%, transparent);
+    backdrop-filter: blur(16px);
   }
 
   .header-inner {
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    min-height: 3.5rem;
+    min-height: 3.75rem;
     padding-block: var(--space-2);
   }
 
@@ -65,22 +85,107 @@ const { locale, t, appUrl } = Astro.props;
 
   .brand-mark {
     color: var(--color-accent);
-    font-size: var(--text-sm);
   }
 
   .header-nav {
     display: none;
-    gap: var(--space-4);
+    align-items: center;
+    gap: var(--space-1);
   }
 
-  .header-nav a {
+  .header-nav > a {
+    padding: var(--space-2) var(--space-3);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     text-decoration: none;
+    border-radius: var(--radius-sm);
   }
 
-  .header-nav a:hover {
+  .header-nav > a:hover {
     color: var(--color-text);
+    background: var(--color-bg-surface);
+  }
+
+  .nav-dropdown {
+    position: relative;
+  }
+
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .nav-dropdown-trigger:hover,
+  .nav-dropdown.is-open .nav-dropdown-trigger {
+    color: var(--color-text);
+    background: var(--color-bg-surface);
+  }
+
+  .chevron {
+    font-size: 0.65rem;
+    opacity: 0.7;
+  }
+
+  .nav-dropdown-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 14rem;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elevated);
+    box-shadow: 0 16px 40px color-mix(in srgb, var(--color-bg-base) 50%, transparent);
+  }
+
+  .nav-dropdown.is-open .nav-dropdown-panel {
+    display: grid;
+    gap: 2px;
+  }
+
+  .nav-dropdown-panel a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--text-sm);
+  }
+
+  .nav-dropdown-panel a:hover {
+    background: var(--color-accent-muted);
+  }
+
+  .item-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .item-dot-live {
+    background: var(--color-success-fg);
+  }
+
+  .item-dot-preview {
+    background: var(--color-accent);
+  }
+
+  .item-dot-building {
+    background: var(--color-text-muted);
   }
 
   .header-actions {
@@ -91,9 +196,10 @@ const { locale, t, appUrl } = Astro.props;
 
   .header-cta {
     padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 960px) {
     .header-nav {
       display: flex;
     }

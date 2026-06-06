@@ -1,5 +1,5 @@
 import type { Locale } from "../config";
-import type { SiteCopy } from "./types";
+import type { ProductSlug, SiteCopy } from "./types";
 import pt from "./locales/pt";
 import fr from "./locales/fr";
 import es from "./locales/es";
@@ -9,6 +9,10 @@ const bundles: Record<Locale, SiteCopy> = { pt, fr, es, de };
 
 export function getCopy(locale: Locale): SiteCopy {
   return bundles[locale] ?? bundles.pt;
+}
+
+export function getProduct(locale: Locale, slug: ProductSlug) {
+  return getCopy(locale).products[slug];
 }
 
 export function htmlLang(locale: Locale): string {
@@ -21,4 +25,5 @@ export function htmlLang(locale: Locale): string {
   return map[locale];
 }
 
-export type { SiteCopy };
+export type { SiteCopy, ProductSlug, PageStatus } from "./types";
+export { PRODUCT_SLUGS, pagePath, productPath } from "./types";

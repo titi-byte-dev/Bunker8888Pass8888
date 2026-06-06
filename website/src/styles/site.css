@@ -21,6 +21,13 @@ html {
   }
 }
 
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent),
+    var(--color-bg-base);
+}
+
 .skip-link {
   position: absolute;
   left: var(--space-4);

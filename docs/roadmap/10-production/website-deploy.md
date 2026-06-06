@@ -11,7 +11,7 @@ npm ci
 PUBLIC_APP_URL=https://app.aegispass.com npm run build
 ```
 
-Output: `website/dist/` (4 páginas: `/`, `/fr/`, `/es/`, `/de/`).
+Output: `website/dist/` (**28 páginas**: home, platform, 4 produtos, partners × 4 locales).
 
 ## nginx (VPS)
 

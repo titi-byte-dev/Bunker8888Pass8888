@@ -1,0 +1,49 @@
+---
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ConstructionBanner from "../components/ConstructionBanner.astro";
+import ZkSection from "../components/ZkSection.astro";
+import LayerStack from "../components/LayerStack.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getCopy(locale);
+const p = t.platform;
+---
+
+<SiteShell locale={locale} meta={p.meta}>
+  <section class="section page-top">
+    <div class="container">
+      {
+        p.pageStatus !== "live" && <ConstructionBanner t={t} />
+      }
+      <PageHero
+        eyebrow={p.hero.eyebrow}
+        headline={p.hero.headline}
+        subline={p.hero.subline}
+        compact
+      />
+      <ZkSection zk={p.zk} />
+      <LayerStack layers={p.layers} />
+    </div>
+  </section>
+  <CtaBand
+    title={t.home.ctaBand.title}
+    body={t.home.ctaBand.body}
+    primaryLabel={t.home.ctaBand.primary}
+    primaryHref={APP_URL}
+  />
+</SiteShell>
+
+<style>
+  .page-top {
+    padding-top: var(--space-8);
+  }
+</style>

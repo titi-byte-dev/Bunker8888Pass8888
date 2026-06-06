@@ -1,0 +1,78 @@
+---
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy, getProduct, pagePath, type ProductSlug } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ConstructionBanner from "../components/ConstructionBanner.astro";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+interface Props {
+  locale: Locale;
+  slug: ProductSlug;
+}
+
+const { locale, slug } = Astro.props;
+const t = getCopy(locale);
+const product = getProduct(locale, slug);
+---
+
+<SiteShell locale={locale} meta={product.meta}>
+  <section class="section page-top">
+    <div class="container">
+      {
+        product.pageStatus !== "live" && <ConstructionBanner t={t} />
+      }
+      <div class="product-hero-row">
+        <PageHero
+          eyebrow={product.hero.eyebrow}
+          headline={product.hero.headline}
+          subline={product.hero.subline}
+          compact
+        />
+        <StatusBadge label={t.statusLabels[product.pageStatus]} status={product.pageStatus} />
+      </div>
+      <FeatureGrid title={product.features.title} items={product.features.items} t={t} />
+      <div class="product-page-ctas">
+        <a class="btn btn-primary" href={APP_URL}>{product.cta.primary}</a>
+        <a class="btn btn-secondary" href={pagePath(locale, "platform")}>{product.cta.secondary}</a>
+      </div>
+    </div>
+  </section>
+  <CtaBand
+    title={t.home.ctaBand.title}
+    body={t.home.ctaBand.body}
+    primaryLabel={t.home.ctaBand.primary}
+    primaryHref={APP_URL}
+  />
+</SiteShell>
+
+<style>
+  .page-top {
+    padding-top: var(--space-8);
+  }
+
+  .product-hero-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  @media (min-width: 768px) {
+    .product-hero-row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+  }
+
+  .product-page-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+</style>

@@ -1,0 +1,138 @@
+---
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  zk: SiteCopy["platform"]["zk"];
+}
+
+const { zk } = Astro.props;
+---
+
+<div class="zk-block">
+  <header class="section-header">
+    <h2 class="section-title">{zk.title}</h2>
+    <p class="section-lead">{zk.lead}</p>
+  </header>
+  <div class="zk-layout">
+    <div class="zk-diagram card" role="img" aria-label={zk.title}>
+      <div class="zk-node zk-node-client">
+        <span class="zk-node-label">{zk.diagram.client}</span>
+        <span class="zk-node-action">{zk.diagram.clientAction}</span>
+      </div>
+      <div class="zk-flow">
+        <span aria-hidden="true">→</span>
+        <span class="zk-payload">{zk.diagram.payload}</span>
+        <span class="zk-blocked" aria-hidden="true">✕</span>
+      </div>
+      <div class="zk-node">
+        <span class="zk-node-label">{zk.diagram.server}</span>
+        <span class="zk-node-action">{zk.diagram.serverAction}</span>
+      </div>
+      <p class="zk-note">{zk.note}</p>
+    </div>
+    <ol class="zk-steps">
+      {
+        zk.steps.map((step) => (
+          <li class="card">
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</div>
+
+<style>
+  .zk-layout {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 960px) {
+    .zk-layout {
+      grid-template-columns: 1fr 1.1fr;
+    }
+  }
+
+  .zk-diagram {
+    text-align: center;
+    padding: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+    justify-items: center;
+  }
+
+  .zk-node {
+    width: 100%;
+    max-width: 14rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border-strong);
+    background: var(--color-bg-surface);
+  }
+
+  .zk-node-client {
+    border-color: var(--color-accent);
+  }
+
+  .zk-node-label {
+    display: block;
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+
+  .zk-node-action {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .zk-flow {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .zk-payload {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-inset);
+    font-family: var(--font-mono);
+  }
+
+  .zk-blocked {
+    color: var(--color-danger);
+    font-weight: 700;
+  }
+
+  .zk-note {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .zk-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .zk-steps h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-base);
+  }
+
+  .zk-steps p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    line-height: var(--leading-body);
+  }
+</style>

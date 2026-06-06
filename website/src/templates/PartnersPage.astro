@@ -1,0 +1,79 @@
+---
+import type { Locale } from "../config";
+import { getCopy } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ConstructionBanner from "../components/ConstructionBanner.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getCopy(locale);
+const p = t.partners;
+---
+
+<SiteShell locale={locale} meta={p.meta}>
+  <section class="section page-top">
+    <div class="container">
+      {p.pageStatus !== "live" && <ConstructionBanner t={t} />}
+      <PageHero eyebrow={p.hero.eyebrow} headline={p.hero.headline} subline={p.hero.subline} />
+      <div class="benefits card">
+        <h2 class="benefits-title">{p.benefits.title}</h2>
+        <ul>
+          {p.benefits.items.map((item) => <li>{item}</li>)}
+        </ul>
+        <p class="contact">
+          <span>{p.contact.label}:</span>
+          <a href={`mailto:${p.contact.email}`}>{p.contact.email}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+  <CtaBand
+    title={t.home.ctaBand.title}
+    body={t.home.ctaBand.body}
+    primaryLabel={t.home.ctaBand.primary}
+    primaryHref={import.meta.env.PUBLIC_APP_URL ?? "https://app.aegispass.com"}
+  />
+</SiteShell>
+
+<style>
+  .page-top {
+    padding-top: var(--space-8);
+  }
+
+  .benefits-title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .benefits ul {
+    margin: 0 0 var(--space-6);
+    padding-left: 1.2rem;
+    color: var(--color-text-muted);
+    line-height: var(--leading-body);
+  }
+
+  .benefits li {
+    margin-bottom: var(--space-2);
+  }
+
+  .contact {
+    margin: 0;
+    font-size: var(--text-sm);
+  }
+
+  .contact a {
+    color: var(--color-link);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .contact a:hover {
+    text-decoration: underline;
+  }
+</style>

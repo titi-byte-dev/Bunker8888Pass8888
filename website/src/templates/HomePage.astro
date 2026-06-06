@@ -1,0 +1,158 @@
+---
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy, pagePath, PRODUCT_SLUGS } from "../i18n";
+import SiteShell from "./SiteShell.astro";
+import PageHero from "../components/PageHero.astro";
+import ProductCard from "../components/ProductCard.astro";
+import CtaBand from "../components/CtaBand.astro";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getCopy(locale);
+---
+
+<SiteShell locale={locale} meta={t.home.meta}>
+  <section class="campaign-hero section">
+    <div class="gradient-orb campaign-orb" aria-hidden="true"></div>
+    <div class="container campaign-inner">
+      <PageHero
+        eyebrow={t.home.campaign.eyebrow}
+        headline={t.home.campaign.headline}
+        highlight={t.home.campaign.highlight}
+        subline={t.home.campaign.subline}
+      />
+      <div class="campaign-ctas">
+        <a class="btn btn-primary" href={APP_URL}>{t.home.campaign.ctaPrimary}</a>
+        <a class="btn btn-secondary" href="#products">{t.home.campaign.ctaSecondary}</a>
+      </div>
+      <dl class="proof-strip">
+        {
+          t.home.proof.map((p) => (
+            <div>
+              <dt>{p.value}</dt>
+              <dd>{p.label}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" id="products">
+    <div class="container">
+      <header class="section-header">
+        <h2 class="section-title">{t.home.products.title}</h2>
+        <p class="section-lead">{t.home.products.lead}</p>
+      </header>
+      <div class="product-grid">
+        {
+          PRODUCT_SLUGS.map((slug) => (
+            <ProductCard
+              locale={locale}
+              slug={slug}
+              t={t}
+              exploreLabel={t.home.products.explore}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section platform-teaser">
+    <div class="container platform-teaser-inner card">
+      <div>
+        <h2 class="section-title">{t.home.platformTeaser.title}</h2>
+        <p class="section-lead">{t.home.platformTeaser.body}</p>
+      </div>
+      <a class="btn btn-secondary" href={pagePath(locale, "platform")}>
+        {t.home.platformTeaser.link} →
+      </a>
+    </div>
+  </section>
+
+  <CtaBand
+    title={t.home.ctaBand.title}
+    body={t.home.ctaBand.body}
+    primaryLabel={t.home.ctaBand.primary}
+    primaryHref={APP_URL}
+  />
+</SiteShell>
+
+<style>
+  .campaign-hero {
+    position: relative;
+    overflow: hidden;
+    padding-top: clamp(var(--space-8), 8vw, var(--space-16));
+  }
+
+  .campaign-orb {
+    top: -30%;
+    right: -15%;
+  }
+
+  .campaign-inner {
+    position: relative;
+  }
+
+  .campaign-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-10);
+  }
+
+  .proof-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    margin: 0;
+  }
+
+  .proof-strip dt {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+  }
+
+  .proof-strip dd {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .product-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 768px) {
+    .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .product-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .platform-teaser-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .platform-teaser-inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+</style>
