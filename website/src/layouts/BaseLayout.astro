@@ -1,0 +1,53 @@
+---
+import "../styles/site.css";
+import type { Locale } from "../config";
+import { APP_URL, LOCALES, localePath, SITE_ORIGIN } from "../config";
+import { getCopy, htmlLang } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getCopy(locale);
+const lang = htmlLang(locale);
+
+const alternateLinks = LOCALES.map((loc) => ({
+  locale: loc,
+  href: new URL(localePath(loc), SITE_ORIGIN).href,
+}));
+---
+
+<!doctype html>
+<html lang={lang} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta property="og:title" content={t.meta.ogTitle} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content={new URL("/og.svg", Astro.site ?? Astro.url).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL("/og.svg", Astro.site ?? Astro.url).href} />
+    {alternateLinks.map(({ locale: loc, href }) => (
+      <link rel="alternate" hreflang={htmlLang(loc)} href={href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL("/", SITE_ORIGIN).href} />
+    <link rel="canonical" href={Astro.url.href} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="site-shell">
+    <a class="skip-link" href="#main">{t.skip}</a>
+    <slot />
+  </body>
+</html>

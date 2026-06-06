@@ -1,0 +1,51 @@
+---
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  t: SiteCopy;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section partners-section" id={t.partners.id} aria-labelledby="partners-title">
+  <div class="container">
+    <div class="partners-card card">
+      <p class="section-eyebrow">{t.partners.eyebrow}</p>
+      <h2 id="partners-title" class="section-title">{t.partners.title}</h2>
+      <p class="partners-body">{t.partners.body}</p>
+      <p class="partners-hint">
+        <a href="mailto:partners@aegispass.com">{t.partners.hint}</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .partners-card {
+    max-width: var(--prose-max);
+    border-color: color-mix(in srgb, var(--color-accent) 20%, var(--color-border));
+  }
+
+  .partners-body {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+  }
+
+  .partners-hint {
+    margin: 0;
+    font-size: var(--text-sm);
+  }
+
+  .partners-hint a {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .partners-hint a:hover {
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,105 @@
+---
+import type { Locale } from "../config";
+import { localePath } from "../config";
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  t: SiteCopy;
+  appUrl: string;
+}
+
+const { locale, t, appUrl } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href={localePath(locale)} aria-label="AegisPass">
+      <span class="brand-mark" aria-hidden="true">◆</span>
+      <span class="brand-name">AegisPass</span>
+    </a>
+
+    <nav class="header-nav" aria-label="Principal">
+      <a href={`#${t.zk.id}`}>{t.nav.zeroKnowledge}</a>
+      <a href={`#${t.ecosystem.id}`}>{t.nav.ecosystem}</a>
+      <a href={`#${t.product.id}`}>{t.nav.product}</a>
+      <a href={`#${t.partners.id}`}>{t.nav.partners}</a>
+    </nav>
+
+    <div class="header-actions">
+      <slot name="lang" />
+      <a class="btn btn-primary header-cta" href={appUrl}>{t.nav.enter}</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-base) 88%, transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 3.5rem;
+    padding-block: var(--space-2);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-lg);
+    margin-right: auto;
+  }
+
+  .brand-mark {
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+  }
+
+  .header-nav {
+    display: none;
+    gap: var(--space-4);
+  }
+
+  .header-nav a {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .header-nav a:hover {
+    color: var(--color-text);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .header-cta {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  @media (min-width: 900px) {
+    .header-nav {
+      display: flex;
+    }
+
+    .brand {
+      margin-right: 0;
+    }
+  }
+</style>

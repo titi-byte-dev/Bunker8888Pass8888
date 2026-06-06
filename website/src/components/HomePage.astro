@@ -1,0 +1,36 @@
+---
+import type { Locale } from "../config";
+import { APP_URL } from "../config";
+import { getCopy } from "../i18n";
+import SiteHeader from "../components/SiteHeader.astro";
+import LangSwitcher from "../components/LangSwitcher.astro";
+import Hero from "../components/Hero.astro";
+import ZeroKnowledge from "../components/ZeroKnowledge.astro";
+import Ecosystem from "../components/Ecosystem.astro";
+import Pillars from "../components/Pillars.astro";
+import ProductPreview from "../components/ProductPreview.astro";
+import Partners from "../components/Partners.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getCopy(locale);
+---
+
+<SiteHeader locale={locale} t={t} appUrl={APP_URL}>
+  <LangSwitcher slot="lang" locale={locale} t={t} />
+</SiteHeader>
+
+<main id="main" class="site-main">
+  <Hero t={t} appUrl={APP_URL} />
+  <ProductPreview t={t} />
+  <ZeroKnowledge t={t} />
+  <Ecosystem t={t} />
+  <Pillars t={t} />
+  <Partners t={t} />
+</main>
+
+<SiteFooter t={t} appUrl={APP_URL} />

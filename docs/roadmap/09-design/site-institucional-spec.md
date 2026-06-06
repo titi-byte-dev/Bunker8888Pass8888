@@ -94,7 +94,7 @@ nenhum canal para recrutar parceiros.
 - **Camada Ops como integracoes** (Moloni/Factorial/Pipedrive) quando houver provas.
 - **Blog/CMS** para SEO de conteudo.
 - **Pagina de precos** quando o modelo comercial estabilizar.
-- **i18n (PT/EN)** — estruturar copy em ficheiros separados desde o inicio.
+- **i18n (PT/FR/ES/DE)** — copy em `website/src/i18n/locales/`; PT na raiz `/`, restantes com prefixo (`/fr/`, `/es/`, `/de/`). EN fica para v2.
 
 ## Success Metrics
 

@@ -1,0 +1,219 @@
+/**
+ * Site institucional — importa tokens partilhados com a app (único acoplamento).
+ * Didático: @import relativo evita duplicar cores; alterações em tokens.css
+ * propagam-se automaticamente ao site e ao frontend SvelteKit.
+ */
+@import "../../../frontend/src/lib/design/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100%;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+.site-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-main {
+  flex: 1;
+}
+
+.container {
+  width: min(100% - var(--space-8), var(--content-max));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: clamp(var(--space-12), 8vw, var(--space-16));
+}
+
+.section-header {
+  max-width: var(--prose-max);
+  margin-bottom: var(--space-8);
+}
+
+.section-eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-label);
+}
+
+.section-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-2xl), 4vw, var(--text-3xl));
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.section-lead {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-text-muted);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-surface);
+}
+
+.fig-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.card-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .card-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card-grid-zk {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.muted-note {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-inset));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.gradient-orb {
+  pointer-events: none;
+  position: absolute;
+  inset: auto;
+  width: min(60vw, 32rem);
+  height: min(60vw, 32rem);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent) 18%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: reveal-up var(--duration-normal) var(--ease-out) both;
+  }
+
+  .reveal-delay-1 {
+    animation-delay: 80ms;
+  }
+
+  .reveal-delay-2 {
+    animation-delay: 160ms;
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-delay-1,
+  .reveal-delay-2 {
+    animation: none;
+  }
+}

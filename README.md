@@ -49,6 +49,18 @@ Em **Definições → Documentação** (`/settings/docs`): conteúdo didático p
 
 Regenerar após editar Markdown: `npm run docs:build` (raiz) ou `make docs-build`.
 
+### Site institucional (público)
+
+Pasta [`website/`](website/) — Astro estático para **aegispass.com**, em **PT, FR, ES e DE**
+(substitui o protótipo `site/` SvelteKit). Partilha `tokens.css` com a app.
+
+```bash
+cd website && npm install && npm run dev
+```
+
+Ver [`website/README.md`](website/README.md) e PRD em
+[`docs/roadmap/09-design/site-institucional-spec.md`](docs/roadmap/09-design/site-institucional-spec.md).
+
 ### Roadmap interno
 
 Plano completo em [`docs/roadmap/`](docs/roadmap/README.md). Para IA e contribuidores:

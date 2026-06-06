@@ -180,6 +180,17 @@ Cada task tem um **ID rastreável** (`PREFIXO-NNN`), uma estimativa relativa
 | DOC-014 | Docs produção + matriz dev/prod + índice journeys | 2 | S | 🟢 | DOC-001 |
 | DOC-015 | Layout docs: sidebar colapsável, Svelte Flow (sequence ladder), FlowPlayer responsivo, shell fluido | 2 | M | 🟢 | DOC-011, UI-011 |
 
+## WEB — Site institucional (aegispass.com)
+
+> Pasta `website/` (Astro estático). PRD: [`../09-design/site-institucional-spec.md`](../09-design/site-institucional-spec.md)
+
+| ID | Descrição | Fase | Tamanho | Estado | Depende de |
+|---|---|---|---|---|---|
+| WEB-001 | Scaffold Astro + i18n PT/FR/ES/DE + hero, ZK, ecossistema, pilares, rodapé | 1 | L | 🟢 | UI-001 |
+| WEB-002 | Pré-visualização produto + OG cards | 2 | M | 🟢 | WEB-001 |
+| WEB-003 | Secção parceiros (teaser white-label) | 2 | S | 🟢 | WEB-001 |
+| WEB-004 | Deploy estático (CDN/nginx) + domínio aegispass.com | 1 | M | ⚪ | WEB-001 |
+
 ## GOOGLE — Layer de Proxy (transversal)
 
 | ID | Descrição | Fase | Tamanho | Estado | Depende de |

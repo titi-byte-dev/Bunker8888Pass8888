@@ -1,0 +1,71 @@
+---
+import type { Locale } from "../config";
+import { LOCALES, localePath } from "../config";
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  t: SiteCopy;
+}
+
+const { locale, t } = Astro.props;
+---
+
+<div class="lang-switcher">
+  <label class="sr-only" for="lang-select">{t.lang[locale]}</label>
+  <select id="lang-select" class="lang-select" data-current={locale}>
+    {
+      LOCALES.map((loc) => (
+        <option value={loc} selected={loc === locale}>
+          {t.lang[loc]}
+        </option>
+      ))
+    }
+  </select>
+</div>
+
+<script define:vars={{ paths: Object.fromEntries(LOCALES.map((l) => [l, localePath(l)])) }}>
+  const select = document.getElementById("lang-select");
+  if (select instanceof HTMLSelectElement) {
+    select.addEventListener("change", () => {
+      const next = select.value;
+      if (next && paths[next]) {
+        window.location.href = paths[next];
+      }
+    });
+  }
+</script>
+
+<style>
+  .lang-switcher {
+    position: relative;
+  }
+
+  .lang-select {
+    appearance: none;
+    padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-surface)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b9aab' d='M3 4.5 6 8l3-3.5'/%3E%3C/svg%3E")
+      no-repeat right 0.5rem center;
+    color: var(--color-text);
+    font-size: var(--text-xs);
+    cursor: pointer;
+  }
+
+  .lang-select:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>

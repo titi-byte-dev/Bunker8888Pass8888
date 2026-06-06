@@ -42,6 +42,8 @@ vendor/
 node_modules/
 .svelte-kit/
 build/
+website/dist/
+website/.astro/
 .vercel/
 
 # --- Base de dados / volumes Docker locais ---

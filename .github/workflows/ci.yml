@@ -70,3 +70,28 @@ jobs:
 
       - name: tests (vitest)
         run: npm run test
+
+  website:
+    name: Website (Astro)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: install deps
+        run: npm ci
+
+      - name: build static site
+        run: npm run build
+
+      - name: tests (i18n parity)
+        run: npm run test

@@ -1,0 +1,133 @@
+---
+import type { SiteCopy } from "../i18n";
+
+interface Props {
+  t: SiteCopy;
+}
+
+const { t } = Astro.props;
+---
+
+<section class="section ecosystem-section" id={t.ecosystem.id} aria-labelledby="eco-title">
+  <div class="container">
+    <header class="section-header">
+      <h2 id="eco-title" class="section-title">{t.ecosystem.title}</h2>
+      <p class="section-lead">{t.ecosystem.lead}</p>
+    </header>
+
+    <div class="stack-visual card">
+      <div class="stack-layer stack-workspace">
+        <div class="stack-layer-head">
+          <span class="stack-tag">{t.ecosystem.workspaceLabel}</span>
+          <span class="stack-hint">{t.ecosystem.workspaceHint}</span>
+        </div>
+        <ul class="stack-items">
+          {t.ecosystem.workspaceItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      <div class="stack-connector" aria-hidden="true">
+        <span class="stack-line"></span>
+        <span class="stack-arrow">↓</span>
+      </div>
+
+      <div class="stack-layer stack-core">
+        <div class="stack-layer-head">
+          <span class="stack-tag stack-tag-core">{t.ecosystem.coreLabel}</span>
+          <span class="stack-hint">{t.ecosystem.coreHint}</span>
+        </div>
+        <ul class="stack-items stack-items-core">
+          {t.ecosystem.coreItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <p class="muted-note">{t.ecosystem.footnote}</p>
+  </div>
+</section>
+
+<style>
+  .stack-visual {
+    padding: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .stack-layer {
+    padding: var(--space-6);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-inset);
+  }
+
+  .stack-core {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-surface));
+  }
+
+  .stack-layer-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .stack-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-label);
+  }
+
+  .stack-tag-core {
+    color: var(--color-accent);
+  }
+
+  .stack-hint {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .stack-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stack-items li {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    font-size: var(--text-sm);
+  }
+
+  .stack-items-core li {
+    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+  }
+
+  .stack-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-muted);
+  }
+
+  .stack-line {
+    width: 2px;
+    height: 1.5rem;
+    background: var(--color-border-strong);
+  }
+
+  .stack-arrow {
+    font-size: var(--text-lg);
+    line-height: 1;
+  }
+</style>
